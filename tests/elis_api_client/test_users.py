@@ -25,26 +25,28 @@ def dummy_user():
     }
 
 
+@pytest.mark.asyncio
 class TestUsers:
-    def test_get_users(self, http_client: APIClient, dummy_user):
-        http_client.get.return_value = [dummy_user]
+    async def test_get_users(self, http_client: APIClient, dummy_user, mock_generator):
+        http_client.fetch_all.return_value = mock_generator(dummy_user)
 
         client = ElisAPIClient(http_client=http_client)
         users = client.get_users()
 
-        assert list(users) == [User(**dummy_user)]
+        async for u in users:
+            assert u == User(**dummy_user)
 
-        http_client.get.assert_called()
-        http_client.get.assert_called_with(f"/users", {})
+        http_client.fetch_all.assert_called()
+        http_client.fetch_all.assert_called_with("users")
 
-    def test_get_user(self, http_client: APIClient, dummy_user):
-        http_client.get.return_value = dummy_user
+    async def test_get_user(self, http_client: APIClient, dummy_user):
+        http_client.fetch_one.return_value = dummy_user
 
         client = ElisAPIClient(http_client=http_client)
         uid = dummy_user["id"]
-        user = client.get_user(uid)
+        user = await client.get_user(uid)
 
         assert user == User(**dummy_user)
 
-        http_client.get.assert_called()
-        http_client.get.assert_called_with(f"/users/{uid}")
+        http_client.fetch_one.assert_called()
+        http_client.fetch_one.assert_called_with("users", uid)

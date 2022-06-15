@@ -1,4 +1,5 @@
 import pytest
+import pytest_asyncio
 
 from rossum_ng.api_client import APIClient
 from unittest.mock import MagicMock
@@ -7,3 +8,12 @@ from unittest.mock import MagicMock
 @pytest.fixture
 def http_client():
     return MagicMock(APIClient)
+
+
+@pytest_asyncio.fixture
+async def mock_generator():
+    async def f(item):
+        for org in [item]:
+            yield org
+
+    return f

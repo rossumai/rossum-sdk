@@ -1,4 +1,5 @@
 import pytest
+
 from rossum_ng.models.organization import Organization
 from rossum_ng.elis_api_client import ElisAPIClient
 from rossum_ng.api_client import APIClient
@@ -22,26 +23,30 @@ def dummy_organization():
     }
 
 
+@pytest.mark.asyncio
 class TestOrganizations:
-    def test_get_organizations(self, http_client: APIClient, dummy_organization):
-        http_client.get.return_value = [dummy_organization]
+    async def test_get_organizations(
+        self, http_client: APIClient, dummy_organization, mock_generator
+    ):
+        http_client.fetch_all.return_value = mock_generator(dummy_organization)
 
         client = ElisAPIClient(http_client=http_client)
         organizations = client.get_organizations()
 
-        assert list(organizations) == [Organization(**dummy_organization)]
+        async for o in organizations:
+            assert o == Organization(**dummy_organization)
 
-        http_client.get.assert_called()
-        http_client.get.assert_called_with(f"/organizations", {})
+        http_client.fetch_all.assert_called()
+        http_client.fetch_all.assert_called_with("organizations")
 
-    def test_get_organization(self, http_client: APIClient, dummy_organization):
-        http_client.get.return_value = dummy_organization
+    async def test_get_organization(self, http_client: APIClient, dummy_organization):
+        http_client.fetch_one.return_value = dummy_organization
 
         client = ElisAPIClient(http_client=http_client)
         oid = dummy_organization["id"]
-        organization = client.get_organization(oid)
+        organization = await client.get_organization(oid)
 
         assert organization == Organization(**dummy_organization)
 
-        http_client.get.assert_called()
-        http_client.get.assert_called_with(f"/organizations/{oid}")
+        http_client.fetch_one.assert_called()
+        http_client.fetch_one.assert_called_with("organizations", oid)

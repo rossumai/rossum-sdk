@@ -1,6 +1,5 @@
 import pytest
-from typing import Any, Dict
-from unittest.mock import MagicMock
+
 from rossum_ng.elis_api_client import ElisAPIClient
 from rossum_ng.models.annotation import Annotation
 from rossum_ng.api_client import APIClient
@@ -38,26 +37,28 @@ def dummy_annotation():
     }
 
 
+@pytest.mark.asyncio
 class TestAnnotations:
-    def test_get_annotations(self, http_client: APIClient, dummy_annotation):
-        http_client.get.return_value = [dummy_annotation]
+    async def test_get_annotations(self, http_client: APIClient, dummy_annotation, mock_generator):
+        http_client.fetch_all.return_value = mock_generator(dummy_annotation)
 
         client = ElisAPIClient(http_client=http_client)
         annotations = client.get_annotations()
 
-        assert list(annotations) == [Annotation(**dummy_annotation)]
+        async for a in annotations:
+            assert a == Annotation(**dummy_annotation)
 
-        http_client.get.assert_called()
-        http_client.get.assert_called_with(f"/annotations", {})
+        http_client.fetch_all.assert_called()
+        http_client.fetch_all.assert_called_with("annotations")
 
-    def test_get_annotation(self, http_client: APIClient, dummy_annotation):
-        http_client.get.return_value = dummy_annotation
+    async def test_get_annotation(self, http_client: APIClient, dummy_annotation):
+        http_client.fetch_one.return_value = dummy_annotation
 
         client = ElisAPIClient(http_client=http_client)
         aid = dummy_annotation["id"]
-        annotation = client.get_annotation(aid)
+        annotation = await client.get_annotation(aid)
 
         assert annotation == Annotation(**dummy_annotation)
 
-        http_client.get.assert_called()
-        http_client.get.assert_called_with(f"/annotations/{aid}")
+        http_client.fetch_one.assert_called()
+        http_client.fetch_one.assert_called_with("annotations", aid)

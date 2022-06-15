@@ -1,7 +1,7 @@
 from rossum_ng.api_client import APIClient
 from rossum_ng.models.organization import Organization
 from rossum_ng.models.queue import Queue
-from typing import Optional, Union, Dict, List, Iterable, Sequence, Any
+from typing import Optional, Union, Dict, List, Iterable, Sequence, Any, AsyncIterable
 
 from rossum_ng.models.schema import Schema
 from rossum_ng.models.user import User
@@ -32,64 +32,61 @@ class ElisAPIClient:
         self._auth_header = None
         self._http_client = http_client or APIClient()
 
-    def get_queue(self, id: int, sideloads: Optional[Iterable[APIObject]] = None) -> Queue:
-        queue: Dict[Any, Any] = self._http_client.get(f"/queues/{id}")
+    async def get_queue(self, id: int, sideloads: Optional[Iterable[APIObject]] = None) -> Queue:
+        queue = await self._http_client.fetch_one("queues", id)
 
         return Queue(**queue)
 
     # https://elis.rossum.ai/api/docs/#list-all-queues
-    def get_queues(
+    async def get_queues(
         self, sideloads: Optional[Iterable[APIObject]] = None, **filters
-    ) -> Iterable[Queue]:
-        queues: Iterable[Dict[Any, Any]] = self._http_client.get("/queues", filters)
+    ) -> AsyncIterable[Queue]:
+        async for q in self._http_client.fetch_all("queues"):
+            yield Queue(**q)
 
-        return (Queue(**q) for q in queues)
+    async def get_organizations(self, sideloads: Optional[Iterable[APIObject]] = None, **filters):
+        async for o in self._http_client.fetch_all("organizations"):
+            yield Organization(**o)
 
-    def get_organizations(self, sideloads: Optional[Iterable[APIObject]] = None, **filters):
-        organizations: Iterable[Dict[Any, Any]] = self._http_client.get("/organizations", filters)
-
-        return (Organization(**o) for o in organizations)
-
-    def get_organization(
+    async def get_organization(
         self, id: int, sideloads: Optional[Iterable[APIObject]] = None
     ) -> Organization:
-        organization: Dict[Any, Any] = self._http_client.get(f"/organizations/{id}")
+        organization: Dict[Any, Any] = await self._http_client.fetch_one("organizations", id)
 
         return Organization(**organization)
 
-    def get_schemas(
+    async def get_schemas(
         self, sideloads: Optional[Iterable[APIObject]] = None, **filters
-    ) -> Iterable[Schema]:
-        schemas: Iterable[Dict[Any, Any]] = self._http_client.get(f"/schemas", filters)
+    ) -> AsyncIterable[Schema]:
+        async for s in self._http_client.fetch_all("schemas"):
+            yield Schema(**s)
 
-        return (Schema(**s) for s in schemas)
-
-    def get_schema(self, id: int, sideloads: Optional[Iterable[APIObject]] = None) -> Schema:
-        schema: Dict[Any, Any] = self._http_client.get(f"/schemas/{id}")
+    async def get_schema(self, id: int, sideloads: Optional[Iterable[APIObject]] = None) -> Schema:
+        schema: Dict[Any, Any] = await self._http_client.fetch_one("schemas", id)
 
         return Schema(**schema)
 
-    def get_users(
+    async def get_users(
         self, sideloads: Optional[Iterable[APIObject]] = None, **filters
-    ) -> Iterable[User]:
-        users: Iterable[Dict[Any, Any]] = self._http_client.get(f"/users", filters)
+    ) -> AsyncIterable[User]:
+        async for u in self._http_client.fetch_all("users"):
+            yield User(**u)
 
-        return (User(**u) for u in users)
-
-    def get_user(self, id: int, sideloads: Optional[Iterable[APIObject]] = None) -> User:
-        user: Dict[Any, Any] = self._http_client.get(f"/users/{id}")
+    async def get_user(self, id: int, sideloads: Optional[Iterable[APIObject]] = None) -> User:
+        user = await self._http_client.fetch_one("users", id)
 
         return User(**user)
 
-    def get_annotations(self, sideloads: Optional[Iterable[APIObject]] = None, **filters):
-        annotations: Iterable[Dict[Any, Any]] = self._http_client.get(f"/annotations", filters)
+    async def get_annotations(self, sideloads: Optional[Iterable[APIObject]] = None, **filters):
+        annotations = self._http_client.fetch_all("annotations")
 
-        return (Annotation(**u) for u in annotations)
+        async for a in annotations:
+            yield Annotation(**a)
 
-    def get_annotation(
+    async def get_annotation(
         self, id: int, sideloads: Optional[Iterable[APIObject]] = None
     ) -> Annotation:
-        annotation: Dict[Any, Any] = self._http_client.get(f"/annotations/{id}")
+        annotation = await self._http_client.fetch_one("annotations", id)
 
         return Annotation(**annotation)
 

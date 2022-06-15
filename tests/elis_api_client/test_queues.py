@@ -60,26 +60,28 @@ def dummy_queue():
     }
 
 
+@pytest.mark.asyncio
 class TestQueues:
-    def test_get_queues(self, http_client: APIClient, dummy_queue):
-        http_client.get.return_value = [dummy_queue]
+    async def test_get_queues(self, http_client: APIClient, dummy_queue, mock_generator):
+        http_client.fetch_all.return_value = mock_generator(dummy_queue)
 
         client = ElisAPIClient(http_client=http_client)
         queues = client.get_queues()
 
-        assert list(queues) == [Queue(**dummy_queue)]
+        async for q in queues:
+            assert q == Queue(**dummy_queue)
 
-        http_client.get.assert_called()
-        http_client.get.assert_called_with("/queues", {})
+        http_client.fetch_all.assert_called()
+        http_client.fetch_all.assert_called_with("queues")
 
-    def test_get_queue(self, http_client: APIClient, dummy_queue):
-        http_client.get.return_value = dummy_queue
+    async def test_get_queue(self, http_client: APIClient, dummy_queue):
+        http_client.fetch_one.return_value = dummy_queue
 
         client = ElisAPIClient(http_client=http_client)
         qid = dummy_queue["id"]
-        queue = client.get_queue(qid)
+        queue = await client.get_queue(qid)
 
         assert queue == Queue(**dummy_queue)
 
-        http_client.get.assert_called()
-        http_client.get.assert_called_with(f"/queues/{qid}")
+        http_client.fetch_one.assert_called()
+        http_client.fetch_one.assert_called_with("queues", qid)

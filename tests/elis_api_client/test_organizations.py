@@ -30,23 +30,21 @@ class TestOrganizations:
     ):
         http_client.fetch_all.return_value = mock_generator(dummy_organization)
 
-        client = ElisAPIClient(http_client=http_client)
-        organizations = client.get_organizations()
+        client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
+        organizations = client.list_all_organizations()
 
         async for o in organizations:
             assert o == Organization(**dummy_organization)
 
-        http_client.fetch_all.assert_called()
-        http_client.fetch_all.assert_called_with("organizations")
+        http_client.fetch_all.assert_called_with("organizations", ())
 
     async def test_get_organization(self, http_client: APIClient, dummy_organization):
         http_client.fetch_one.return_value = dummy_organization
 
-        client = ElisAPIClient(http_client=http_client)
+        client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
         oid = dummy_organization["id"]
-        organization = await client.get_organization(oid)
+        organization = await client.retrieve_organization(oid)
 
         assert organization == Organization(**dummy_organization)
 
-        http_client.fetch_one.assert_called()
         http_client.fetch_one.assert_called_with("organizations", oid)

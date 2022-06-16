@@ -57,7 +57,10 @@ class APIClient:
     """Perform CRUD operations over resources provided by Elis API."""
 
     def __init__(
-        self, username: str, password: str, base_url: str = "https://elis.rossum.ai/api/v1"
+        self,
+        username: str,
+        password: str,
+        base_url: Optional[str] = "https://elis.rossum.ai/api/v1",
     ):
         self.base_url = base_url
         self.username = username

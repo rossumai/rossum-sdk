@@ -38,26 +38,35 @@ def dummy_schema():
 
 @pytest.mark.asyncio
 class TestSchemas:
-    async def test_get_schemas(self, http_client: APIClient, dummy_schema, mock_generator):
+    async def test_list_all_schemas(self, http_client: APIClient, dummy_schema, mock_generator):
         http_client.fetch_all.return_value = mock_generator(dummy_schema)
 
-        client = ElisAPIClient(http_client=http_client)
-        schemas = client.get_schemas()
+        client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
+        schemas = client.list_all_schemas()
 
         async for s in schemas:
             assert s == Schema(**dummy_schema)
 
-        http_client.fetch_all.assert_called()
-        http_client.fetch_all.assert_called_with("schemas")
+        http_client.fetch_all.assert_called_with("schemas", ())
 
-    async def test_get_schema(self, http_client: APIClient, dummy_schema):
+    async def test_retrieve_schema(self, http_client: APIClient, dummy_schema):
         http_client.fetch_one.return_value = dummy_schema
 
-        client = ElisAPIClient(http_client=http_client)
+        client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
         sid = dummy_schema["id"]
-        schema = await client.get_schema(sid)
+        schema = await client.retrieve_schema(sid)
 
         assert schema == Schema(**dummy_schema)
 
-        http_client.fetch_one.assert_called()
         http_client.fetch_one.assert_called_with("schemas", sid)
+
+    async def test_create_new_schema(self, http_client: APIClient, dummy_schema):
+        http_client.create.return_value = dummy_schema
+
+        client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
+        data = {"name": "Test Schema", "content": []}
+        schema = await client.create_new_schema(data)
+
+        assert schema == Schema(**dummy_schema)
+
+        http_client.create.assert_called_with("schemas", data)

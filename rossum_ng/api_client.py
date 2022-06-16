@@ -2,24 +2,23 @@ from __future__ import annotations
 
 """
 TODO
-* pagination
 * exception repacking
 * filters and ordering
 * upload a file: /v1/queues/{id}/upload
 * export annotations: /v1/queues/{id}/export
 * enum with resource types instead of strings
+* rate limiting?
 """
 
+import asyncio
 import functools
-import inspect
 import logging
-import types
 import typing
 
 import httpx
 
 if typing.TYPE_CHECKING:
-    from typing import Any, AsyncIterator, Dict, Iterable, List, Optional
+    from typing import Any, AsyncIterator, Dict, Iterable, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -54,34 +53,6 @@ def authenticate_if_needed(method):
     return authenticate_if_needed
 
 
-def authenticate_if_needed_generator(method):
-    """Perform authentication if a APIClient method fails on 401.
-
-    This is a version for methods that are async generators.
-    """
-
-    @functools.wraps(method)
-    async def authenticate_if_needed(self: APIClient, *args, **kwargs):
-        # Authenticate if there is no token, no need to fire the request only to get 401 and retry
-        if self.token is None:
-            await self._authenticate()
-        try:
-            async for item in method(self, *args, **kwargs):
-                yield item
-        except httpx.HTTPStatusError as e:
-            if e.response.status_code != 401:
-                raise
-            logger.debug(f"Token expired, authenticating user {self.username!r}...")
-            await self._authenticate()
-            # TODO we might want to cope with expired token in the middle of yielding. The
-            # try-except and authentication might need to be inlined to understand pagination,
-            # i.e. to authenticate if request for page N fails and continue from N.
-            async for item in method(self, *args, **kwargs):
-                yield item
-
-    return authenticate_if_needed
-
-
 class APIClient:
     """Perform CRUD operations over resources provided by Elis API."""
 
@@ -108,21 +79,38 @@ class APIClient:
 
     @authenticate_if_needed
     async def fetch_one(self, resource: str, id: int) -> Dict[str, Any]:
-        """Retrieve a single object in a specific category."""
+        """Retrieve a single object in a specific resource."""
         response = await self.client.get(f"{self.base_url}/{resource}/{id}", headers=self._headers)
         response.raise_for_status()
         return response.json()
 
-    @authenticate_if_needed_generator
     async def fetch_all(self, resource: str) -> AsyncIterator[Dict[str, Any]]:
-        """Retrieve a list of objects in a specific category."""
-        response = await self.client.get(
-            f"{self.base_url}/{resource}?page_size=100", headers=self._headers
+        """Retrieve a list of objects in a specific resource."""
+        results, next_page_url, total_pages = await self._fetch_page(
+            f"{self.base_url}/{resource}?page_size=100"
         )
+        # Fire async tasks to fetch the rest of the pages and start yielding results from page 1
+        page_requests = [
+            asyncio.create_task(
+                self._fetch_page(f"{self.base_url}/{resource}?page={i}&page_size=100")
+            )
+            for i in range(2, total_pages + 1)
+        ]
+        for r in results:
+            yield r
+        # Await requests one by one to yield results in correct order to ensure the same order of
+        # results next time the same resource is fetched. This slightly descreases throughput.
+        for request in page_requests:
+            results, next_page_url, _ = await request
+            for r in results:
+                yield r
+
+    @authenticate_if_needed
+    async def _fetch_page(self, page_url) -> Tuple[Dict[str, Any], str, int]:
+        response = await self.client.get(page_url, headers=self._headers)
         response.raise_for_status()
         data = response.json()
-        for r in data["results"]:
-            yield r
+        return data["results"], data["pagination"]["next"], data["pagination"]["total_pages"]
 
     @authenticate_if_needed
     async def create(self, resource: str, data: Dict[str, Any]) -> Dict[str, Any]:

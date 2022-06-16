@@ -9,7 +9,6 @@ from unittest import mock
 
 import httpx
 import pytest
-
 from rossum_ng.api_client import APIClient
 
 WORKSPACES = [
@@ -21,7 +20,25 @@ WORKSPACES = [
         "organization": "https://elis.rossum.ai/api/v1/organizations/123",
         "queues": [],
         "metadata": {},
-    }
+    },
+    {
+        "id": 1234,
+        "name": "Test Workspace",
+        "url": "https://elis.rossum.ai/api/v1/workspaces/1234",
+        "autopilot": False,
+        "organization": "https://elis.rossum.ai/api/v1/organizations/123",
+        "queues": [],
+        "metadata": {},
+    },
+    {
+        "id": 4321,
+        "name": "Test Workspace",
+        "url": "https://elis.rossum.ai/api/v1/workspaces/1234",
+        "autopilot": False,
+        "organization": "https://elis.rossum.ai/api/v1/organizations/123",
+        "queues": [],
+        "metadata": {},
+    },
 ]
 
 
@@ -78,10 +95,31 @@ async def test_fetch_one_404(client, httpx_mock):
 
 @pytest.mark.asyncio
 async def test_fetch_all(client, httpx_mock):
+    second_page = "https://elis.rossum.ai/api/v1/workspaces?page=2&page_size=100"
+    third_page = "https://elis.rossum.ai/api/v1/workspaces?page=3&page_size=100"
     httpx_mock.add_response(
         method="GET",
         url="https://elis.rossum.ai/api/v1/workspaces?page_size=100",
-        json={"results": WORKSPACES},
+        json={
+            "pagination": {"total": 3, "total_pages": 3, "next": second_page, "previous": None},
+            "results": WORKSPACES[:1],
+        },
+    )
+    httpx_mock.add_response(
+        method="GET",
+        url=second_page,
+        json={
+            "pagination": {"total": 3, "total_pages": 3, "next": third_page, "previous": None},
+            "results": WORKSPACES[1:2],
+        },
+    )
+    httpx_mock.add_response(
+        method="GET",
+        url=third_page,
+        json={
+            "pagination": {"total": 3, "total_pages": 3, "next": None, "previous": None},
+            "results": WORKSPACES[2:],
+        },
     )
     workspaces = [w async for w in client.fetch_all("workspaces")]
     assert workspaces == WORKSPACES

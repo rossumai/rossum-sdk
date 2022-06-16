@@ -1,3 +1,7 @@
+"""A script that tests all operations over a single resource provided by Elis API.
+
+It could evolve in time into an E2E test.
+"""
 import asyncio
 import logging
 import os
@@ -20,24 +24,26 @@ async def main():
         os.environ["ELIS_PASSWORD"],
         base_url="https://elis.develop.r8.lol/api/v1",
     )
-    response = await client.create(f"/v1/workspaces", data=WORKSPACE)
+    response = await client.create("workspaces", data=WORKSPACE)
     workspace_id = response["id"]
-    response = await client.read(f"/v1/workspaces/{workspace_id}")
+    response = await client.fetch_one("workspaces", id=workspace_id)
     print("GET result:", response)
-    response = [w async for w in client.list(f"/v1/workspaces")]
+    response = [w async for w in client.fetch_all("workspaces")]
     print("LIST result:", response)
     response = await client.replace(
-        f"/v1/workspaces/{workspace_id}",
+        "workspaces",
+        id=workspace_id,
         data={**WORKSPACE, "name": f"{WORKSPACE['name']} {random.randint(1, 100)}"},
     )
     print("PUT result:", response)
     response = await client.update(
-        f"/v1/workspaces/{workspace_id}",
+        "workspaces",
+        id=workspace_id,
         data={"name": f"{WORKSPACE['name']} {random.randint(1, 100)}"},
     )
     print("PATCH result:", response)
 
-    response = await client.delete(f"/v1/workspaces/{workspace_id}")
+    response = await client.delete("workspaces", id=workspace_id)
     print(f"Workspace {workspace_id} deleted.")
 
 

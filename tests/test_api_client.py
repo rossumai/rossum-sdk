@@ -140,6 +140,20 @@ async def test_fetch_all_ordering(client, httpx_mock):
 
 
 @pytest.mark.asyncio
+async def test_fetch_all_filters(client, httpx_mock):
+    httpx_mock.add_response(
+        method="GET",
+        url="https://elis.rossum.ai/api/v1/workspaces?page_size=100&name=Test&autopilot=1",
+        json={
+            "pagination": {"total": 3, "total_pages": 1, "next": None, "previous": None},
+            "results": WORKSPACES,
+        },
+    )
+    workspaces = [w async for w in client.fetch_all("workspaces", name="Test", autopilot=1)]
+    assert workspaces == WORKSPACES
+
+
+@pytest.mark.asyncio
 async def test_fetch_all_404(client, httpx_mock):
     httpx_mock.add_response(
         method="GET",

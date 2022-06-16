@@ -3,17 +3,17 @@ from __future__ import annotations
 """
 TODO
 * exception repacking
-* filters
 * upload a file: /v1/queues/{id}/upload
 * export annotations: /v1/queues/{id}/export
 * enum with resource types instead of strings
+* password reset
 * rate limiting?
 """
-
 import asyncio
 import functools
 import logging
 import typing
+import urllib
 
 import httpx
 
@@ -85,7 +85,7 @@ class APIClient:
         return response.json()
 
     async def fetch_all(
-        self, resource: str, ordering: Iterable[str] = ()
+        self, resource: str, ordering: Iterable[str] = (), **filters: Dict[str, Any]
     ) -> AsyncIterator[Dict[str, Any]]:
         """Retrieve a list of objects in a specific resource.
 
@@ -95,8 +95,16 @@ class APIClient:
             name of the resource provided by Elis API
         ordering
             comma-delimited fields of the resource, prepend the field with - for descending
+        filters
+            mapping from resource field to value used to filter records
         """
-        query_params = f"page_size=100&ordering={','.join(ordering)}"
+        query_params = urllib.parse.urlencode(
+            {
+                "page_size": 100,
+                "ordering": ",".join(ordering),
+                **filters,
+            }
+        )
         results, next_page_url, total_pages = await self._fetch_page(
             f"{self.base_url}/{resource}?{query_params}"
         )

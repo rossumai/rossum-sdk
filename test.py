@@ -28,8 +28,9 @@ async def main():
     workspace_id = response["id"]
     response = await client.fetch_one("workspaces", id=workspace_id)
     print("GET result:", response)
-    response = [w async for w in client.fetch_all("workspaces")]
-    print("LIST result:", response)
+    print("LIST results:")
+    async for w in client.fetch_all("workspaces", ordering=["-id"]):
+        print(w)
     response = await client.replace(
         "workspaces",
         id=workspace_id,

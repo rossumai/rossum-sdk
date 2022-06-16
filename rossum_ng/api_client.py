@@ -3,7 +3,7 @@ from __future__ import annotations
 """
 TODO
 * exception repacking
-* filters and ordering
+* filters
 * upload a file: /v1/queues/{id}/upload
 * export annotations: /v1/queues/{id}/export
 * enum with resource types instead of strings
@@ -84,15 +84,26 @@ class APIClient:
         response.raise_for_status()
         return response.json()
 
-    async def fetch_all(self, resource: str) -> AsyncIterator[Dict[str, Any]]:
-        """Retrieve a list of objects in a specific resource."""
+    async def fetch_all(
+        self, resource: str, ordering: Iterable[str] = ()
+    ) -> AsyncIterator[Dict[str, Any]]:
+        """Retrieve a list of objects in a specific resource.
+
+        Arguments
+        ---------
+        resource
+            name of the resource provided by Elis API
+        ordering
+            comma-delimited fields of the resource, prepend the field with - for descending
+        """
+        query_params = f"page_size=100&ordering={','.join(ordering)}"
         results, next_page_url, total_pages = await self._fetch_page(
-            f"{self.base_url}/{resource}?page_size=100"
+            f"{self.base_url}/{resource}?{query_params}"
         )
         # Fire async tasks to fetch the rest of the pages and start yielding results from page 1
         page_requests = [
             asyncio.create_task(
-                self._fetch_page(f"{self.base_url}/{resource}?page={i}&page_size=100")
+                self._fetch_page(f"{self.base_url}/{resource}?page={i}&{query_params}")
             )
             for i in range(2, total_pages + 1)
         ]

@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from rossum_ng.elis_api_client import ElisAPIClient
+from rossum_ng.elis_api_client_sync import ElisAPIClientSync
 from rossum_ng.models.hook import Hook
 
 
@@ -74,6 +75,46 @@ class TestHooks:
             "events": [],
         }
         hook = await client.create_new_hook(data)
+
+        assert hook == Hook(**dummy_hook)
+
+        http_client.create.assert_called_with("hooks", data)
+
+
+class TestHooksAsync:
+    def test_list_all_hooks(self, http_client: MagicMock, dummy_hook, mock_generator):
+        http_client.fetch_all.return_value = mock_generator(dummy_hook)
+
+        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
+        hooks = client.list_all_hooks()
+
+        for h in hooks:
+            assert h == Hook(**dummy_hook)
+
+        http_client.fetch_all.assert_called_with("hooks", ())
+
+    def test_retrieve_user(self, http_client: MagicMock, dummy_hook):
+        http_client.fetch_one.return_value = dummy_hook
+
+        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
+        uid = dummy_hook["id"]
+        hook = client.retrieve_hook(uid)
+
+        assert hook == Hook(**dummy_hook)
+
+        http_client.fetch_one.assert_called_with("hooks", uid)
+
+    def test_create_new_user(self, http_client: MagicMock, dummy_hook):
+        http_client.create.return_value = dummy_hook
+
+        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
+        data = {
+            "name": "MyQ Hook",
+            "queues": ["https://elis.rossum.ai/api/v1/queues/8199"],
+            "config": {"url": "https://myq.east-west-trading.com"},
+            "events": [],
+        }
+        hook = client.create_new_hook(data)
 
         assert hook == Hook(**dummy_hook)
 

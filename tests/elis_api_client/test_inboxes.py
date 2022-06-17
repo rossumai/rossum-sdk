@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from rossum_ng.elis_api_client import ElisAPIClient
+from rossum_ng.elis_api_client_sync import ElisAPIClientSync
 from rossum_ng.models.inbox import Inbox
 
 
@@ -50,6 +51,26 @@ class TestInboxes:
         }
 
         inbox = await client.create_new_inbox(data)
+
+        assert inbox == Inbox(**dummy_inbox)
+
+        http_client.create.assert_called_with("inboxes", data)
+
+
+class TestInboxesSync:
+    def test_create_new_inbox(self, http_client: MagicMock, dummy_inbox):
+        http_client.create.return_value = dummy_inbox
+
+        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
+        data = {
+            "name": "Test Inbox",
+            "email_prefix": "east-west-trading-co-test",
+            "bounce_email_to": "joe@east-west-trading.com",
+            "queues": ["https://elis.rossum.ai/api/v1/queues/8236"],
+            "filters": {"allowed_senders": ["*@east-west-trading.com"]},
+        }
+
+        inbox = client.create_new_inbox(data)
 
         assert inbox == Inbox(**dummy_inbox)
 

@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from rossum_ng.elis_api_client import ElisAPIClient
+from rossum_ng.elis_api_client_sync import ElisAPIClientSync
 from rossum_ng.models.queue import Queue
 
 
@@ -96,6 +97,45 @@ class TestQueues:
             "schema": "https://elis.rossum.ai/api/v1/schemas/31336",
         }
         queue = await client.create_new_queue(data)
+
+        assert queue == Queue(**dummy_queue)
+
+        http_client.create.assert_called_with("queues", data)
+
+
+class TestQueuesSync:
+    def test_list_all_queues(self, http_client: MagicMock, dummy_queue, mock_generator):
+        http_client.fetch_all.return_value = mock_generator(dummy_queue)
+
+        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
+        queues = client.list_all_queues()
+
+        for q in queues:
+            assert q == Queue(**dummy_queue)
+
+        http_client.fetch_all.assert_called_with("queues", ())
+
+    def test_retrieve_queue(self, http_client: MagicMock, dummy_queue):
+        http_client.fetch_one.return_value = dummy_queue
+
+        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
+        qid = dummy_queue["id"]
+        queue = client.retrieve_queue(qid)
+
+        assert queue == Queue(**dummy_queue)
+
+        http_client.fetch_one.assert_called_with("queues", qid)
+
+    def test_create_new_queue(self, http_client: MagicMock, dummy_queue):
+        http_client.create.return_value = dummy_queue
+
+        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
+        data = {
+            "name": "Test Queue",
+            "workspace": "https://elis.rossum.ai/api/v1/workspaces/7540",
+            "schema": "https://elis.rossum.ai/api/v1/schemas/31336",
+        }
+        queue = client.create_new_queue(data)
 
         assert queue == Queue(**dummy_queue)
 

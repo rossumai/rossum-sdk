@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Any
+from typing import List, Any, Dict
 
 
 @dataclass
@@ -10,4 +10,4 @@ class Workspace:
     autopilot: bool
     organization: str
     queues: List[str] = field(default_factory=list)
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: Dict[str, Any] = field(default_factory=dict)

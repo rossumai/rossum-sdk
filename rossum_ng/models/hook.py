@@ -8,8 +8,8 @@ class Hook:
     name: str
     url: str
     active: bool
-    config: dict[str, Any]
-    test: dict[str, Any]
+    config: Dict[str, Any]
+    test: Dict[str, Any]
     guide: str
     read_more_url: str
     extension_image_url: str

@@ -30,21 +30,22 @@ class TestUsers:
         http_client.fetch_all.return_value = mock_generator(dummy_connector)
 
         client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
-        users = client.list_all_connectors()
+        connectors = client.list_all_connectors()
 
-        async for u in users:
-            assert u == Connector(**dummy_connector)
+        async for c in connectors:
+            assert c == Connector(**dummy_connector)
 
         http_client.fetch_all.assert_called_with("connectors", ())
 
+    @pytest.mark.asyncio
     async def test_retrieve_connector(self, http_client: MagicMock, dummy_connector):
         http_client.fetch_one.return_value = dummy_connector
 
         client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
         cid = dummy_connector["id"]
-        user = await client.retrieve_connector(cid)
+        connector = await client.retrieve_connector(cid)
 
-        assert user == Connector(**dummy_connector)
+        assert connector == Connector(**dummy_connector)
 
         http_client.fetch_one.assert_called_with("connectors", cid)
 
@@ -58,8 +59,8 @@ class TestUsers:
             "service_url": "https://myq.east-west-trading.com",
             "authorization_token": "wuNg0OenyaeK4eenOovi7aiF",
         }
-        user = await client.create_new_connector(data)
+        connector = await client.create_new_connector(data)
 
-        assert user == Connector(**dummy_connector)
+        assert connector == Connector(**dummy_connector)
 
         http_client.create.assert_called_with("connectors", data)

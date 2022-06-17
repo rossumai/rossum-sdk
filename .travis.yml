@@ -19,7 +19,7 @@ cache: pip
 jobs:
   fast_finish: true
   include:
-    - python: 3.7
+    - python: 3.9
       env: TOXENV=linting TOXCFG=tox.ini
       stage: test
 
@@ -31,9 +31,9 @@ jobs:
       env: TOXENV=py38 TOXCFG=tox.ini
       stage: test
 
-    - python: 3.7
-      env: TOXENV=py37 TOXCFG=tox.ini
-      stage: test
+    #- python: 3.7
+      #env: TOXENV=py37 TOXCFG=tox.ini
+      #stage: test
 
 
 # Hotfix: setuptools is capped at version 59, as newer versions seem to have issues with importlib_metadata in python 3.7.

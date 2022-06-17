@@ -79,7 +79,6 @@ class TestUsersSync:
 
         http_client.fetch_all.assert_called_with("connectors", ())
 
-    @pytest.mark.asyncio
     def test_retrieve_connector(self, http_client: MagicMock, dummy_connector):
         http_client.fetch_one.return_value = dummy_connector
 

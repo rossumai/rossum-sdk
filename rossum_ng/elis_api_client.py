@@ -1,4 +1,4 @@
-from typing import Any, AsyncIterable, Dict, Iterable, Optional
+from typing import Any, AsyncIterable, Dict, Iterable, Optional, Union
 
 from rossum_ng.api_client import APIClient
 from rossum_ng.models.annotation import Annotation
@@ -12,9 +12,9 @@ from rossum_ng.models.user import User
 from rossum_ng.models.user_role import UserRole
 from rossum_ng.models.workspace import Workspace
 
-
-class APIObject:
-    pass
+APIObject = Union[
+    Annotation, Connector, Hook, Inbox, Organization, Queue, Schema, UserRole, Workspace
+]
 
 
 class Sideload:

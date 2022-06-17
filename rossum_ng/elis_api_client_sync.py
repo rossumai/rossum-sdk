@@ -1,8 +1,8 @@
 import asyncio
-from typing import Any, AsyncIterable, Dict, Iterable, Optional, TypeVar, Union
+from typing import Any, AsyncIterable, Dict, Iterable, Optional, TypeVar
 
-from build.lib.rossum_ng.elis_api_client import ElisAPIClient
 from rossum_ng.api_client import APIClient
+from rossum_ng.elis_api_client import APIObject, ElisAPIClient
 from rossum_ng.models.annotation import Annotation
 from rossum_ng.models.connector import Connector
 from rossum_ng.models.hook import Hook
@@ -20,9 +20,6 @@ class Sideload:
 
 
 T = TypeVar("T")
-APIObject = Union[
-    Annotation, Connector, Hook, Inbox, Organization, Queue, Schema, UserRole, Workspace
-]
 
 
 class ElisAPIClientSync(ElisAPIClient):

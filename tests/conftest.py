@@ -1,8 +1,9 @@
+from unittest.mock import MagicMock
+
 import pytest
 import pytest_asyncio
 
 from rossum_ng.api_client import APIClient
-from unittest.mock import MagicMock
 
 
 @pytest.fixture

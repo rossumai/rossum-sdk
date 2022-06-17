@@ -1,7 +1,9 @@
+from unittest.mock import MagicMock
+
 import pytest
-from rossum_ng.models.user import User
+
 from rossum_ng.elis_api_client import ElisAPIClient
-from rossum_ng.api_client import APIClient
+from rossum_ng.models.user import User
 
 
 @pytest.fixture
@@ -27,7 +29,7 @@ def dummy_user():
 
 @pytest.mark.asyncio
 class TestUsers:
-    async def test_list_all_users(self, http_client: APIClient, dummy_user, mock_generator):
+    async def test_list_all_users(self, http_client: MagicMock, dummy_user, mock_generator):
         http_client.fetch_all.return_value = mock_generator(dummy_user)
 
         client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
@@ -38,7 +40,7 @@ class TestUsers:
 
         http_client.fetch_all.assert_called_with("users", ())
 
-    async def test_retrieve_user(self, http_client: APIClient, dummy_user):
+    async def test_retrieve_user(self, http_client: MagicMock, dummy_user):
         http_client.fetch_one.return_value = dummy_user
 
         client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
@@ -49,7 +51,7 @@ class TestUsers:
 
         http_client.fetch_one.assert_called_with("users", uid)
 
-    async def test_create_new_user(self, http_client: APIClient, dummy_user):
+    async def test_create_new_user(self, http_client: MagicMock, dummy_user):
         http_client.create.return_value = dummy_user
 
         client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)

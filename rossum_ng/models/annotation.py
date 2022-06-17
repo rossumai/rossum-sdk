@@ -32,5 +32,4 @@ class Annotation:
     metadata: Dict[Any, Any] = field(default_factory=dict)
     automated: bool = False
     automation_blocker: Optional[str] = None
-    content: str
     related_emails: List[str] = field(default_factory=list)

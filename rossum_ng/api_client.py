@@ -13,12 +13,12 @@ import asyncio
 import functools
 import logging
 import typing
-import urllib
+import urllib.parse
 
 import httpx
 
 if typing.TYPE_CHECKING:
-    from typing import Any, AsyncIterator, Dict, Iterable, List, Optional, Tuple
+    from typing import Any, AsyncIterator, Dict, Iterable, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 

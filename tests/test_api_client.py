@@ -9,6 +9,7 @@ from unittest import mock
 
 import httpx
 import pytest
+
 from rossum_ng.api_client import APIClient
 
 WORKSPACES = [
@@ -67,7 +68,7 @@ async def test_authenticate(client, httpx_mock):
     httpx_mock.add_response(
         method="POST", url="https://elis.rossum.ai/api/v1/auth/login", status_code=401
     )
-    with pytest.raises(httpx.HTTPStatusError, match="401") as e:
+    with pytest.raises(httpx.HTTPStatusError, match="401"):
         await client._authenticate()
 
 

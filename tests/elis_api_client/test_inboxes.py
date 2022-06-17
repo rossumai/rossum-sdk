@@ -1,7 +1,9 @@
+from unittest.mock import MagicMock
+
 import pytest
-from rossum_ng.models.inbox import Inbox
+
 from rossum_ng.elis_api_client import ElisAPIClient
-from rossum_ng.api_client import APIClient
+from rossum_ng.models.inbox import Inbox
 
 
 @pytest.fixture
@@ -35,7 +37,7 @@ def dummy_inbox():
 
 @pytest.mark.asyncio
 class TestInboxes:
-    async def test_create_new_inbox(self, http_client: APIClient, dummy_inbox):
+    async def test_create_new_inbox(self, http_client: MagicMock, dummy_inbox):
         http_client.create.return_value = dummy_inbox
 
         client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)

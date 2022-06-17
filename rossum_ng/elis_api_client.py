@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Iterable, Any, AsyncIterable
+from typing import Any, AsyncIterable, Dict, Iterable, Optional
 
 from rossum_ng.api_client import APIClient
 from rossum_ng.models.annotation import Annotation
@@ -31,7 +31,7 @@ class ElisAPIClient:
     ):
         self._http_client = http_client or APIClient(username, password, base_url)
 
-    ##### QUEUE #####
+    # ##### QUEUE #####
     # https://elis.rossum.ai/api/docs/#retrieve-a-queue-2
     async def retrieve_queue(
         self, id: int, sideloads: Optional[Iterable[APIObject]] = None
@@ -74,7 +74,7 @@ class ElisAPIClient:
     def export_annotations(self, id_: int, annotation_ids: Iterable[int], format_: str) -> dict:
         return {}
 
-    ##### ORGANIZATIONS #####
+    # ##### ORGANIZATIONS #####
     # https://elis.rossum.ai/api/docs/#list-all-organizations
     async def list_all_organizations(
         self,
@@ -93,7 +93,7 @@ class ElisAPIClient:
 
         return Organization(**organization)
 
-    ##### SCHEMAS #####
+    # ##### SCHEMAS #####
     # https://elis.rossum.ai/api/docs/#list-all-schemas
     async def list_all_schemas(
         self,
@@ -120,7 +120,7 @@ class ElisAPIClient:
 
         return Schema(**queue)
 
-    ##### USERS #####
+    # ##### USERS #####
     # https://elis.rossum.ai/api/docs/#list-all-users
     async def list_all_users(
         self,
@@ -132,9 +132,7 @@ class ElisAPIClient:
             yield User(**u)
 
     # https://elis.rossum.ai/api/docs/#retrieve-a-user-2
-    async def retrieve_user(
-        self, id: int, sideloads: Optional[Iterable[APIObject]] = None
-    ) -> User:
+    async def retrieve_user(self, id: int, sideloads: Optional[Iterable[APIObject]] = None) -> User:
         user = await self._http_client.fetch_one("users", id)
 
         return User(**user)
@@ -155,7 +153,7 @@ class ElisAPIClient:
     def reset_user_password(self, email: str) -> dict:
         return {}
 
-    ##### ANNOTATIONS #####
+    # ##### ANNOTATIONS #####
     # https://elis.rossum.ai/api/docs/#list-all-annotations
     async def list_all_annotations(
         self,
@@ -186,7 +184,7 @@ class ElisAPIClient:
 
         return Annotation(**annotation)
 
-    ##### WORKSPACES #####
+    # ##### WORKSPACES #####
     # https://elis.rossum.ai/api/docs/#list-all-workspaces
     async def list_all_workspaces(
         self,
@@ -213,7 +211,7 @@ class ElisAPIClient:
 
         return Workspace(**workspace)
 
-    ##### INBOX #####
+    # ##### INBOX #####
     # https://elis.rossum.ai/api/docs/#create-a-new-inbox
     async def create_new_inbox(
         self, data: Dict[str, Any], sideloads: Optional[Iterable[APIObject]] = None
@@ -222,7 +220,7 @@ class ElisAPIClient:
 
         return Inbox(**inbox)
 
-    ##### CONNECTORS #####
+    # ##### CONNECTORS #####
     # https://elis.rossum.ai/api/docs/#list-all-connectors
     async def list_all_connectors(
         self,
@@ -250,7 +248,7 @@ class ElisAPIClient:
 
         return Connector(**connector)
 
-    ##### HOOKS #####
+    # ##### HOOKS #####
     # https://elis.rossum.ai/api/docs/#list-all-hooks
     async def list_all_hooks(
         self,
@@ -275,7 +273,7 @@ class ElisAPIClient:
 
         return Hook(**hook)
 
-    ##### USER ROLES #####
+    # ##### USER ROLES #####
     # https://elis.rossum.ai/api/docs/#list-all-user-roles
     async def list_all_user_roles(
         self,

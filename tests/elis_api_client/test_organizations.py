@@ -1,8 +1,9 @@
+from unittest.mock import MagicMock
+
 import pytest
 
-from rossum_ng.models.organization import Organization
 from rossum_ng.elis_api_client import ElisAPIClient
-from rossum_ng.api_client import APIClient
+from rossum_ng.models.organization import Organization
 
 
 @pytest.fixture
@@ -26,7 +27,7 @@ def dummy_organization():
 @pytest.mark.asyncio
 class TestOrganizations:
     async def test_get_organizations(
-        self, http_client: APIClient, dummy_organization, mock_generator
+        self, http_client: MagicMock, dummy_organization, mock_generator
     ):
         http_client.fetch_all.return_value = mock_generator(dummy_organization)
 
@@ -38,7 +39,7 @@ class TestOrganizations:
 
         http_client.fetch_all.assert_called_with("organizations", ())
 
-    async def test_get_organization(self, http_client: APIClient, dummy_organization):
+    async def test_get_organization(self, http_client: MagicMock, dummy_organization):
         http_client.fetch_one.return_value = dummy_organization
 
         client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)

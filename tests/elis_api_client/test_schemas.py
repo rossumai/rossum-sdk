@@ -1,8 +1,9 @@
+from unittest.mock import MagicMock
+
 import pytest
 
-from rossum_ng.models.schema import Schema
 from rossum_ng.elis_api_client import ElisAPIClient
-from rossum_ng.api_client import APIClient
+from rossum_ng.models.schema import Schema
 
 
 @pytest.fixture
@@ -38,7 +39,7 @@ def dummy_schema():
 
 @pytest.mark.asyncio
 class TestSchemas:
-    async def test_list_all_schemas(self, http_client: APIClient, dummy_schema, mock_generator):
+    async def test_list_all_schemas(self, http_client: MagicMock, dummy_schema, mock_generator):
         http_client.fetch_all.return_value = mock_generator(dummy_schema)
 
         client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
@@ -49,7 +50,7 @@ class TestSchemas:
 
         http_client.fetch_all.assert_called_with("schemas", ())
 
-    async def test_retrieve_schema(self, http_client: APIClient, dummy_schema):
+    async def test_retrieve_schema(self, http_client: MagicMock, dummy_schema):
         http_client.fetch_one.return_value = dummy_schema
 
         client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
@@ -60,7 +61,7 @@ class TestSchemas:
 
         http_client.fetch_one.assert_called_with("schemas", sid)
 
-    async def test_create_new_schema(self, http_client: APIClient, dummy_schema):
+    async def test_create_new_schema(self, http_client: MagicMock, dummy_schema):
         http_client.create.return_value = dummy_schema
 
         client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)

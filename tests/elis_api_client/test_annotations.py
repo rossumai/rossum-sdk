@@ -1,8 +1,10 @@
+from unittest.mock import MagicMock
+
 import pytest
 
+from rossum_ng.api_client import APIClient
 from rossum_ng.elis_api_client import ElisAPIClient
 from rossum_ng.models.annotation import Annotation
-from rossum_ng.api_client import APIClient
 
 
 @pytest.fixture
@@ -39,7 +41,7 @@ def dummy_annotation():
 
 @pytest.mark.asyncio
 class TestAnnotations:
-    async def test_get_annotations(self, http_client: APIClient, dummy_annotation, mock_generator):
+    async def test_get_annotations(self, http_client: MagicMock, dummy_annotation, mock_generator):
         http_client.fetch_all.return_value = mock_generator(dummy_annotation)
 
         client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
@@ -77,7 +79,7 @@ class TestAnnotations:
 
         http_client.replace.assert_called_with("annotations", aid, data)
 
-    async def test_update_part_annotation(self, http_client: APIClient, dummy_annotation):
+    async def test_update_part_annotation(self, http_client: MagicMock, dummy_annotation):
         http_client.update.return_value = dummy_annotation
 
         client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)

@@ -1,7 +1,8 @@
+from unittest.mock import MagicMock
+
 import pytest
 
 from rossum_ng.elis_api_client import ElisAPIClient
-from rossum_ng.api_client import APIClient
 from rossum_ng.models.workspace import Workspace
 
 
@@ -24,7 +25,7 @@ def dummy_workspace():
 @pytest.mark.asyncio
 class TestWorkspaces:
     async def test_list_all_workspaces(
-        self, http_client: APIClient, dummy_workspace, mock_generator
+        self, http_client: MagicMock, dummy_workspace, mock_generator
     ):
         http_client.fetch_all.return_value = mock_generator(dummy_workspace)
 
@@ -36,7 +37,7 @@ class TestWorkspaces:
 
         http_client.fetch_all.assert_called_with("workspaces", ())
 
-    async def test_retrieve_workspace(self, http_client: APIClient, dummy_workspace):
+    async def test_retrieve_workspace(self, http_client: MagicMock, dummy_workspace):
         http_client.fetch_one.return_value = dummy_workspace
 
         client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
@@ -47,7 +48,7 @@ class TestWorkspaces:
 
         http_client.fetch_one.assert_called_with("workspaces", oid)
 
-    async def test_create_new_organization(self, http_client: APIClient, dummy_workspace):
+    async def test_create_new_organization(self, http_client: MagicMock, dummy_workspace):
         http_client.create.return_value = dummy_workspace
 
         client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)

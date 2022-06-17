@@ -1,7 +1,9 @@
+from unittest.mock import MagicMock
+
 import pytest
-from rossum_ng.models.connector import Connector
+
 from rossum_ng.elis_api_client import ElisAPIClient
-from rossum_ng.api_client import APIClient
+from rossum_ng.models.connector import Connector
 
 
 @pytest.fixture
@@ -23,7 +25,7 @@ def dummy_connector():
 @pytest.mark.asyncio
 class TestUsers:
     async def test_list_all_connectors(
-        self, http_client: APIClient, dummy_connector, mock_generator
+        self, http_client: MagicMock, dummy_connector, mock_generator
     ):
         http_client.fetch_all.return_value = mock_generator(dummy_connector)
 
@@ -35,7 +37,7 @@ class TestUsers:
 
         http_client.fetch_all.assert_called_with("connectors", ())
 
-    async def test_retrieve_connector(self, http_client: APIClient, dummy_connector):
+    async def test_retrieve_connector(self, http_client: MagicMock, dummy_connector):
         http_client.fetch_one.return_value = dummy_connector
 
         client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
@@ -46,7 +48,7 @@ class TestUsers:
 
         http_client.fetch_one.assert_called_with("connectors", cid)
 
-    async def test_create_new_connector(self, http_client: APIClient, dummy_connector):
+    async def test_create_new_connector(self, http_client: MagicMock, dummy_connector):
         http_client.create.return_value = dummy_connector
 
         client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)

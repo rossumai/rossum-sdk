@@ -1,7 +1,9 @@
+from unittest.mock import MagicMock
+
 import pytest
-from rossum_ng.models.queue import Queue
+
 from rossum_ng.elis_api_client import ElisAPIClient
-from rossum_ng.api_client import APIClient
+from rossum_ng.models.queue import Queue
 
 
 @pytest.fixture
@@ -62,7 +64,7 @@ def dummy_queue():
 
 @pytest.mark.asyncio
 class TestQueues:
-    async def test_list_all_queues(self, http_client: APIClient, dummy_queue, mock_generator):
+    async def test_list_all_queues(self, http_client: MagicMock, dummy_queue, mock_generator):
         http_client.fetch_all.return_value = mock_generator(dummy_queue)
 
         client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
@@ -73,7 +75,7 @@ class TestQueues:
 
         http_client.fetch_all.assert_called_with("queues", ())
 
-    async def test_retrieve_queue(self, http_client: APIClient, dummy_queue):
+    async def test_retrieve_queue(self, http_client: MagicMock, dummy_queue):
         http_client.fetch_one.return_value = dummy_queue
 
         client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
@@ -84,7 +86,7 @@ class TestQueues:
 
         http_client.fetch_one.assert_called_with("queues", qid)
 
-    async def test_create_new_queue(self, http_client: APIClient, dummy_queue):
+    async def test_create_new_queue(self, http_client: MagicMock, dummy_queue):
         http_client.create.return_value = dummy_queue
 
         client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)

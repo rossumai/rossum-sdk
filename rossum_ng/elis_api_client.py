@@ -211,6 +211,10 @@ class ElisAPIClient:
 
         return Workspace(**workspace)
 
+    # https://elis.rossum.ai/api/docs/#delete-a-workspace
+    async def delete_workspace(self, id, sideloads: Optional[Iterable[APIObject]] = None) -> None:
+        return await self._http_client.delete("workspaces", id)
+
     # ##### INBOX #####
     # https://elis.rossum.ai/api/docs/#create-a-new-inbox
     async def create_new_inbox(

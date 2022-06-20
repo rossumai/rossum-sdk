@@ -218,6 +218,12 @@ class ElisAPIClientSync:
             self.elis_api_client.create_new_workspace(data, sideloads)
         )
 
+    # https://elis.rossum.ai/api/docs/#retrieve-a-workspace
+    def delete_workspace(self, id, sideloads: Optional[Iterable[APIObject]] = None) -> None:
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.delete_workspace(id, sideloads)
+        )
+
     # ##### INBOX #####
     # https://elis.rossum.ai/api/docs/#create-a-new-inbox
     def create_new_inbox(

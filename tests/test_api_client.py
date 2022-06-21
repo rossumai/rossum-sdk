@@ -5,10 +5,10 @@
 * all CRUD methods are tested for both a happy path and an error (400 or 404)
 """
 import json
-from unittest import mock
 
 import aiofiles
 import httpx
+import mock
 import pytest
 from rossum_ng.api_client import APIClient
 

@@ -20,6 +20,8 @@ import httpx
 if typing.TYPE_CHECKING:
     from typing import Any, AsyncIterator, Dict, Iterable, Optional, Tuple
 
+    from aiofiles.base import AsyncBase
+
 logger = logging.getLogger(__name__)
 
 
@@ -142,6 +144,7 @@ class APIClient:
             headers={**self._headers},
             json=data,
         )
+        print(response.content)
         response.raise_for_status()
         return response.json()
 
@@ -179,5 +182,10 @@ class APIClient:
         response.raise_for_status()
 
     @authenticate_if_needed
-    async def upload(self, resource: str, id: int) -> None:
-        pass
+    async def upload(self, resource: str, id: int, fp: AsyncBase, filename: str) -> None:
+        """Upload a file to a resource that supports this."""
+        quoted_filename = urllib.parse.quote(filename)
+        url = f"{self.base_url}/{resource}/{id}/upload/{quoted_filename}"
+        response = await self.client.post(url, headers={**self._headers}, content=fp)
+        response.raise_for_status()
+        return response.json()

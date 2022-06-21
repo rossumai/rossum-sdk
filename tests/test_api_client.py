@@ -5,11 +5,11 @@
 * all CRUD methods are tested for both a happy path and an error (400 or 404)
 """
 import json
+from unittest import mock
 
+import aiofiles
 import httpx
-import mock
 import pytest
-
 from rossum_ng.api_client import APIClient
 
 WORKSPACES = [
@@ -41,6 +41,15 @@ WORKSPACES = [
         "metadata": {},
     },
 ]
+
+UPLOAD_RESPONSE = {
+    "results": [
+        {
+            "document": "https://elis.develop.r8.lol/api/v1/documents/3164197",
+            "annotation": "https://elis.develop.r8.lol/api/v1/annotations/3154459",
+        }
+    ],
+}
 
 
 @pytest.fixture
@@ -265,6 +274,18 @@ async def test_delete_404(client, httpx_mock):
     )
     with pytest.raises(httpx.HTTPStatusError, match="404"):
         await client.delete("workspaces", id=123)
+
+
+@pytest.mark.asyncio
+async def test_upload(client, httpx_mock):
+    httpx_mock.add_response(
+        method="POST",
+        url="https://elis.rossum.ai/api/v1/queues/123/upload/filename.pdf",
+        json=UPLOAD_RESPONSE,
+    )
+
+    async with aiofiles.tempfile.TemporaryFile("rb") as fp:
+        await client.upload("queues", id=123, fp=fp, filename="filename.pdf")
 
 
 @pytest.mark.asyncio

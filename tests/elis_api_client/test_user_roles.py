@@ -1,9 +1,5 @@
-from unittest.mock import MagicMock
-
 import pytest
 
-from rossum_ng.elis_api_client import ElisAPIClient
-from rossum_ng.elis_api_client_sync import ElisAPIClientSync
 from rossum_ng.models.user_role import UserRole
 
 
@@ -14,12 +10,10 @@ def dummy_user_role():
 
 @pytest.mark.asyncio
 class TestWorkspaces:
-    async def test_list_all_user_roles(
-        self, http_client: MagicMock, dummy_user_role, mock_generator
-    ):
+    async def test_list_all_user_roles(self, elis_client, dummy_user_role, mock_generator):
+        client, http_client = elis_client
         http_client.fetch_all.return_value = mock_generator(dummy_user_role)
 
-        client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
         user_roles = client.list_all_user_roles()
 
         async for u in user_roles:
@@ -29,10 +23,10 @@ class TestWorkspaces:
 
 
 class TestWorkspacesAsync:
-    def test_list_all_user_roles(self, http_client: MagicMock, dummy_user_role, mock_generator):
+    def test_list_all_user_roles(self, elis_client_sync, dummy_user_role, mock_generator):
+        client, http_client = elis_client_sync
         http_client.fetch_all.return_value = mock_generator(dummy_user_role)
 
-        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
         user_roles = client.list_all_user_roles()
 
         for u in user_roles:

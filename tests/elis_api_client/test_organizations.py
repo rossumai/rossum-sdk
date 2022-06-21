@@ -1,9 +1,5 @@
-from unittest.mock import MagicMock
-
 import pytest
 
-from rossum_ng.elis_api_client import ElisAPIClient
-from rossum_ng.elis_api_client_sync import ElisAPIClientSync
 from rossum_ng.models.organization import Organization
 
 
@@ -27,12 +23,10 @@ def dummy_organization():
 
 @pytest.mark.asyncio
 class TestOrganizations:
-    async def test_get_organizations(
-        self, http_client: MagicMock, dummy_organization, mock_generator
-    ):
+    async def test_get_organizations(self, elis_client, dummy_organization, mock_generator):
+        client, http_client = elis_client
         http_client.fetch_all.return_value = mock_generator(dummy_organization)
 
-        client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
         organizations = client.list_all_organizations()
 
         async for o in organizations:
@@ -40,10 +34,10 @@ class TestOrganizations:
 
         http_client.fetch_all.assert_called_with("organizations", ())
 
-    async def test_get_organization(self, http_client: MagicMock, dummy_organization):
+    async def test_get_organization(self, elis_client, dummy_organization):
+        client, http_client = elis_client
         http_client.fetch_one.return_value = dummy_organization
 
-        client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
         oid = dummy_organization["id"]
         organization = await client.retrieve_organization(oid)
 
@@ -53,10 +47,10 @@ class TestOrganizations:
 
 
 class TestOrganizationsSync:
-    def test_get_organizations(self, http_client: MagicMock, dummy_organization, mock_generator):
+    def test_get_organizations(self, elis_client_sync, dummy_organization, mock_generator):
+        client, http_client = elis_client_sync
         http_client.fetch_all.return_value = mock_generator(dummy_organization)
 
-        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
         organizations = client.list_all_organizations()
 
         for o in organizations:
@@ -64,10 +58,10 @@ class TestOrganizationsSync:
 
         http_client.fetch_all.assert_called_with("organizations", ())
 
-    def test_get_organization(self, http_client: MagicMock, dummy_organization):
+    def test_get_organization(self, elis_client_sync, dummy_organization):
+        client, http_client = elis_client_sync
         http_client.fetch_one.return_value = dummy_organization
 
-        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
         oid = dummy_organization["id"]
         organization = client.retrieve_organization(oid)
 

@@ -50,6 +50,7 @@ UPLOAD_RESPONSE = {
         }
     ],
 }
+EXPECTED_UPLOAD_CONTENT = b'--313131\r\nContent-Disposition: form-data; name="content"; filename="filename.pdf"\r\nContent-Type: application/octet-stream\r\n\r\nFake PDF.\r\n--313131\r\nContent-Disposition: form-data; name="values"\r\nContent-Type: application/json\r\n\r\n{"upload:organization_unit": "Sales"}\r\n--313131\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n{"project": "Market ABC"}\r\n--313131--\r\n'
 
 
 @pytest.fixture
@@ -280,12 +281,27 @@ async def test_delete_404(client, httpx_mock):
 async def test_upload(client, httpx_mock):
     httpx_mock.add_response(
         method="POST",
-        url="https://elis.rossum.ai/api/v1/queues/123/upload/filename.pdf",
+        url="https://elis.rossum.ai/api/v1/queues/123/upload",
+        match_content=EXPECTED_UPLOAD_CONTENT,
         json=UPLOAD_RESPONSE,
     )
 
-    async with aiofiles.tempfile.TemporaryFile("rb") as fp:
-        await client.upload("queues", id=123, fp=fp, filename="filename.pdf")
+    # HTTPX uses a random --boundary, patch urandom to make it fixed,
+    # see section 4.1 in https://www.ietf.org/rfc/rfc2388.txt for context
+    with mock.patch("httpx._multipart.os.urandom", return_value=b"111"):
+        async with aiofiles.tempfile.NamedTemporaryFile("wb") as fp:
+            await fp.write(b"Fake PDF.")
+            await fp.flush()
+            async with aiofiles.open(fp.name, "rb") as fp:
+                response = await client.upload(
+                    "queues",
+                    id=123,
+                    fp=fp,
+                    filename="filename.pdf",
+                    values={"upload:organization_unit": "Sales"},
+                    metadata={"project": "Market ABC"},
+                )
+    assert response == UPLOAD_RESPONSE
 
 
 @pytest.mark.asyncio

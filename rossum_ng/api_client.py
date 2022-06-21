@@ -3,7 +3,6 @@ from __future__ import annotations
 """
 TODO
 * exception repacking
-* upload a file: /v1/queues/{id}/upload
 * export annotations: /v1/queues/{id}/export
 * enum with resource types instead of strings
 * password reset
@@ -11,6 +10,7 @@ TODO
 """
 import asyncio
 import functools
+import json
 import logging
 import typing
 import urllib.parse
@@ -19,8 +19,6 @@ import httpx
 
 if typing.TYPE_CHECKING:
     from typing import Any, AsyncIterator, Dict, Iterable, Optional, Tuple
-
-    from aiofiles.base import AsyncBase
 
 logger = logging.getLogger(__name__)
 
@@ -144,7 +142,6 @@ class APIClient:
             headers={**self._headers},
             json=data,
         )
-        print(response.content)
         response.raise_for_status()
         return response.json()
 
@@ -182,10 +179,37 @@ class APIClient:
         response.raise_for_status()
 
     @authenticate_if_needed
-    async def upload(self, resource: str, id: int, fp: AsyncBase, filename: str) -> None:
-        """Upload a file to a resource that supports this."""
-        quoted_filename = urllib.parse.quote(filename)
-        url = f"{self.base_url}/{resource}/{id}/upload/{quoted_filename}"
-        response = await self.client.post(url, headers={**self._headers}, content=fp)
+    async def upload(
+        self,
+        resource: str,
+        id: int,
+        fp,
+        filename: str,
+        values: Optional[Dict[str, Any]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """Upload a file to a resource that supports this.
+
+        Arguments
+        ---------
+            filename
+                name that will be used by Elis for the uploaded file
+            metadata
+                metadata will be set to the object created by the upload
+            values
+                may be used to initialize values of the object created from the uploaded file,
+                semantics is different for each resource
+        """
+
+        url = f"{self.base_url}/{resource}/{id}/upload"
+        files = {"content": (filename, await fp.read(), "application/octet-stream")}
+
+        # Filename of values and metadata must be "", otherwise Elis API returns HTTP 400 with body
+        # "Value must be valid JSON."
+        if values is not None:
+            files["values"] = ("", json.dumps(values).encode("utf-8"), "application/json")
+        if metadata is not None:
+            files["metadata"] = ("", json.dumps(metadata).encode("utf-8"), "application/json")
+        response = await self.client.post(url, headers={**self._headers}, files=files)
         response.raise_for_status()
         return response.json()

@@ -1,6 +1,7 @@
 import pytest
 import pytest_asyncio
 from mock import MagicMock
+
 from rossum_ng.api_client import APIClient
 
 

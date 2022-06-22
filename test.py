@@ -8,6 +8,7 @@ import os
 import random
 
 import aiofiles
+
 from rossum_ng.api_client import APIClient
 from rossum_ng.elis_api_client import ElisAPIClient
 from rossum_ng.elis_api_client_sync import ElisAPIClientSync

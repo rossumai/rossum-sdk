@@ -3,6 +3,7 @@ from __future__ import annotations
 """
 TODO
 * export annotations: /v1/queues/{id}/export
+* sideloading
 * enum with resource types instead of strings
 * password reset
 * rate limiting?
@@ -17,7 +18,7 @@ import urllib.parse
 import httpx
 
 if typing.TYPE_CHECKING:
-    from typing import Any, AsyncIterator, Dict, Iterable, Optional, Tuple
+    from typing import Any, AsyncIterator, Dict, Iterable, List, Optional, Tuple
 
     from aiofiles.threadpool.binary import AsyncFileIO
 
@@ -72,22 +73,13 @@ class APIClient:
         self.token: Optional[str] = None
         self.client = httpx.AsyncClient()
 
-    async def _authenticate(self):
-        response = await self._request(
-            self.client.post,
-            "auth/login",
-            data={"username": self.username, "password": self.password},
-        )
-        self.token = response.json()["key"]
-
     @property
     def _headers(self):
         return {"Authorization": f"token {self.token}"}
 
-    @authenticate_if_needed
     async def fetch_one(self, resource: str, id: int) -> Dict[str, Any]:
         """Retrieve a single object in a specific resource."""
-        response = await self._request(self.client.get, f"{resource}/{id}", headers=self._headers)
+        response = await self._request("GET", f"{resource}/{id}")
         return response.json()
 
     async def fetch_all(
@@ -126,45 +118,33 @@ class APIClient:
             for r in results:
                 yield r
 
-    @authenticate_if_needed
-    async def _fetch_page(self, page_url) -> Tuple[Dict[str, Any], int]:
-        response = await self._request(self.client.get, page_url, headers=self._headers)
+    async def _fetch_page(self, page_url) -> Tuple[List[Dict[str, Any]], int]:
+        response = await self._request("GET", page_url)
         data = response.json()
         return data["results"], data["pagination"]["total_pages"]
 
-    @authenticate_if_needed
     async def create(self, resource: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """Create a new object."""
-        response = await self._request(
-            self.client.post, resource, headers={**self._headers}, json=data
-        )
+        response = await self._request("POST", resource, json=data)
         return response.json()
 
-    @authenticate_if_needed
     async def replace(self, resource: str, id: int, data: Dict[str, Any]) -> Dict[str, Any]:
         "Modify an entire existing object."
-        response = await self._request(
-            self.client.put, f"{resource}/{id}", headers={**self._headers}, json=data
-        )
+        response = await self._request("PUT", f"{resource}/{id}", json=data)
         return response.json()
 
-    @authenticate_if_needed
     async def update(self, resource: str, id: int, data: Dict[str, Any]) -> Dict[str, Any]:
         "Modify particular fields of an existing object."
-        response = await self._request(
-            self.client.patch, f"{resource}/{id}", headers={**self._headers}, json=data
-        )
+        response = await self._request("PATCH", f"{resource}/{id}", json=data)
         return response.json()
 
-    @authenticate_if_needed
     async def delete(self, resource: str, id: int) -> None:
         """Delete a particular object.
 
         Use with caution: For some objects, it triggers a cascade delete of related objects.
         """
-        await self._request(self.client.delete, f"{resource}/{id}", headers=self._headers)
+        await self._request("DELETE", f"{resource}/{id}")
 
-    @authenticate_if_needed
     async def upload(
         self,
         resource: str,
@@ -196,20 +176,35 @@ class APIClient:
             files["values"] = ("", json.dumps(values).encode("utf-8"), "application/json")
         if metadata is not None:
             files["metadata"] = ("", json.dumps(metadata).encode("utf-8"), "application/json")
-        response = await self._request(
-            self.client.post, url, headers={**self._headers}, files=files
-        )
+        response = await self._request("POST", url, files=files)
         return response.json()
 
-    async def _request(self, method, url_part: str, *args, **kwargs) -> httpx.Response:
+    async def _authenticate(self):
+        response = await self.client.post(
+            f"{self.base_url}/auth/login",
+            data={"username": self.username, "password": self.password},
+        )
+        self._raise_for_status(response)
+        self.token = response.json()["key"]
+
+    @authenticate_if_needed
+    async def _request(self, method: str, url_part: str, *args, **kwargs) -> httpx.Response:
         """Performs the actual HTTP call and does error handling."""
         # Do not force the calling site to alway prepend the base URL
         url = f"{self.base_url}/{url_part}"
-        response = await method(url, *args, **kwargs)
+        headers = kwargs.pop("headers", {})
+        headers["Authorization"] = f"token {self.token}"
+        response = await self.client.request(method, url, headers=headers, *args, **kwargs)
+        self._raise_for_status(response)
+        return response
+
+    def _raise_for_status(self, response: httpx.Response):
+        """Raise an exception in case of HTTP error.
+
+        Re-pack to our own exception class to shield users from the fact that we're using
+        httpx which should be an implementation detail.
+        """
         try:
             response.raise_for_status()
         except httpx.HTTPStatusError as e:
-            # Re-pack the exception to our own class to shield users from the fact that we're using
-            # httpx which should be an implementation detail.
             raise APIClientError(response.status_code, response.content.decode("utf-8")) from e
-        return response

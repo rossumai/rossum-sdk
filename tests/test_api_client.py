@@ -286,5 +286,5 @@ async def test_request_repacks_exception(client, httpx_mock):
         content=b'{"detail":"Not found."}',
     )
     with pytest.raises(APIClientError) as err:
-        await client._request(client.client.get, "workspaces/123")
+        await client._request("GET", "workspaces/123")
     assert str(err.value) == 'HTTP 404, content: {"detail":"Not found."}'

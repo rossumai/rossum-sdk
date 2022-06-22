@@ -8,6 +8,7 @@ import os
 import random
 
 import aiofiles
+
 from rossum_ng.api_client import APIClient
 from rossum_ng.elis_api_client import ElisAPIClient
 from rossum_ng.elis_api_client_sync import ElisAPIClientSync
@@ -84,7 +85,14 @@ async def main():
     )
 
     async with aiofiles.open("tests/data/sample_invoice.pdf", "rb") as fp:
-        response = await client.upload("queues", id=queue["id"], fp=fp, filename="filename.pdf")
+        response = await client.upload(
+            "queues",
+            id=queue["id"],
+            fp=fp,
+            filename="filename.pdf",
+            values={"upload:organization_unit": "Sales"},
+            metadata={"project": "Market ABC"},
+        )
         print("UPLOAD result:", response)
 
     response = await client.delete("workspaces", id=workspace["id"])

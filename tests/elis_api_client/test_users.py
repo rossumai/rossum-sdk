@@ -1,6 +1,6 @@
-from unittest.mock import MagicMock
-
 import pytest
+from mock import MagicMock
+
 from rossum_ng.elis_api_client import ElisAPIClient
 from rossum_ng.elis_api_client_sync import ElisAPIClientSync
 from rossum_ng.models.user import User

@@ -19,6 +19,8 @@ import httpx
 if typing.TYPE_CHECKING:
     from typing import Any, AsyncIterator, Dict, Iterable, Optional, Tuple
 
+    from aiofiles.threadpool.binary import AsyncFileIO
+
 logger = logging.getLogger(__name__)
 
 
@@ -167,7 +169,7 @@ class APIClient:
         self,
         resource: str,
         id: int,
-        fp,
+        fp: AsyncFileIO,
         filename: str,
         values: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None,

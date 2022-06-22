@@ -2,7 +2,6 @@ from __future__ import annotations
 
 """
 TODO
-* exception repacking
 * export annotations: /v1/queues/{id}/export
 * enum with resource types instead of strings
 * password reset
@@ -23,10 +22,13 @@ if typing.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class HTTPError(Exception):
-    def __init__(self, status_code, body):
+class APIClientError(Exception):
+    def __init__(self, status_code, error):
         self.status_code = status_code
-        self.body = body
+        self.error = error
+
+    def __str__(self):
+        return f"HTTP {self.status_code}, content: {self.error}"
 
 
 def authenticate_if_needed(method):
@@ -43,8 +45,8 @@ def authenticate_if_needed(method):
             await self._authenticate()
         try:
             return await method(self, *args, **kwargs)
-        except httpx.HTTPStatusError as e:
-            if e.response.status_code != 401:
+        except APIClientError as e:
+            if e.status_code != 401:
                 raise
             logger.debug(f"Token expired, authenticating user {self.username!r}...")
             await self._authenticate()
@@ -69,11 +71,11 @@ class APIClient:
         self.client = httpx.AsyncClient()
 
     async def _authenticate(self):
-        response = await self.client.post(
-            f"{self.base_url}/auth/login",
+        response = await self._request(
+            self.client.post,
+            "auth/login",
             data={"username": self.username, "password": self.password},
         )
-        response.raise_for_status()
         self.token = response.json()["key"]
 
     @property
@@ -83,8 +85,7 @@ class APIClient:
     @authenticate_if_needed
     async def fetch_one(self, resource: str, id: int) -> Dict[str, Any]:
         """Retrieve a single object in a specific resource."""
-        response = await self.client.get(f"{self.base_url}/{resource}/{id}", headers=self._headers)
-        response.raise_for_status()
+        response = await self._request(self.client.get, f"{resource}/{id}", headers=self._headers)
         return response.json()
 
     async def fetch_all(
@@ -108,14 +109,10 @@ class APIClient:
                 **filters,
             }
         )
-        results, next_page_url, total_pages = await self._fetch_page(
-            f"{self.base_url}/{resource}?{query_params}"
-        )
+        results, total_pages = await self._fetch_page(f"{resource}?{query_params}")
         # Fire async tasks to fetch the rest of the pages and start yielding results from page 1
         page_requests = [
-            asyncio.create_task(
-                self._fetch_page(f"{self.base_url}/{resource}?page={i}&{query_params}")
-            )
+            asyncio.create_task(self._fetch_page(f"{resource}?page={i}&{query_params}"))
             for i in range(2, total_pages + 1)
         ]
         for r in results:
@@ -123,48 +120,38 @@ class APIClient:
         # Await requests one by one to yield results in correct order to ensure the same order of
         # results next time the same resource is fetched. This slightly descreases throughput.
         for request in page_requests:
-            results, next_page_url, _ = await request
+            results, _ = await request
             for r in results:
                 yield r
 
     @authenticate_if_needed
-    async def _fetch_page(self, page_url) -> Tuple[Dict[str, Any], str, int]:
-        response = await self.client.get(page_url, headers=self._headers)
-        response.raise_for_status()
+    async def _fetch_page(self, page_url) -> Tuple[Dict[str, Any], int]:
+        response = await self._request(self.client.get, page_url, headers=self._headers)
         data = response.json()
-        return data["results"], data["pagination"]["next"], data["pagination"]["total_pages"]
+        return data["results"], data["pagination"]["total_pages"]
 
     @authenticate_if_needed
     async def create(self, resource: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """Create a new object."""
-        response = await self.client.post(
-            f"{self.base_url}/{resource}",
-            headers={**self._headers},
-            json=data,
+        response = await self._request(
+            self.client.post, resource, headers={**self._headers}, json=data
         )
-        response.raise_for_status()
         return response.json()
 
     @authenticate_if_needed
     async def replace(self, resource: str, id: int, data: Dict[str, Any]) -> Dict[str, Any]:
         "Modify an entire existing object."
-        response = await self.client.put(
-            f"{self.base_url}/{resource}/{id}",
-            headers={**self._headers},
-            json=data,
+        response = await self._request(
+            self.client.put, f"{resource}/{id}", headers={**self._headers}, json=data
         )
-        response.raise_for_status()
         return response.json()
 
     @authenticate_if_needed
     async def update(self, resource: str, id: int, data: Dict[str, Any]) -> Dict[str, Any]:
         "Modify particular fields of an existing object."
-        response = await self.client.patch(
-            f"{self.base_url}/{resource}/{id}",
-            headers={**self._headers},
-            json=data,
+        response = await self._request(
+            self.client.patch, f"{resource}/{id}", headers={**self._headers}, json=data
         )
-        response.raise_for_status()
         return response.json()
 
     @authenticate_if_needed
@@ -173,10 +160,7 @@ class APIClient:
 
         Use with caution: For some objects, it triggers a cascade delete of related objects.
         """
-        response = await self.client.delete(
-            f"{self.base_url}/{resource}/{id}", headers=self._headers
-        )
-        response.raise_for_status()
+        await self._request(self.client.delete, f"{resource}/{id}", headers=self._headers)
 
     @authenticate_if_needed
     async def upload(
@@ -201,7 +185,7 @@ class APIClient:
                 semantics is different for each resource
         """
 
-        url = f"{self.base_url}/{resource}/{id}/upload"
+        url = f"{resource}/{id}/upload"
         files = {"content": (filename, await fp.read(), "application/octet-stream")}
 
         # Filename of values and metadata must be "", otherwise Elis API returns HTTP 400 with body
@@ -210,6 +194,20 @@ class APIClient:
             files["values"] = ("", json.dumps(values).encode("utf-8"), "application/json")
         if metadata is not None:
             files["metadata"] = ("", json.dumps(metadata).encode("utf-8"), "application/json")
-        response = await self.client.post(url, headers={**self._headers}, files=files)
-        response.raise_for_status()
+        response = await self._request(
+            self.client.post, url, headers={**self._headers}, files=files
+        )
         return response.json()
+
+    async def _request(self, method, url_part: str, *args, **kwargs) -> httpx.Response:
+        """Performs the actual HTTP call and does error handling."""
+        # Do not force the calling site to alway prepend the base URL
+        url = f"{self.base_url}/{url_part}"
+        response = await method(url, *args, **kwargs)
+        try:
+            response.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            # Re-pack the exception to our own class to shield users from the fact that we're using
+            # httpx which should be an implementation detail.
+            raise APIClientError(response.status_code, response.content.decode("utf-8")) from e
+        return response

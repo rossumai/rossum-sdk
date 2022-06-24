@@ -88,14 +88,13 @@ class ElisAPIClient:
         """
         tasks = set()
         for file, filename in files:
-            async with aiofiles.open(file) as fp:
-                tasks.add(
-                    asyncio.create_task(
-                        self._http_client.upload("queues", queue_id, fp, filename, values, metadata)
-                    )
-                )
+            tasks.add(asyncio.create_task(self._upload(file, queue_id, filename, values, metadata)))
 
         await asyncio.gather(*tasks)
+
+    async def _upload(self, file, queue_id, filename, values, metadata):
+        async with aiofiles.open(file, "rb") as fp:
+            await self._http_client.upload("queues", queue_id, fp, filename, values, metadata)
 
     # TODO: specific method in APICLient
     def export_annotations(self, id_: int, annotation_ids: Iterable[int], format_: str) -> dict:

@@ -1,9 +1,5 @@
-from unittest.mock import MagicMock
-
 import pytest
 
-from rossum_ng.elis_api_client import ElisAPIClient
-from rossum_ng.elis_api_client_sync import ElisAPIClientSync
 from rossum_ng.models.annotation import Annotation
 
 
@@ -41,10 +37,10 @@ def dummy_annotation():
 
 @pytest.mark.asyncio
 class TestAnnotations:
-    async def test_get_annotations(self, http_client: MagicMock, dummy_annotation, mock_generator):
+    async def test_get_annotations(self, elis_client, dummy_annotation, mock_generator):
+        client, http_client = elis_client
         http_client.fetch_all.return_value = mock_generator(dummy_annotation)
 
-        client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
         annotations = client.list_all_annotations()
 
         async for a in annotations:
@@ -52,10 +48,10 @@ class TestAnnotations:
 
         http_client.fetch_all.assert_called_with("annotations", ())
 
-    async def test_get_annotation(self, http_client: MagicMock, dummy_annotation):
+    async def test_get_annotation(self, elis_client, dummy_annotation):
+        client, http_client = elis_client
         http_client.fetch_one.return_value = dummy_annotation
 
-        client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
         aid = dummy_annotation["id"]
         annotation = await client.retrieve_annotation(aid)
 
@@ -63,10 +59,10 @@ class TestAnnotations:
 
         http_client.fetch_one.assert_called_with("annotations", aid)
 
-    async def test_update_annotation(self, http_client: MagicMock, dummy_annotation):
+    async def test_update_annotation(self, elis_client, dummy_annotation):
+        client, http_client = elis_client
         http_client.replace.return_value = dummy_annotation
 
-        client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
         aid = dummy_annotation["id"]
         data = {
             "document": "https://elis.rossum.ai/api/v1/documents/315877",
@@ -79,10 +75,10 @@ class TestAnnotations:
 
         http_client.replace.assert_called_with("annotations", aid, data)
 
-    async def test_update_part_annotation(self, http_client: MagicMock, dummy_annotation):
+    async def test_update_part_annotation(self, elis_client, dummy_annotation):
+        client, http_client = elis_client
         http_client.update.return_value = dummy_annotation
 
-        client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
         aid = dummy_annotation["id"]
         data = {
             "status": "deleted",
@@ -95,10 +91,10 @@ class TestAnnotations:
 
 
 class TestAnnotationsSync:
-    def test_get_annotations(self, http_client: MagicMock, dummy_annotation, mock_generator):
+    def test_get_annotations(self, elis_client_sync, dummy_annotation, mock_generator):
+        client, http_client = elis_client_sync
         http_client.fetch_all.return_value = mock_generator(dummy_annotation)
 
-        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
         annotations = client.list_all_annotations()
 
         for a in annotations:
@@ -106,10 +102,10 @@ class TestAnnotationsSync:
 
         http_client.fetch_all.assert_called_with("annotations", ())
 
-    def test_get_annotation(self, http_client: MagicMock, dummy_annotation):
+    def test_get_annotation(self, elis_client_sync, dummy_annotation):
+        client, http_client = elis_client_sync
         http_client.fetch_one.return_value = dummy_annotation
 
-        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
         aid = dummy_annotation["id"]
         annotation = client.retrieve_annotation(aid)
 
@@ -117,10 +113,10 @@ class TestAnnotationsSync:
 
         http_client.fetch_one.assert_called_with("annotations", aid)
 
-    def test_update_annotation(self, http_client: MagicMock, dummy_annotation):
+    def test_update_annotation(self, elis_client_sync, dummy_annotation):
+        client, http_client = elis_client_sync
         http_client.replace.return_value = dummy_annotation
 
-        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
         aid = dummy_annotation["id"]
         data = {
             "document": "https://elis.rossum.ai/api/v1/documents/315877",
@@ -133,10 +129,10 @@ class TestAnnotationsSync:
 
         http_client.replace.assert_called_with("annotations", aid, data)
 
-    def test_update_part_annotation(self, http_client: MagicMock, dummy_annotation):
+    def test_update_part_annotation(self, elis_client_sync, dummy_annotation):
+        client, http_client = elis_client_sync
         http_client.update.return_value = dummy_annotation
 
-        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
         aid = dummy_annotation["id"]
         data = {
             "status": "deleted",

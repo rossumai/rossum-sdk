@@ -1,4 +1,13 @@
-from typing import Any, AsyncIterable, Dict, Iterable, Optional, Union
+from __future__ import annotations
+
+import asyncio
+import typing
+
+import aiofiles
+
+if typing.TYPE_CHECKING:
+    import pathlib
+    from typing import Any, AsyncIterable, Dict, Iterable, Optional, Sequence, Tuple, Union
 
 from rossum_ng.api_client import APIClient
 from rossum_ng.models.annotation import Annotation
@@ -12,9 +21,10 @@ from rossum_ng.models.user import User
 from rossum_ng.models.user_role import UserRole
 from rossum_ng.models.workspace import Workspace
 
-APIObject = Union[
-    Annotation, Connector, Hook, Inbox, Organization, Queue, Schema, UserRole, Workspace
-]
+if typing.TYPE_CHECKING:
+    APIObject = Union[
+        Annotation, Connector, Hook, Inbox, Organization, Queue, Schema, UserRole, Workspace
+    ]
 
 
 class Sideload:
@@ -32,115 +42,133 @@ class ElisAPIClient:
         self._http_client = http_client or APIClient(username, password, base_url)
 
     # ##### QUEUE #####
-    # https://elis.rossum.ai/api/docs/#retrieve-a-queue-2
     async def retrieve_queue(
-        self, id: int, sideloads: Optional[Iterable[APIObject]] = None
+        self, queue_id: int, sideloads: Optional[Iterable[APIObject]] = None
     ) -> Queue:
-        queue = await self._http_client.fetch_one("queues", id)
+        """https://elis.rossum.ai/api/docs/#retrieve-a-queue-2"""
+        queue = await self._http_client.fetch_one("queues", queue_id)
 
         return Queue(**queue)
 
-    # https://elis.rossum.ai/api/docs/#list-all-queues
     async def list_all_queues(
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
         **filters: Dict[str, Any],
     ) -> AsyncIterable[Queue]:
+        """https://elis.rossum.ai/api/docs/#list-all-queues"""
         async for q in self._http_client.fetch_all("queues", ordering, **filters):
             yield Queue(**q)
 
-    # https://elis.rossum.ai/api/docs/#create-new-queue
     async def create_new_queue(
         self, data: Dict[str, Any], sideloads: Optional[Iterable[APIObject]] = None
     ) -> Queue:
+        """https://elis.rossum.ai/api/docs/#create-new-queue"""
         queue = await self._http_client.create("queues", data)
 
         return Queue(**queue)
 
-    # TODO: specific method in APICLient
-    def upload_document(
+    async def import_document(
         self,
-        id_: int,
-        file: Optional[str] = "",
-        filename_overwrite: str = "",
-        values: Dict[str, str] = None,
-        metadata: Optional[Dict] = None,
-        file_bytes: Optional[bytes] = None,
-    ) -> dict:
-        return {}
+        queue_id: int,
+        files: Sequence[Tuple[Union[str, pathlib.Path], str]],
+        values: Optional[Dict[str, Any]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        """https://elis.rossum.ai/api/docs/#import-a-document
+
+        arguments
+        ---------
+            files
+                2-tuple containing current filepath and name to be used by Elis for the uploaded file
+            metadata
+                metadata will be set to newly created annotation object
+            values
+                may be used to initialize datapoint values by setting the value of rir_field_names in the schema
+        """
+        tasks = set()
+        for file, filename in files:
+            tasks.add(asyncio.create_task(self._upload(file, queue_id, filename, values, metadata)))
+
+        await asyncio.gather(*tasks)
+
+    async def _upload(self, file, queue_id, filename, values, metadata):
+        async with aiofiles.open(file, "rb") as fp:
+            await self._http_client.upload("queues", queue_id, fp, filename, values, metadata)
 
     # TODO: specific method in APICLient
     def export_annotations(self, id_: int, annotation_ids: Iterable[int], format_: str) -> dict:
         return {}
 
     # ##### ORGANIZATIONS #####
-    # https://elis.rossum.ai/api/docs/#list-all-organizations
     async def list_all_organizations(
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
         **filters: Dict[str, Any],
     ):
+        """https://elis.rossum.ai/api/docs/#list-all-organizations"""
         async for o in self._http_client.fetch_all("organizations", ordering, **filters):
             yield Organization(**o)
 
-    # https://elis.rossum.ai/api/docs/#retrieve-an-organization
     async def retrieve_organization(
-        self, id: int, sideloads: Optional[Iterable[APIObject]] = None
+        self, org_id: int, sideloads: Optional[Iterable[APIObject]] = None
     ) -> Organization:
-        organization: Dict[Any, Any] = await self._http_client.fetch_one("organizations", id)
+        """https://elis.rossum.ai/api/docs/#retrieve-an-organization"""
+        organization: Dict[Any, Any] = await self._http_client.fetch_one("organizations", org_id)
 
         return Organization(**organization)
 
     # ##### SCHEMAS #####
-    # https://elis.rossum.ai/api/docs/#list-all-schemas
     async def list_all_schemas(
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
         **filters: Dict[str, Any],
     ) -> AsyncIterable[Schema]:
+        """https://elis.rossum.ai/api/docs/#list-all-schemas"""
         async for s in self._http_client.fetch_all("schemas", ordering, **filters):
             yield Schema(**s)
 
-    # https://elis.rossum.ai/api/docs/#retrieve-a-schema
     async def retrieve_schema(
-        self, id: int, sideloads: Optional[Iterable[APIObject]] = None
+        self, schema_id: int, sideloads: Optional[Iterable[APIObject]] = None
     ) -> Schema:
-        schema: Dict[Any, Any] = await self._http_client.fetch_one("schemas", id)
+        """https://elis.rossum.ai/api/docs/#retrieve-a-schema"""
+        schema: Dict[Any, Any] = await self._http_client.fetch_one("schemas", schema_id)
 
         return Schema(**schema)
 
-    # https://elis.rossum.ai/api/docs/#create-a-new-schema
     async def create_new_schema(
         self, data: Dict[str, Any], sideloads: Optional[Iterable[APIObject]] = None
     ) -> Schema:
+        """https://elis.rossum.ai/api/docs/#create-a-new-schema"""
         queue = await self._http_client.create("schemas", data)
 
         return Schema(**queue)
 
     # ##### USERS #####
-    # https://elis.rossum.ai/api/docs/#list-all-users
     async def list_all_users(
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
         **filters: Dict[str, Any],
     ) -> AsyncIterable[User]:
+        """https://elis.rossum.ai/api/docs/#list-all-users"""
         async for u in self._http_client.fetch_all("users", ordering, **filters):
             yield User(**u)
 
-    # https://elis.rossum.ai/api/docs/#retrieve-a-user-2
-    async def retrieve_user(self, id: int, sideloads: Optional[Iterable[APIObject]] = None) -> User:
-        user = await self._http_client.fetch_one("users", id)
+    async def retrieve_user(
+        self, user_id: int, sideloads: Optional[Iterable[APIObject]] = None
+    ) -> User:
+        """https://elis.rossum.ai/api/docs/#retrieve-a-user-2"""
+        user = await self._http_client.fetch_one("users", user_id)
 
         return User(**user)
 
-    # https://elis.rossum.ai/api/docs/#create-new-user
     async def create_new_user(
         self, data: Dict[str, Any], sideloads: Optional[Iterable[APIObject]] = None
     ) -> User:
+        """https://elis.rossum.ai/api/docs/#create-new-user"""
         user = await self._http_client.create("users", data)
 
         return User(**user)
@@ -154,136 +182,138 @@ class ElisAPIClient:
         return {}
 
     # ##### ANNOTATIONS #####
-    # https://elis.rossum.ai/api/docs/#list-all-annotations
     async def list_all_annotations(
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
         **filters: Dict[str, Any],
     ) -> AsyncIterable[Annotation]:
+        """https://elis.rossum.ai/api/docs/#list-all-annotations"""
         async for a in self._http_client.fetch_all("annotations", ordering, **filters):
             yield Annotation(**a)
 
-    # https://elis.rossum.ai/api/docs/#retrieve-an-annotation
     async def retrieve_annotation(
-        self, id: int, sideloads: Optional[Iterable[APIObject]] = None
+        self, annotation_id: int, sideloads: Optional[Iterable[APIObject]] = None
     ) -> Annotation:
-        annotation = await self._http_client.fetch_one("annotations", id)
+        """https://elis.rossum.ai/api/docs/#retrieve-an-annotation"""
+        annotation = await self._http_client.fetch_one("annotations", annotation_id)
 
         return Annotation(**annotation)
 
-    # https://elis.rossum.ai/api/docs/#update-an-annotation
-    async def update_annotation(self, id: int, data: Dict[str, Any]) -> Annotation:
-        annotation = await self._http_client.replace("annotations", id, data)
+    async def update_annotation(self, annotation_id: int, data: Dict[str, Any]) -> Annotation:
+        """https://elis.rossum.ai/api/docs/#update-an-annotation"""
+        annotation = await self._http_client.replace("annotations", annotation_id, data)
 
         return Annotation(**annotation)
 
-    # https://elis.rossum.ai/api/docs/#update-part-of-an-annotation
-    async def update_part_annotation(self, id: int, data: Dict[str, Any]) -> Annotation:
-        annotation = await self._http_client.update("annotations", id, data)
+    async def update_part_annotation(self, annotation_id: int, data: Dict[str, Any]) -> Annotation:
+        """https://elis.rossum.ai/api/docs/#update-part-of-an-annotation"""
+        annotation = await self._http_client.update("annotations", annotation_id, data)
 
         return Annotation(**annotation)
 
     # ##### WORKSPACES #####
-    # https://elis.rossum.ai/api/docs/#list-all-workspaces
     async def list_all_workspaces(
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
         **filters: Dict[str, Any],
     ) -> AsyncIterable[Workspace]:
+        """https://elis.rossum.ai/api/docs/#list-all-workspaces"""
         async for w in self._http_client.fetch_all("workspaces", ordering, **filters):
             yield Workspace(**w)
 
-    # https://elis.rossum.ai/api/docs/#retrieve-a-workspace
     async def retrieve_workspace(
-        self, id, sideloads: Optional[Iterable[APIObject]] = None
+        self, workspace_id, sideloads: Optional[Iterable[APIObject]] = None
     ) -> Workspace:
-        workspace = await self._http_client.fetch_one("workspaces", id)
+        """https://elis.rossum.ai/api/docs/#retrieve-a-workspace"""
+        workspace = await self._http_client.fetch_one("workspaces", workspace_id)
 
         return Workspace(**workspace)
 
-    # https://elis.rossum.ai/api/docs/#create-a-new-workspace
     async def create_new_workspace(
         self, data: Dict[str, Any], sideloads: Optional[Iterable[APIObject]] = None
     ) -> Workspace:
+        """https://elis.rossum.ai/api/docs/#create-a-new-workspace"""
         workspace = await self._http_client.create("workspaces", data)
 
         return Workspace(**workspace)
 
-    # https://elis.rossum.ai/api/docs/#delete-a-workspace
-    async def delete_workspace(self, id, sideloads: Optional[Iterable[APIObject]] = None) -> None:
-        return await self._http_client.delete("workspaces", id)
+    async def delete_workspace(
+        self, workspace_id, sideloads: Optional[Iterable[APIObject]] = None
+    ) -> None:
+        """https://elis.rossum.ai/api/docs/#delete-a-workspace"""
+        return await self._http_client.delete("workspaces", workspace_id)
 
     # ##### INBOX #####
-    # https://elis.rossum.ai/api/docs/#create-a-new-inbox
     async def create_new_inbox(
         self, data: Dict[str, Any], sideloads: Optional[Iterable[APIObject]] = None
     ) -> Inbox:
+        """https://elis.rossum.ai/api/docs/#create-a-new-inbox"""
         inbox = await self._http_client.create("inboxes", data)
 
         return Inbox(**inbox)
 
     # ##### CONNECTORS #####
-    # https://elis.rossum.ai/api/docs/#list-all-connectors
     async def list_all_connectors(
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
         **filters: Dict[str, Any],
     ) -> AsyncIterable[Connector]:
+        """https://elis.rossum.ai/api/docs/#list-all-connectors"""
 
         async for c in self._http_client.fetch_all("connectors", ordering, **filters):
             yield Connector(**c)
 
-    # https://elis.rossum.ai/api/docs/#retrieve-a-connector
     async def retrieve_connector(
-        self, id, sideloads: Optional[Iterable[APIObject]] = None
+        self, connector_id, sideloads: Optional[Iterable[APIObject]] = None
     ) -> Connector:
-        connector = await self._http_client.fetch_one("connectors", id)
+        """https://elis.rossum.ai/api/docs/#retrieve-a-connector"""
+        connector = await self._http_client.fetch_one("connectors", connector_id)
 
         return Connector(**connector)
 
-    # https://elis.rossum.ai/api/docs/#create-a-new-connector
     async def create_new_connector(
         self, data: Dict[str, Any], sideloads: Optional[Iterable[APIObject]] = None
     ) -> Connector:
+        """https://elis.rossum.ai/api/docs/#create-a-new-connector"""
         connector = await self._http_client.create("connectors", data)
 
         return Connector(**connector)
 
     # ##### HOOKS #####
-    # https://elis.rossum.ai/api/docs/#list-all-hooks
     async def list_all_hooks(
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
         **filters: Dict[str, Any],
     ) -> AsyncIterable[Hook]:
+        """https://elis.rossum.ai/api/docs/#list-all-hooks"""
         async for h in self._http_client.fetch_all("hooks", ordering, **filters):
             yield Hook(**h)
 
-    # https://elis.rossum.ai/api/docs/#retrieve-a-hook
-    async def retrieve_hook(self, id, sideloads: Optional[Iterable[APIObject]] = None) -> Hook:
-        hook = await self._http_client.fetch_one("hooks", id)
+    async def retrieve_hook(self, hook_id, sideloads: Optional[Iterable[APIObject]] = None) -> Hook:
+        """https://elis.rossum.ai/api/docs/#retrieve-a-hook"""
+        hook = await self._http_client.fetch_one("hooks", hook_id)
 
         return Hook(**hook)
 
-    # https://elis.rossum.ai/api/docs/#create-a-new-hook
     async def create_new_hook(
         self, data: Dict[str, Any], sideloads: Optional[Iterable[APIObject]] = None
     ) -> Hook:
+        """https://elis.rossum.ai/api/docs/#create-a-new-hook"""
         hook = await self._http_client.create("hooks", data)
 
         return Hook(**hook)
 
     # ##### USER ROLES #####
-    # https://elis.rossum.ai/api/docs/#list-all-user-roles
     async def list_all_user_roles(
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
         **filters: Dict[str, Any],
     ) -> AsyncIterable[UserRole]:
+        """https://elis.rossum.ai/api/docs/#list-all-user-roles"""
         async for u in self._http_client.fetch_all("groups", ordering, **filters):
             yield UserRole(**u)

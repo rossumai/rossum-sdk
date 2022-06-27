@@ -1,9 +1,5 @@
-from unittest.mock import MagicMock
-
 import pytest
 
-from rossum_ng.elis_api_client import ElisAPIClient
-from rossum_ng.elis_api_client_sync import ElisAPIClientSync
 from rossum_ng.models.workspace import Workspace
 
 
@@ -25,12 +21,10 @@ def dummy_workspace():
 
 @pytest.mark.asyncio
 class TestWorkspaces:
-    async def test_list_all_workspaces(
-        self, http_client: MagicMock, dummy_workspace, mock_generator
-    ):
+    async def test_list_all_workspaces(self, elis_client, dummy_workspace, mock_generator):
+        client, http_client = elis_client
         http_client.fetch_all.return_value = mock_generator(dummy_workspace)
 
-        client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
         workspaces = client.list_all_workspaces()
 
         async for w in workspaces:
@@ -38,10 +32,10 @@ class TestWorkspaces:
 
         http_client.fetch_all.assert_called_with("workspaces", ())
 
-    async def test_retrieve_workspace(self, http_client: MagicMock, dummy_workspace):
+    async def test_retrieve_workspace(self, elis_client, dummy_workspace):
+        client, http_client = elis_client
         http_client.fetch_one.return_value = dummy_workspace
 
-        client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
         oid = dummy_workspace["id"]
         workspace = await client.retrieve_workspace(oid)
 
@@ -49,10 +43,10 @@ class TestWorkspaces:
 
         http_client.fetch_one.assert_called_with("workspaces", oid)
 
-    async def test_create_new_workspace(self, http_client: MagicMock, dummy_workspace):
+    async def test_create_new_workspace(self, elis_client, dummy_workspace):
+        client, http_client = elis_client
         http_client.create.return_value = dummy_workspace
 
-        client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
         data = {
             "name": "Test Workspace",
             "organization": "https://elis.rossum.ai/api/v1/organizations/406",
@@ -64,10 +58,10 @@ class TestWorkspaces:
 
         http_client.create.assert_called_with("workspaces", data)
 
-    async def test_delete_workspace(self, http_client: MagicMock, dummy_workspace):
+    async def test_delete_workspace(self, elis_client, dummy_workspace):
+        client, http_client = elis_client
         http_client.delete.return_value = None
 
-        client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
         oid = dummy_workspace["id"]
         await client.delete_workspace(oid)
 
@@ -75,10 +69,10 @@ class TestWorkspaces:
 
 
 class TestWorkspacesSync:
-    def test_list_all_workspaces(self, http_client: MagicMock, dummy_workspace, mock_generator):
+    def test_list_all_workspaces(self, elis_client_sync, dummy_workspace, mock_generator):
+        client, http_client = elis_client_sync
         http_client.fetch_all.return_value = mock_generator(dummy_workspace)
 
-        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
         workspaces = client.list_all_workspaces()
 
         for w in workspaces:
@@ -86,10 +80,10 @@ class TestWorkspacesSync:
 
         http_client.fetch_all.assert_called_with("workspaces", ())
 
-    def test_retrieve_workspace(self, http_client: MagicMock, dummy_workspace):
+    def test_retrieve_workspace(self, elis_client_sync, dummy_workspace):
+        client, http_client = elis_client_sync
         http_client.fetch_one.return_value = dummy_workspace
 
-        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
         oid = dummy_workspace["id"]
         workspace = client.retrieve_workspace(oid)
 
@@ -97,10 +91,10 @@ class TestWorkspacesSync:
 
         http_client.fetch_one.assert_called_with("workspaces", oid)
 
-    def test_create_new_workspace(self, http_client: MagicMock, dummy_workspace):
+    def test_create_new_workspace(self, elis_client_sync, dummy_workspace):
+        client, http_client = elis_client_sync
         http_client.create.return_value = dummy_workspace
 
-        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
         data = {
             "name": "Test Workspace",
             "organization": "https://elis.rossum.ai/api/v1/organizations/406",
@@ -111,10 +105,10 @@ class TestWorkspacesSync:
 
         http_client.create.assert_called_with("workspaces", data)
 
-    def test_delete_workspace(self, http_client: MagicMock, dummy_workspace):
+    def test_delete_workspace(self, elis_client_sync, dummy_workspace):
+        client, http_client = elis_client_sync
         http_client.delete.return_value = None
 
-        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
         oid = dummy_workspace["id"]
         client.delete_workspace(oid)
 

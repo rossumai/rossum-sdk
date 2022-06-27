@@ -1,8 +1,5 @@
 import pytest
-from mock import MagicMock
 
-from rossum_ng.elis_api_client import ElisAPIClient
-from rossum_ng.elis_api_client_sync import ElisAPIClientSync
 from rossum_ng.models.user import User
 
 
@@ -29,10 +26,10 @@ def dummy_user():
 
 @pytest.mark.asyncio
 class TestUsers:
-    async def test_list_all_users(self, http_client: MagicMock, dummy_user, mock_generator):
+    async def test_list_all_users(self, elis_client, dummy_user, mock_generator):
+        client, http_client = elis_client
         http_client.fetch_all.return_value = mock_generator(dummy_user)
 
-        client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
         users = client.list_all_users()
 
         async for u in users:
@@ -40,10 +37,10 @@ class TestUsers:
 
         http_client.fetch_all.assert_called_with("users", ())
 
-    async def test_retrieve_user(self, http_client: MagicMock, dummy_user):
+    async def test_retrieve_user(self, elis_client, dummy_user):
+        client, http_client = elis_client
         http_client.fetch_one.return_value = dummy_user
 
-        client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
         uid = dummy_user["id"]
         user = await client.retrieve_user(uid)
 
@@ -51,10 +48,10 @@ class TestUsers:
 
         http_client.fetch_one.assert_called_with("users", uid)
 
-    async def test_create_new_user(self, http_client: MagicMock, dummy_user):
+    async def test_create_new_user(self, elis_client, dummy_user):
+        client, http_client = elis_client
         http_client.create.return_value = dummy_user
 
-        client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
         data = {
             "organization": "https://elis.rossum.ai/api/v1/organizations/406",
             "username": "jane@east-west-trading.com",
@@ -70,10 +67,10 @@ class TestUsers:
 
 
 class TestUsersSync:
-    def test_list_all_users(self, http_client: MagicMock, dummy_user, mock_generator):
+    def test_list_all_users(self, elis_client_sync, dummy_user, mock_generator):
+        client, http_client = elis_client_sync
         http_client.fetch_all.return_value = mock_generator(dummy_user)
 
-        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
         users = client.list_all_users()
 
         for u in users:
@@ -81,10 +78,10 @@ class TestUsersSync:
 
         http_client.fetch_all.assert_called_with("users", ())
 
-    def test_retrieve_user(self, http_client: MagicMock, dummy_user):
+    def test_retrieve_user(self, elis_client_sync, dummy_user):
+        client, http_client = elis_client_sync
         http_client.fetch_one.return_value = dummy_user
 
-        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
         uid = dummy_user["id"]
         user = client.retrieve_user(uid)
 
@@ -92,10 +89,10 @@ class TestUsersSync:
 
         http_client.fetch_one.assert_called_with("users", uid)
 
-    def test_create_new_user(self, http_client: MagicMock, dummy_user):
+    def test_create_new_user(self, elis_client_sync, dummy_user):
+        client, http_client = elis_client_sync
         http_client.create.return_value = dummy_user
 
-        client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
         data = {
             "organization": "https://elis.rossum.ai/api/v1/organizations/406",
             "username": "jane@east-west-trading.com",

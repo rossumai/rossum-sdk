@@ -95,6 +95,16 @@ async def main():
         )
         print("UPLOAD result:", response)
 
+    print("EXPORT result:")
+    async for chunk in client.export(
+        "queues",
+        id_=queue["id"],
+        export_format="xml",
+        page_size=200,
+        columns=["meta_file_name", "document_id", "status"],
+    ):
+        print(chunk)
+
     response = await client.delete("workspaces", id_=workspace["id"])
     print(f"Workspace {workspace['id']} deleted.")
 

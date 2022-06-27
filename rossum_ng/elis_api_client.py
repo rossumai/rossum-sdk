@@ -45,7 +45,7 @@ class ElisAPIClient:
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> AsyncIterable[Queue]:
         async for q in self._http_client.fetch_all("queues", ordering, **filters):
             yield Queue(**q)
@@ -80,7 +80,7 @@ class ElisAPIClient:
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
-        **filters: Dict[str, Any],
+        **filters: Any,
     ):
         async for o in self._http_client.fetch_all("organizations", ordering, **filters):
             yield Organization(**o)
@@ -99,7 +99,7 @@ class ElisAPIClient:
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> AsyncIterable[Schema]:
         async for s in self._http_client.fetch_all("schemas", ordering, **filters):
             yield Schema(**s)
@@ -126,7 +126,7 @@ class ElisAPIClient:
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> AsyncIterable[User]:
         async for u in self._http_client.fetch_all("users", ordering, **filters):
             yield User(**u)
@@ -159,7 +159,7 @@ class ElisAPIClient:
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> AsyncIterable[Annotation]:
         async for a in self._http_client.fetch_all("annotations", ordering, **filters):
             yield Annotation(**a)
@@ -190,7 +190,7 @@ class ElisAPIClient:
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> AsyncIterable[Workspace]:
         async for w in self._http_client.fetch_all("workspaces", ordering, **filters):
             yield Workspace(**w)
@@ -230,7 +230,7 @@ class ElisAPIClient:
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> AsyncIterable[Connector]:
 
         async for c in self._http_client.fetch_all("connectors", ordering, **filters):
@@ -258,7 +258,7 @@ class ElisAPIClient:
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> AsyncIterable[Hook]:
         async for h in self._http_client.fetch_all("hooks", ordering, **filters):
             yield Hook(**h)
@@ -283,7 +283,7 @@ class ElisAPIClient:
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> AsyncIterable[UserRole]:
         async for u in self._http_client.fetch_all("groups", ordering, **filters):
             yield UserRole(**u)

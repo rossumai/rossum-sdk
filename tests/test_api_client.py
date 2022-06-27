@@ -9,6 +9,7 @@ import json
 import aiofiles
 import mock
 import pytest
+import pytest_httpx
 
 from rossum_ng.api_client import APIClient, APIClientError
 
@@ -51,6 +52,10 @@ UPLOAD_RESPONSE = {
     ],
 }
 EXPECTED_UPLOAD_CONTENT = b'--313131\r\nContent-Disposition: form-data; name="content"; filename="filename.pdf"\r\nContent-Type: application/octet-stream\r\n\r\nFake PDF.\r\n--313131\r\nContent-Disposition: form-data; name="values"\r\nContent-Type: application/json\r\n\r\n{"upload:organization_unit": "Sales"}\r\n--313131\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n{"project": "Market ABC"}\r\n--313131--\r\n'
+
+ANNOTATIONS = [{"fake": "annotation1"}, {"fake": "annotation2"}]
+
+CSV_EXPORT = b"meta_file_name,Invoice number\r\nfilename_1.pdf,11111\r\nfilename_2.pdf,22222"
 
 
 @pytest.fixture
@@ -236,6 +241,83 @@ async def test_upload(client, httpx_mock):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "filters,expected_method, first_url, second_url",
+    [
+        (
+            {},
+            "GET",
+            "https://elis.rossum.ai/api/v1/queues/123/export?format=json&page_size=100&columns=col1%2Ccol2&id=456%2C789",
+            "https://elis.rossum.ai/api/v1/queues/123/export?format=json&page_size=100&page=2&columns=col1%2Ccol2&id=456%2C789",
+        ),
+        (
+            {"to_status": "exported"},
+            "POST",
+            "https://elis.rossum.ai/api/v1/queues/123/export?format=json&page_size=100&columns=col1%2Ccol2&id=456%2C789&to_status=exported",
+            "https://elis.rossum.ai/api/v1/queues/123/export?format=json&page_size=100&page=2&columns=col1%2Ccol2&id=456%2C789&to_status=exported",
+        ),
+    ],
+)
+async def test_export_json(client, httpx_mock, filters, expected_method, first_url, second_url):
+    httpx_mock.add_response(
+        method=expected_method,
+        url=first_url,
+        json={
+            "pagination": {"total": 2, "total_pages": 2, "next": second_url, "previous": None},
+            "results": ANNOTATIONS[:1],
+        },
+    )
+    httpx_mock.add_response(
+        method=expected_method,
+        url=second_url,
+        json={
+            "pagination": {"total": 2, "total_pages": 2, "next": None, "previous": None},
+            "results": ANNOTATIONS[1:],
+        },
+    )
+    cols = ["col1", "col2"]
+    annotations = [
+        w
+        async for w in client.export(
+            "queues", id_=123, export_format="json", columns=cols, id="456,789", **filters
+        )
+    ]
+    assert annotations == ANNOTATIONS  # Annotations are yielded in correct order
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "filters,expected_method, expected_url",
+    [
+        (
+            {},
+            "GET",
+            "https://elis.rossum.ai/api/v1/queues/123/export?format=csv&columns=col1%2Ccol2&id=456%2C789",
+        ),
+        (
+            {"to_status": "exported"},
+            "POST",
+            "https://elis.rossum.ai/api/v1/queues/123/export?format=csv&columns=col1%2Ccol2&id=456%2C789&to_status=exported",
+        ),
+    ],
+)
+async def test_export_csv(client, httpx_mock, filters, expected_method, expected_url):
+    httpx_mock.add_response(
+        method=expected_method,
+        url=expected_url,
+        stream=pytest_httpx.IteratorStream([CSV_EXPORT[:20], CSV_EXPORT[20:]]),
+    )
+    cols = ["col1", "col2"]
+    export_chunks = [
+        w
+        async for w in client.export(
+            "queues", id_=123, export_format="csv", columns=cols, id="456,789", **filters
+        )
+    ]
+    assert b"".join(export_chunks) == CSV_EXPORT  # Streamed chunks are yielded in correct order
+
+
+@pytest.mark.asyncio
 async def test_authenticate_if_needed_token_expired(client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
@@ -259,6 +341,29 @@ async def test_authenticate_if_needed_token_expired(client, httpx_mock):
 
 
 @pytest.mark.asyncio
+async def test_authenticate_generator_if_needed_token_expired(client, httpx_mock):
+    httpx_mock.add_response(
+        method="GET",
+        url="https://elis.rossum.ai/api/v1/queues/123/export?format=csv",
+        headers={"Authorization": "token fake-token"},
+        status_code=401,
+    )
+    httpx_mock.add_response(
+        method="GET",
+        url="https://elis.rossum.ai/api/v1/queues/123/export?format=csv",
+        match_headers={"Authorization": "token new-token"},
+        stream=pytest_httpx.IteratorStream([CSV_EXPORT[:20], CSV_EXPORT[20:]]),
+    )
+
+    def set_token():
+        client.token = "new-token"
+
+    with mock.patch.object(client, "_authenticate", side_effect=set_token):
+        chunks = [chunk async for chunk in client._stream("GET", "queues/123/export?format=csv")]
+    assert b"".join(chunks) == CSV_EXPORT
+
+
+@pytest.mark.asyncio
 async def test_authenticate_if_needed_no_token(httpx_mock):
     client = APIClient("username", "password")
     httpx_mock.add_response(
@@ -278,6 +383,24 @@ async def test_authenticate_if_needed_no_token(httpx_mock):
 
 
 @pytest.mark.asyncio
+async def test_authenticate_generator_if_needed_no_token(client, httpx_mock):
+    client = APIClient("username", "password")
+    httpx_mock.add_response(
+        method="GET",
+        url="https://elis.rossum.ai/api/v1/queues/123/export?format=csv",
+        match_headers={"Authorization": "token new-token"},
+        stream=pytest_httpx.IteratorStream([CSV_EXPORT[:20], CSV_EXPORT[20:]]),
+    )
+
+    def set_token():
+        client.token = "new-token"
+
+    with mock.patch.object(client, "_authenticate", side_effect=set_token):
+        chunks = [chunk async for chunk in client._stream("GET", "queues/123/export?format=csv")]
+    assert b"".join(chunks) == CSV_EXPORT
+
+
+@pytest.mark.asyncio
 async def test_request_repacks_exception(client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
@@ -288,3 +411,17 @@ async def test_request_repacks_exception(client, httpx_mock):
     with pytest.raises(APIClientError) as err:
         await client._request("GET", "workspaces/123")
     assert str(err.value) == 'HTTP 404, content: {"detail":"Not found."}'
+
+
+@pytest.mark.asyncio
+async def test_stream_repacks_exception(client, httpx_mock):
+    httpx_mock.add_response(
+        method="GET",
+        url="https://elis.rossum.ai/api/v1/queues/123/export?format=csv&exported_at=invalid",
+        status_code=404,
+        content=b"exported_at: Enter a valid date/time",
+    )
+    with pytest.raises(APIClientError) as err:
+        async for w in client._stream("GET", "queues/123/export?format=csv&exported_at=invalid"):
+            pass
+    assert str(err.value) == "HTTP 404, content: exported_at: Enter a valid date/time"

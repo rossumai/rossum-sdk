@@ -89,7 +89,7 @@ async def test_fetch_one(client, httpx_mock):
         url="https://elis.rossum.ai/api/v1/workspaces/7694",
         json=WORKSPACES[0],
     )
-    workspace = await client.fetch_one("workspaces", id=7694)
+    workspace = await client.fetch_one("workspaces", id_=7694)
     assert workspace == WORKSPACES[0]
 
 
@@ -181,7 +181,7 @@ async def test_replace(client, httpx_mock):
         match_content=json.dumps(data).encode("utf-8"),
         json=WORKSPACES[0],
     )
-    workspace = await client.replace("workspaces", id=123, data=data)
+    workspace = await client.replace("workspaces", id_=123, data=data)
     assert workspace == WORKSPACES[0]
 
 
@@ -194,7 +194,7 @@ async def test_update(client, httpx_mock):
         match_content=json.dumps(data).encode("utf-8"),
         json=WORKSPACES[0],
     )
-    workspace = await client.update("workspaces", id=123, data=data)
+    workspace = await client.update("workspaces", id_=123, data=data)
     assert workspace == WORKSPACES[0]
 
 
@@ -204,7 +204,7 @@ async def test_delete(client, httpx_mock):
         method="DELETE",
         url="https://elis.rossum.ai/api/v1/workspaces/123",
     )
-    result = await client.delete("workspaces", id=123)
+    result = await client.delete("workspaces", id_=123)
     assert result is None
 
 
@@ -226,7 +226,7 @@ async def test_upload(client, httpx_mock):
             async with aiofiles.open(fp.name, "rb") as fp:
                 response = await client.upload(
                     "queues",
-                    id=123,
+                    id_=123,
                     fp=fp,
                     filename="filename.pdf",
                     values={"upload:organization_unit": "Sales"},
@@ -254,7 +254,7 @@ async def test_authenticate_if_needed_token_expired(client, httpx_mock):
         client.token = "new-token"
 
     with mock.patch.object(client, "_authenticate", side_effect=set_token):
-        workspace = await client.fetch_one("workspaces", id=7694)
+        workspace = await client.fetch_one("workspaces", id_=7694)
     assert workspace == WORKSPACES[0]
 
 
@@ -272,7 +272,7 @@ async def test_authenticate_if_needed_no_token(httpx_mock):
         client.token = "new-token"
 
     with mock.patch.object(client, "_authenticate", side_effect=set_token):
-        workspace = await client.fetch_one("workspaces", id=7694)
+        workspace = await client.fetch_one("workspaces", id_=7694)
 
     assert workspace == WORKSPACES[0]
 

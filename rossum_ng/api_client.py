@@ -77,9 +77,9 @@ class APIClient:
     def _headers(self):
         return {"Authorization": f"token {self.token}"}
 
-    async def fetch_one(self, resource: str, id: int) -> Dict[str, Any]:
+    async def fetch_one(self, resource: str, id_: int) -> Dict[str, Any]:
         """Retrieve a single object in a specific resource."""
-        response = await self._request("GET", f"{resource}/{id}")
+        response = await self._request("GET", f"{resource}/{id_}")
         return response.json()
 
     async def fetch_all(
@@ -128,27 +128,27 @@ class APIClient:
         response = await self._request("POST", resource, json=data)
         return response.json()
 
-    async def replace(self, resource: str, id: int, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def replace(self, resource: str, id_: int, data: Dict[str, Any]) -> Dict[str, Any]:
         "Modify an entire existing object."
-        response = await self._request("PUT", f"{resource}/{id}", json=data)
+        response = await self._request("PUT", f"{resource}/{id_}", json=data)
         return response.json()
 
-    async def update(self, resource: str, id: int, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def update(self, resource: str, id_: int, data: Dict[str, Any]) -> Dict[str, Any]:
         "Modify particular fields of an existing object."
-        response = await self._request("PATCH", f"{resource}/{id}", json=data)
+        response = await self._request("PATCH", f"{resource}/{id_}", json=data)
         return response.json()
 
-    async def delete(self, resource: str, id: int) -> None:
+    async def delete(self, resource: str, id_: int) -> None:
         """Delete a particular object.
 
         Use with caution: For some objects, it triggers a cascade delete of related objects.
         """
-        await self._request("DELETE", f"{resource}/{id}")
+        await self._request("DELETE", f"{resource}/{id_}")
 
     async def upload(
         self,
         resource: str,
-        id: int,
+        id_: int,
         fp: AsyncFileIO,
         filename: str,
         values: Optional[Dict[str, Any]] = None,
@@ -167,7 +167,7 @@ class APIClient:
                 semantics is different for each resource
         """
 
-        url = f"{resource}/{id}/upload"
+        url = f"{resource}/{id_}/upload"
         files = {"content": (filename, await fp.read(), "application/octet-stream")}
 
         # Filename of values and metadata must be "", otherwise Elis API returns HTTP 400 with body

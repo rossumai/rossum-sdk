@@ -54,7 +54,7 @@ class ElisAPIClient:
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> AsyncIterable[Queue]:
         """https://elis.rossum.ai/api/docs/#list-all-queues"""
         async for q in self._http_client.fetch_all("queues", ordering, **filters):
@@ -105,7 +105,7 @@ class ElisAPIClient:
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
-        **filters: Dict[str, Any],
+        **filters: Any,
     ):
         """https://elis.rossum.ai/api/docs/#list-all-organizations"""
         async for o in self._http_client.fetch_all("organizations", ordering, **filters):
@@ -124,7 +124,7 @@ class ElisAPIClient:
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> AsyncIterable[Schema]:
         """https://elis.rossum.ai/api/docs/#list-all-schemas"""
         async for s in self._http_client.fetch_all("schemas", ordering, **filters):
@@ -151,7 +151,7 @@ class ElisAPIClient:
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> AsyncIterable[User]:
         """https://elis.rossum.ai/api/docs/#list-all-users"""
         async for u in self._http_client.fetch_all("users", ordering, **filters):
@@ -186,7 +186,7 @@ class ElisAPIClient:
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> AsyncIterable[Annotation]:
         """https://elis.rossum.ai/api/docs/#list-all-annotations"""
         async for a in self._http_client.fetch_all("annotations", ordering, **filters):
@@ -217,7 +217,7 @@ class ElisAPIClient:
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> AsyncIterable[Workspace]:
         """https://elis.rossum.ai/api/docs/#list-all-workspaces"""
         async for w in self._http_client.fetch_all("workspaces", ordering, **filters):
@@ -259,7 +259,7 @@ class ElisAPIClient:
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> AsyncIterable[Connector]:
         """https://elis.rossum.ai/api/docs/#list-all-connectors"""
 
@@ -287,7 +287,7 @@ class ElisAPIClient:
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> AsyncIterable[Hook]:
         """https://elis.rossum.ai/api/docs/#list-all-hooks"""
         async for h in self._http_client.fetch_all("hooks", ordering, **filters):
@@ -312,7 +312,7 @@ class ElisAPIClient:
         self,
         ordering: Iterable[str] = (),
         sideloads: Optional[Iterable[APIObject]] = None,
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> AsyncIterable[UserRole]:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles"""
         async for u in self._http_client.fetch_all("groups", ordering, **filters):

@@ -55,20 +55,20 @@ async def main():
         base_url="https://elis.develop.r8.lol/api/v1",
     )
     workspace = await client.create("workspaces", data=WORKSPACE)
-    response = await client.fetch_one("workspaces", id=workspace["id"])
+    response = await client.fetch_one("workspaces", id_=workspace["id"])
     print("GET result:", response)
     print("LIST results:")
     async for w in client.fetch_all("workspaces", ordering=["-id"], name=WORKSPACE["name"]):
         print(w)
     response = await client.replace(
         "workspaces",
-        id=workspace["id"],
+        id_=workspace["id"],
         data={**WORKSPACE, "name": WORKSPACE["name"]},
     )
     print("PUT result:", response)
     response = await client.update(
         "workspaces",
-        id=workspace["id"],
+        id_=workspace["id"],
         data={"name": f"{WORKSPACE['name']} {random.randint(1, 100)}"},
     )
     print("PATCH result:", response)
@@ -87,7 +87,7 @@ async def main():
     async with aiofiles.open("tests/data/sample_invoice.pdf", "rb") as fp:
         response = await client.upload(
             "queues",
-            id=queue["id"],
+            id_=queue["id"],
             fp=fp,
             filename="filename.pdf",
             values={"upload:organization_unit": "Sales"},
@@ -95,7 +95,17 @@ async def main():
         )
         print("UPLOAD result:", response)
 
-    response = await client.delete("workspaces", id=workspace["id"])
+    print("EXPORT result:")
+    async for chunk in client.export(
+        "queues",
+        id_=queue["id"],
+        export_format="xml",
+        page_size=200,
+        columns=["meta_file_name", "document_id", "status"],
+    ):
+        print(chunk)
+
+    response = await client.delete("workspaces", id_=workspace["id"])
     print(f"Workspace {workspace['id']} deleted.")
 
 

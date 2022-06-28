@@ -13,6 +13,7 @@ class Organization:
     is_trial: bool
     created_at: str
     trial_expires_at: str
+    expires_at: Optional[str] = None
     oidc_provider: Optional[str] = None
     ui_settings: dict = field(default_factory=dict)
     metadata: dict = field(default_factory=dict)

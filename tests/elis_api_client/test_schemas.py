@@ -69,6 +69,15 @@ class TestSchemas:
 
         http_client.create.assert_called_with("schemas", data)
 
+    async def test_delete_schema(self, elis_client, dummy_schema):
+        client, http_client = elis_client
+        http_client.delete.return_value = None
+
+        sid = dummy_schema["id"]
+        await client.delete_schema(sid)
+
+        http_client.delete.assert_called_with("schemas", sid)
+
 
 class TestSchemasSync:
     def test_list_all_schemas(self, elis_client_sync, dummy_schema, mock_generator):
@@ -103,3 +112,12 @@ class TestSchemasSync:
         assert schema == Schema(**dummy_schema)
 
         http_client.create.assert_called_with("schemas", data)
+
+    def test_delete_schema(self, elis_client_sync, dummy_schema):
+        client, http_client = elis_client_sync
+        http_client.delete.return_value = None
+
+        sid = dummy_schema["id"]
+        client.delete_schema(sid)
+
+        http_client.delete.assert_called_with("schemas", sid)

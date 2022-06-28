@@ -68,6 +68,12 @@ class ElisAPIClient:
 
         return Queue(**queue)
 
+    async def delete_queue(
+        self, queue_id: int, sideloads: Optional[Iterable[APIObject]] = None
+    ) -> None:
+        """https://elis.rossum.ai/api/docs/#delete-a-queue"""
+        return await self._http_client.delete("queues", queue_id)
+
     async def import_document(
         self,
         queue_id: int,
@@ -145,6 +151,12 @@ class ElisAPIClient:
         queue = await self._http_client.create("schemas", data)
 
         return Schema(**queue)
+
+    async def delete_schema(
+        self, schema_id, sideloads: Optional[Iterable[APIObject]] = None
+    ) -> None:
+        """https://elis.rossum.ai/api/docs/#delete-a-schema"""
+        return await self._http_client.delete("schemas", schema_id)
 
     # ##### USERS #####
     async def list_all_users(

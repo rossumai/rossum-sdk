@@ -78,6 +78,12 @@ class ElisAPIClientSync:
             self.elis_api_client.create_new_queue(data, sideloads)
         )
 
+    def delete_queue(self, queue_id, sideloads: Optional[Iterable[APIObject]] = None) -> None:
+        """https://elis.rossum.ai/api/docs/#delete-a-queue"""
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.delete_queue(queue_id, sideloads)
+        )
+
     def import_document(
         self,
         queue_id: int,
@@ -151,6 +157,10 @@ class ElisAPIClientSync:
         return self.event_loop.run_until_complete(
             self.elis_api_client.create_new_schema(data, sideloads)
         )
+
+    def delete_schema(self, id, sideloads: Optional[Iterable[APIObject]] = None) -> None:
+        """https://elis.rossum.ai/api/docs/#delete-a-schema"""
+        return self.event_loop.run_until_complete(self.elis_api_client.delete_schema(id, sideloads))
 
     # ##### USERS #####
     def list_all_users(

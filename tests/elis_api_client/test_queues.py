@@ -99,6 +99,15 @@ class TestQueues:
 
         http_client.create.assert_called_with("queues", data)
 
+    async def test_delete_queue(self, elis_client, dummy_queue):
+        client, http_client = elis_client
+        http_client.delete.return_value = None
+
+        qid = dummy_queue["id"]
+        await client.delete_queue(qid)
+
+        http_client.delete.assert_called_with("queues", qid)
+
     async def test_import_document(self, elis_client):
         client, http_client = elis_client
         http_client.upload.return_value = None
@@ -182,3 +191,12 @@ class TestQueuesSync:
         ]
 
         http_client.upload.assert_has_calls(calls, any_order=True)
+
+    def test_delete_schema(self, elis_client_sync, dummy_queue):
+        client, http_client = elis_client_sync
+        http_client.delete.return_value = None
+
+        qid = dummy_queue["id"]
+        client.delete_queue(qid)
+
+        http_client.delete.assert_called_with("queues", qid)

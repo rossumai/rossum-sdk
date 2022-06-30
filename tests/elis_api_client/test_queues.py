@@ -1,6 +1,7 @@
 import pytest
 from mock import MagicMock, call, patch
 
+from rossum_ng.models.annotation import Annotation
 from rossum_ng.models.queue import Queue
 
 
@@ -57,6 +58,40 @@ def dummy_queue():
                 "deleted_annotations": False,
             },
         },
+    }
+
+
+@pytest.fixture
+def dummy_annotation():
+    return {
+        "id": 315777,
+        "url": "https://elis.rossum.ai/api/v1/annotations/315777",
+        "status": "exported",
+        "arrived_at": "2019-10-13T21:33:01.509886Z",
+        "exported_at": "2019-10-14T12:00:01.000133Z",
+        "document": {
+            "url": "https://elis.rossum.ai/api/v1/documents/315877",
+            "file_name": "template_invoice.pdf",
+            "file": "https://elis.rossum.ai/api/v1/documents/315877/content",
+        },
+        "modifier": None,
+        "schema": {"url": "https://elis.rossum.ai/api/v1/schemas/31336"},
+        "metadata": {},
+        "content": [
+            {
+                "category": "section",
+                "schema_id": "invoice_details_section",
+                "children": [
+                    {
+                        "category": "datapoint",
+                        "schema_id": "document_id",
+                        "value": "12345",
+                        "type": "string",
+                        "rir_confidence": 0.99,
+                    },
+                ],
+            }
+        ],
     }
 
 
@@ -131,6 +166,35 @@ class TestQueues:
         ]
         http_client.upload.assert_has_calls(calls, any_order=True)
 
+    async def test_export_annotations_to_json(self, elis_client, dummy_annotation, mock_generator):
+        client, http_client = elis_client
+        http_client.export.return_value = mock_generator(dummy_annotation)
+
+        qid = 123
+        export_format = "json"
+
+        async for a in client.export_annotations_to_json(queue_id=qid):
+            assert a == Annotation(**dummy_annotation)
+
+        http_client.export.assert_called_with("queues", qid, export_format)
+
+    async def test_export_annotations_to_file(self, elis_client, mock_file_read):
+        client, http_client = elis_client
+        http_client.export.return_value = mock_file_read("tests/data/annotation_export.xml")
+
+        qid = 123
+        export_format = "xml"
+
+        result = []
+        async for a in client.export_annotations_to_file(queue_id=qid, export_format=export_format):
+            result += a
+
+        http_client.export.assert_called_with("queues", qid, export_format)
+
+        with open("tests/data/annotation_export.xml", "rb") as fp:
+            for i, line in enumerate(fp.read()):
+                assert result[i] == line
+
 
 class TestQueuesSync:
     def test_list_all_queues(self, elis_client_sync, dummy_queue, mock_generator):
@@ -200,3 +264,32 @@ class TestQueuesSync:
         client.delete_queue(qid)
 
         http_client.delete.assert_called_with("queues", qid)
+
+    def test_export_annotations_to_json(self, elis_client_sync, dummy_annotation, mock_generator):
+        client, http_client = elis_client_sync
+        http_client.export.return_value = mock_generator(dummy_annotation)
+
+        qid = 123
+        export_format = "json"
+
+        for a in client.export_annotations_to_json(queue_id=qid):
+            assert a == Annotation(**dummy_annotation)
+
+        http_client.export.assert_called_with("queues", qid, export_format)
+
+    def test_export_annotations_to_file(self, elis_client_sync, mock_file_read):
+        client, http_client = elis_client_sync
+        http_client.export.return_value = mock_file_read("tests/data/annotation_export.xml")
+
+        qid = 123
+        export_format = "xml"
+
+        result = []
+        for a in client.export_annotations_to_file(queue_id=qid, export_format=export_format):
+            result += a
+
+        http_client.export.assert_called_with("queues", qid, export_format)
+
+        with open("tests/data/annotation_export.xml", "rb") as fp:
+            for i, line in enumerate(fp.read()):
+                assert result[i] == line

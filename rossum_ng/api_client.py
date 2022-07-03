@@ -17,7 +17,7 @@ import typing
 import httpx
 
 if typing.TYPE_CHECKING:
-    from typing import Any, AsyncIterator, Dict, Iterable, List, Optional, Tuple, Union
+    from typing import Any, AsyncIterator, Dict, List, Optional, Sequence, Tuple, Union
 
     from aiofiles.threadpool.binary import AsyncFileIO
 
@@ -112,7 +112,7 @@ class APIClient:
         return response.json()
 
     async def fetch_all(
-        self, resource: str, ordering: Iterable[str] = (), method: str = "GET", **filters: Any
+        self, resource: str, ordering: Sequence[str] = (), method: str = "GET", **filters: Any
     ) -> AsyncIterator[Dict[str, Any]]:
         """Retrieve a list of objects in a specific resource.
 
@@ -218,7 +218,7 @@ class APIClient:
         resource: str,
         id_: int,
         export_format: str,
-        columns: Iterable[str] = (),
+        columns: Sequence[str] = (),
         **filters: Any,
     ) -> AsyncIterator[Union[Dict[str, Any], bytes]]:
         query_params = {"format": export_format}

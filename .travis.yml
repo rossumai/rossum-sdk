@@ -20,6 +20,12 @@ jobs:
   fast_finish: true
   include:
     - python: 3.9
+      stage: test
+      if: type = cron
+      name: E2E test
+      script: pytest tests/e2e.py
+
+    - python: 3.9
       env: TOXENV=linting TOXCFG=tox.ini
       stage: test
 

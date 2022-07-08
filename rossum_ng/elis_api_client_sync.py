@@ -52,7 +52,7 @@ class ElisAPIClientSync:
 
     # ##### QUEUE #####
     def retrieve_queue(
-        self, queue_id: int, sideloads: Optional[Iterable[APIObject]] = None
+        self, queue_id: int, sideloads: Optional[Sequence[APIObject]] = None
     ) -> Queue:
         """https://elis.rossum.ai/api/docs/#retrieve-a-queue-2"""
         return self.event_loop.run_until_complete(
@@ -61,8 +61,8 @@ class ElisAPIClientSync:
 
     def list_all_queues(
         self,
-        ordering: Iterable[str] = (),
-        sideloads: Optional[Iterable[APIObject]] = None,
+        ordering: Sequence[str] = (),
+        sideloads: Optional[Sequence[APIObject]] = None,
         **filters: Dict[str, Any],
     ) -> Iterable[Queue]:
         """https://elis.rossum.ai/api/docs/#list-all-queues"""
@@ -71,14 +71,14 @@ class ElisAPIClientSync:
         )
 
     def create_new_queue(
-        self, data: Dict[str, Any], sideloads: Optional[Iterable[APIObject]] = None
+        self, data: Dict[str, Any], sideloads: Optional[Sequence[APIObject]] = None
     ) -> Queue:
         """https://elis.rossum.ai/api/docs/#create-new-queue"""
         return self.event_loop.run_until_complete(
             self.elis_api_client.create_new_queue(data, sideloads)
         )
 
-    def delete_queue(self, queue_id, sideloads: Optional[Iterable[APIObject]] = None) -> None:
+    def delete_queue(self, queue_id, sideloads: Optional[Sequence[APIObject]] = None) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-queue"""
         return self.event_loop.run_until_complete(
             self.elis_api_client.delete_queue(queue_id, sideloads)
@@ -107,14 +107,14 @@ class ElisAPIClientSync:
         )
 
     # TODO: specific method in APICLient
-    def export_annotations(self, id_: int, annotation_ids: Iterable[int], format_: str) -> dict:
+    def export_annotations(self, id_: int, annotation_ids: Sequence[int], format_: str) -> dict:
         return {}
 
     # ##### ORGANIZATIONS #####
     def list_all_organizations(
         self,
-        ordering: Iterable[str] = (),
-        sideloads: Optional[Iterable[APIObject]] = None,
+        ordering: Sequence[str] = (),
+        sideloads: Optional[Sequence[APIObject]] = None,
         **filters: Dict[str, Any],
     ):
         """https://elis.rossum.ai/api/docs/#list-all-organizations"""
@@ -123,7 +123,7 @@ class ElisAPIClientSync:
         )
 
     def retrieve_organization(
-        self, org_id: int, sideloads: Optional[Iterable[APIObject]] = None
+        self, org_id: int, sideloads: Optional[Sequence[APIObject]] = None
     ) -> Organization:
         """https://elis.rossum.ai/api/docs/#retrieve-an-organization"""
         return self.event_loop.run_until_complete(
@@ -133,8 +133,8 @@ class ElisAPIClientSync:
     # ##### SCHEMAS #####
     def list_all_schemas(
         self,
-        ordering: Iterable[str] = (),
-        sideloads: Optional[Iterable[APIObject]] = None,
+        ordering: Sequence[str] = (),
+        sideloads: Optional[Sequence[APIObject]] = None,
         **filters: Dict[str, Any],
     ) -> Iterable[Schema]:
         """https://elis.rossum.ai/api/docs/#list-all-schemas"""
@@ -143,7 +143,7 @@ class ElisAPIClientSync:
         )
 
     def retrieve_schema(
-        self, schema_id: int, sideloads: Optional[Iterable[APIObject]] = None
+        self, schema_id: int, sideloads: Optional[Sequence[APIObject]] = None
     ) -> Schema:
         """https://elis.rossum.ai/api/docs/#retrieve-a-schema"""
         return self.event_loop.run_until_complete(
@@ -151,22 +151,22 @@ class ElisAPIClientSync:
         )
 
     def create_new_schema(
-        self, data: Dict[str, Any], sideloads: Optional[Iterable[APIObject]] = None
+        self, data: Dict[str, Any], sideloads: Optional[Sequence[APIObject]] = None
     ) -> Schema:
         """https://elis.rossum.ai/api/docs/#create-a-new-schema"""
         return self.event_loop.run_until_complete(
             self.elis_api_client.create_new_schema(data, sideloads)
         )
 
-    def delete_schema(self, id, sideloads: Optional[Iterable[APIObject]] = None) -> None:
+    def delete_schema(self, id, sideloads: Optional[Sequence[APIObject]] = None) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-schema"""
         return self.event_loop.run_until_complete(self.elis_api_client.delete_schema(id, sideloads))
 
     # ##### USERS #####
     def list_all_users(
         self,
-        ordering: Iterable[str] = (),
-        sideloads: Optional[Iterable[APIObject]] = None,
+        ordering: Sequence[str] = (),
+        sideloads: Optional[Sequence[APIObject]] = None,
         **filters: Dict[str, Any],
     ) -> Iterable[User]:
         """https://elis.rossum.ai/api/docs/#list-all-users"""
@@ -174,14 +174,14 @@ class ElisAPIClientSync:
             self.elis_api_client.list_all_users(ordering, sideloads, **filters)
         )
 
-    def retrieve_user(self, user_id: int, sideloads: Optional[Iterable[APIObject]] = None) -> User:
+    def retrieve_user(self, user_id: int, sideloads: Optional[Sequence[APIObject]] = None) -> User:
         """https://elis.rossum.ai/api/docs/#retrieve-a-user-2"""
         return self.event_loop.run_until_complete(
             self.elis_api_client.retrieve_user(user_id, sideloads)
         )
 
     def create_new_user(
-        self, data: Dict[str, Any], sideloads: Optional[Iterable[APIObject]] = None
+        self, data: Dict[str, Any], sideloads: Optional[Sequence[APIObject]] = None
     ) -> User:
         """https://elis.rossum.ai/api/docs/#create-new-user"""
         return self.event_loop.run_until_complete(
@@ -199,8 +199,8 @@ class ElisAPIClientSync:
     # ##### ANNOTATIONS #####
     def list_all_annotations(
         self,
-        ordering: Iterable[str] = (),
-        sideloads: Optional[Iterable[APIObject]] = None,
+        ordering: Sequence[str] = (),
+        sideloads: Optional[Sequence[APIObject]] = None,
         **filters: Dict[str, Any],
     ) -> Iterable[Annotation]:
         """https://elis.rossum.ai/api/docs/#list-all-annotations"""
@@ -209,7 +209,7 @@ class ElisAPIClientSync:
         )
 
     def retrieve_annotation(
-        self, annotation_id: int, sideloads: Optional[Iterable[APIObject]] = None
+        self, annotation_id: int, sideloads: Optional[Sequence[APIObject]] = None
     ) -> Annotation:
         """https://elis.rossum.ai/api/docs/#retrieve-an-annotation"""
         return self.event_loop.run_until_complete(
@@ -231,8 +231,8 @@ class ElisAPIClientSync:
     # ##### WORKSPACES #####
     def list_all_workspaces(
         self,
-        ordering: Iterable[str] = (),
-        sideloads: Optional[Iterable[APIObject]] = None,
+        ordering: Sequence[str] = (),
+        sideloads: Optional[Sequence[APIObject]] = None,
         **filters: Dict[str, Any],
     ) -> Iterable[Workspace]:
         """https://elis.rossum.ai/api/docs/#list-all-workspaces"""
@@ -240,21 +240,21 @@ class ElisAPIClientSync:
             self.elis_api_client.list_all_workspaces(ordering, sideloads, **filters)
         )
 
-    def retrieve_workspace(self, id, sideloads: Optional[Iterable[APIObject]] = None) -> Workspace:
+    def retrieve_workspace(self, id, sideloads: Optional[Sequence[APIObject]] = None) -> Workspace:
         """https://elis.rossum.ai/api/docs/#retrieve-a-workspace"""
         return self.event_loop.run_until_complete(
             self.elis_api_client.retrieve_workspace(id, sideloads)
         )
 
     def create_new_workspace(
-        self, data: Dict[str, Any], sideloads: Optional[Iterable[APIObject]] = None
+        self, data: Dict[str, Any], sideloads: Optional[Sequence[APIObject]] = None
     ) -> Workspace:
         """https://elis.rossum.ai/api/docs/#create-a-new-workspace"""
         return self.event_loop.run_until_complete(
             self.elis_api_client.create_new_workspace(data, sideloads)
         )
 
-    def delete_workspace(self, id, sideloads: Optional[Iterable[APIObject]] = None) -> None:
+    def delete_workspace(self, id, sideloads: Optional[Sequence[APIObject]] = None) -> None:
         """https://elis.rossum.ai/api/docs/#retrieve-a-workspace"""
         return self.event_loop.run_until_complete(
             self.elis_api_client.delete_workspace(id, sideloads)
@@ -262,7 +262,7 @@ class ElisAPIClientSync:
 
     # ##### INBOX #####
     def create_new_inbox(
-        self, data: Dict[str, Any], sideloads: Optional[Iterable[APIObject]] = None
+        self, data: Dict[str, Any], sideloads: Optional[Sequence[APIObject]] = None
     ) -> Inbox:
         """https://elis.rossum.ai/api/docs/#create-a-new-inbox"""
         return self.event_loop.run_until_complete(
@@ -272,8 +272,8 @@ class ElisAPIClientSync:
     # ##### CONNECTORS #####
     def list_all_connectors(
         self,
-        ordering: Iterable[str] = (),
-        sideloads: Optional[Iterable[APIObject]] = None,
+        ordering: Sequence[str] = (),
+        sideloads: Optional[Sequence[APIObject]] = None,
         **filters: Dict[str, Any],
     ) -> Iterable[Connector]:
         """https://elis.rossum.ai/api/docs/#list-all-connectors"""
@@ -282,14 +282,14 @@ class ElisAPIClientSync:
             self.elis_api_client.list_all_connectors(ordering, sideloads, **filters)
         )
 
-    def retrieve_connector(self, id, sideloads: Optional[Iterable[APIObject]] = None) -> Connector:
+    def retrieve_connector(self, id, sideloads: Optional[Sequence[APIObject]] = None) -> Connector:
         """https://elis.rossum.ai/api/docs/#retrieve-a-connector"""
         return self.event_loop.run_until_complete(
             self.elis_api_client.retrieve_connector(id, sideloads)
         )
 
     def create_new_connector(
-        self, data: Dict[str, Any], sideloads: Optional[Iterable[APIObject]] = None
+        self, data: Dict[str, Any], sideloads: Optional[Sequence[APIObject]] = None
     ) -> Connector:
         """https://elis.rossum.ai/api/docs/#create-a-new-connector"""
         return self.event_loop.run_until_complete(
@@ -299,8 +299,8 @@ class ElisAPIClientSync:
     # ##### HOOKS #####
     def list_all_hooks(
         self,
-        ordering: Iterable[str] = (),
-        sideloads: Optional[Iterable[APIObject]] = None,
+        ordering: Sequence[str] = (),
+        sideloads: Optional[Sequence[APIObject]] = None,
         **filters: Dict[str, Any],
     ) -> Iterable[Hook]:
         """https://elis.rossum.ai/api/docs/#list-all-hooks"""
@@ -308,12 +308,12 @@ class ElisAPIClientSync:
             self.elis_api_client.list_all_hooks(ordering, sideloads, **filters)
         )
 
-    def retrieve_hook(self, id, sideloads: Optional[Iterable[APIObject]] = None) -> Hook:
+    def retrieve_hook(self, id, sideloads: Optional[Sequence[APIObject]] = None) -> Hook:
         """https://elis.rossum.ai/api/docs/#retrieve-a-hook"""
         return self.event_loop.run_until_complete(self.elis_api_client.retrieve_hook(id, sideloads))
 
     def create_new_hook(
-        self, data: Dict[str, Any], sideloads: Optional[Iterable[APIObject]] = None
+        self, data: Dict[str, Any], sideloads: Optional[Sequence[APIObject]] = None
     ) -> Hook:
         """https://elis.rossum.ai/api/docs/#create-a-new-hook"""
         return self.event_loop.run_until_complete(
@@ -323,8 +323,8 @@ class ElisAPIClientSync:
     # ##### USER ROLES #####
     def list_all_user_roles(
         self,
-        ordering: Iterable[str] = (),
-        sideloads: Optional[Iterable[APIObject]] = None,
+        ordering: Sequence[str] = (),
+        sideloads: Optional[Sequence[APIObject]] = None,
         **filters: Dict[str, Any],
     ) -> Iterable[UserRole]:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles"""

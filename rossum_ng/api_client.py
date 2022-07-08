@@ -3,13 +3,13 @@ from __future__ import annotations
 """
 TODO
 * convert datetimes to ISO 8601
-* sideloading
 * enum with resource types instead of strings
 * password reset
 * rate limiting?
 """
 import asyncio
 import functools
+import itertools
 import json
 import logging
 import typing
@@ -17,7 +17,7 @@ import typing
 import httpx
 
 if typing.TYPE_CHECKING:
-    from typing import Any, AsyncIterator, Dict, Iterable, List, Optional, Tuple, Union
+    from typing import Any, AsyncIterator, Dict, List, Optional, Sequence, Tuple, Union
 
     from aiofiles.threadpool.binary import AsyncFileIO
 
@@ -112,7 +112,13 @@ class APIClient:
         return response.json()
 
     async def fetch_all(
-        self, resource: str, ordering: Iterable[str] = (), method: str = "GET", **filters: Any
+        self,
+        resource: str,
+        ordering: Sequence[str] = (),
+        sideloads: Sequence[str] = (),
+        content_schema_ids: Sequence[str] = (),
+        method: str = "GET",
+        **filters: Any,
     ) -> AsyncIterator[Dict[str, Any]]:
         """Retrieve a list of objects in a specific resource.
 
@@ -122,6 +128,12 @@ class APIClient:
             name of the resource provided by Elis API
         ordering
             comma-delimited fields of the resource, prepend the field with - for descending
+        sideloads
+            A sequence of resources to be fetched along with the requested resource,
+            e.g. ["content", "automation_blockers"] when fetching `annotations` resource.
+        content_schema_ids
+            sideloads only particular `content` fields when fetching `annotations` resource,
+            has no effect when fetching other resources
         method
             export endpoints have different semantics when POST is used, allow customization of
             method so that export() can re-use fetch_all() implementation
@@ -131,13 +143,17 @@ class APIClient:
         query_params = {
             "page_size": 100,
             "ordering": ",".join(ordering),
+            "sideload": ",".join(sideloads),
+            "content.schema_id": ",".join(content_schema_ids),
             **filters,
         }
-        results, total_pages = await self._fetch_page(f"{resource}", method, query_params)
+        results, total_pages = await self._fetch_page(
+            f"{resource}", method, query_params, sideloads
+        )
         # Fire async tasks to fetch the rest of the pages and start yielding results from page 1
         page_requests = [
             asyncio.create_task(
-                self._fetch_page(f"{resource}", method, {**query_params, "page": i})
+                self._fetch_page(f"{resource}", method, {**query_params, "page": i}, sideloads)
             )
             for i in range(2, total_pages + 1)
         ]
@@ -151,11 +167,52 @@ class APIClient:
                 yield r
 
     async def _fetch_page(
-        self, resource: str, method: str, query_params: Dict[str, Any]
+        self,
+        resource: str,
+        method: str,
+        query_params: Dict[str, Any],
+        sideload_groups: Sequence[str],
     ) -> Tuple[List[Dict[str, Any]], int]:
         response = await self._request(method, resource, params=query_params)
         data = response.json()
+        self._embed_sideloads(data, sideload_groups)
         return data["results"], data["pagination"]["total_pages"]
+
+    def _embed_sideloads(
+        self, response_data: Dict[str, Any], sideload_groups: Sequence[str]
+    ) -> None:
+        """Embed sideloads into the results to enable simple access to the sideloaded objects."""
+        sideloads_by_id: Dict[str, Dict[int, Union[dict, list]]] = {}
+        for sideload_group in sideload_groups:
+            if sideload_group == "content":
+                # Datapoints from all annotations are present in content, we have to construct
+                # content (list of datapoints) for each annotation
+                def annotation_id(datapoint):
+                    return int(
+                        datapoint["url"].replace(f"/content/{datapoint['id']}", "").split("/")[-1]
+                    )
+
+                sideloads_by_id[sideload_group] = {
+                    k: list(v)
+                    for k, v in itertools.groupby(
+                        sorted(response_data[sideload_group], key=annotation_id), key=annotation_id
+                    )
+                }
+            else:
+                sideloads_by_id[sideload_group] = {
+                    s["id"]: s for s in response_data[sideload_group]
+                }
+
+        for result, sideload_group in itertools.product(response_data["results"], sideload_groups):
+            sideload_name = sideload_group.rstrip("s")  # Singular form is used in results
+            url = result[sideload_name]
+            if url is None:
+                continue
+            sideload_id = int(url.replace("/content", "").split("/")[-1])
+
+            result[sideload_name] = sideloads_by_id[sideload_group].get(
+                sideload_id, []
+            )  # `content` can have 0 datapoints, use [] default value in this case
 
     async def create(self, resource: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """Create a new object."""
@@ -218,7 +275,7 @@ class APIClient:
         resource: str,
         id_: int,
         export_format: str,
-        columns: Iterable[str] = (),
+        columns: Sequence[str] = (),
         **filters: Any,
     ) -> AsyncIterator[Union[Dict[str, Any], bytes]]:
         query_params = {"format": export_format}

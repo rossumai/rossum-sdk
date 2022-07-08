@@ -4,6 +4,7 @@
 * `workspace` is used as resource in most tests to make the examples respresentative.
 * all CRUD methods are tested for both a happy path and an error (400 or 404)
 """
+import copy
 import json
 
 import aiofiles
@@ -28,18 +29,80 @@ WORKSPACES = [
         "name": "Test Workspace",
         "url": "https://elis.rossum.ai/api/v1/workspaces/1234",
         "autopilot": False,
-        "organization": "https://elis.rossum.ai/api/v1/organizations/123",
+        "organization": "https://elis.rossum.ai/api/v1/organizations/456",
         "queues": [],
         "metadata": {},
     },
     {
         "id": 4321,
         "name": "Test Workspace",
-        "url": "https://elis.rossum.ai/api/v1/workspaces/1234",
+        "url": "https://elis.rossum.ai/api/v1/workspaces/4321",
         "autopilot": False,
         "organization": "https://elis.rossum.ai/api/v1/organizations/123",
         "queues": [],
         "metadata": {},
+    },
+]
+
+ANNOTATIONS = [  # Most fields are stripped as these are not important for the test
+    {
+        "id": 1111,
+        "document": "https://elis.develop.r8.lol/api/v1/documents/11289",
+        "content": "https://elis.develop.r8.lol/api/v1/annotations/1111/content",
+        "automation_blocker": "https://elis.develop.r8.lol/api/v1/automation_blockers/55",
+    },
+    {
+        "id": 2222,
+        "document": "https://elis.develop.r8.lol/api/v1/documents/11288",
+        "content": "https://elis.develop.r8.lol/api/v1/annotations/2222/content",
+        "automation_blocker": "https://elis.develop.r8.lol/api/v1/automation_blockers/55",
+    },
+    {
+        "id": 3333,
+        "document": "https://elis.develop.r8.lol/api/v1/documents/11287",
+        # URL that targets empty content should be translated to an empty list when sideloading
+        "content": "https://elis.develop.r8.lol/api/v1/annotations/3333/content",
+        # None URL is skipped when sideloading
+        "automation_blocker": None,
+    },
+]
+
+AUTOMATION_BLOCKERS = [
+    {
+        "id": 55,
+        "url": "https://elis.develop.r8.lol/api/v1/automation_blockers/55",
+        "content": [{"type": "automation_disabled", "level": "annotation"}],
+        "annotation": "https://elis.develop.r8.lol/api/v1/annotations/971782",
+    }
+]
+
+CONTENT = [
+    {
+        "id": 11,
+        "schema_id": "invoice_id",
+        "category": "datapoint",
+        "url": "https://elis.develop.r8.lol/api/v1/annotations/2222/content/11",
+        "content": {
+            "value": "1234",
+        },
+    },
+    {
+        "id": 22,
+        "schema_id": "invoice_id",
+        "category": "datapoint",
+        "url": "https://elis.develop.r8.lol/api/v1/annotations/1111/content/22",
+        "content": {
+            "value": "5678",
+        },
+    },
+    {
+        "id": 33,
+        "schema_id": "date_issue",
+        "category": "datapoint",
+        "url": "https://elis.develop.r8.lol/api/v1/annotations/2222/content/33",
+        "content": {
+            "value": "2021-12-31",
+        },
     },
 ]
 
@@ -52,8 +115,6 @@ UPLOAD_RESPONSE = {
     ],
 }
 EXPECTED_UPLOAD_CONTENT = b'--313131\r\nContent-Disposition: form-data; name="content"; filename="filename.pdf"\r\nContent-Type: application/octet-stream\r\n\r\nFake PDF.\r\n--313131\r\nContent-Disposition: form-data; name="values"\r\nContent-Type: application/json\r\n\r\n{"upload:organization_unit": "Sales"}\r\n--313131\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n{"project": "Market ABC"}\r\n--313131--\r\n'
-
-ANNOTATIONS = [{"fake": "annotation1"}, {"fake": "annotation2"}]
 
 CSV_EXPORT = b"meta_file_name,Invoice number\r\nfilename_1.pdf,11111\r\nfilename_2.pdf,22222"
 
@@ -156,6 +217,37 @@ async def test_fetch_all_filters(client, httpx_mock):
     )
     workspaces = [w async for w in client.fetch_all("workspaces", name="Test", autopilot=1)]
     assert workspaces == WORKSPACES
+
+
+@pytest.mark.asyncio
+async def test_fetch_all_sideload(client, httpx_mock):
+    httpx_mock.add_response(
+        method="GET",
+        url="https://elis.rossum.ai/api/v1/workspaces?page_size=100&sideload=content,automation_blockers&content.schema_id=invoice_id,date_issue",
+        json={
+            "pagination": {"total": 3, "total_pages": 1, "next": None, "previous": None},
+            "results": ANNOTATIONS,
+            "content": CONTENT,
+            "automation_blockers": AUTOMATION_BLOCKERS,
+        },
+    )
+    workspaces = [
+        w
+        async for w in client.fetch_all(
+            "workspaces",
+            sideloads=["content", "automation_blockers"],
+            content_schema_ids=["invoice_id", "date_issue"],
+        )
+    ]
+
+    expected_annotations = copy.deepcopy(ANNOTATIONS)
+    expected_annotations[0]["content"] = [CONTENT[1]]
+    expected_annotations[0]["automation_blocker"] = AUTOMATION_BLOCKERS[0]
+    expected_annotations[1]["content"] = [CONTENT[0], CONTENT[2]]
+    expected_annotations[1]["automation_blocker"] = AUTOMATION_BLOCKERS[0]
+    expected_annotations[2]["content"] = []
+
+    assert workspaces == expected_annotations
 
 
 @pytest.mark.asyncio
@@ -264,7 +356,7 @@ async def test_export_json(client, httpx_mock, filters, expected_method, first_u
         url=first_url,
         json={
             "pagination": {"total": 2, "total_pages": 2, "next": second_url, "previous": None},
-            "results": ANNOTATIONS[:1],
+            "results": ANNOTATIONS[:2],
         },
     )
     httpx_mock.add_response(
@@ -272,7 +364,7 @@ async def test_export_json(client, httpx_mock, filters, expected_method, first_u
         url=second_url,
         json={
             "pagination": {"total": 2, "total_pages": 2, "next": None, "previous": None},
-            "results": ANNOTATIONS[1:],
+            "results": ANNOTATIONS[2:],
         },
     )
     cols = ["col1", "col2"]

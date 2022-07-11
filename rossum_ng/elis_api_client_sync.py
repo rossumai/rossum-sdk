@@ -29,6 +29,10 @@ class Sideload:
     pass
 
 
+class AsyncRuntimeError(Exception):
+    pass
+
+
 class ElisAPIClientSync:
     def __init__(
         self,
@@ -39,7 +43,14 @@ class ElisAPIClientSync:
     ):
         self.elis_api_client = ElisAPIClient(username, password, base_url, http_client)
 
-        self.event_loop = asyncio.new_event_loop()
+        try:
+            self.event_loop = asyncio.get_running_loop()
+            if self.event_loop.is_running():
+                raise AsyncRuntimeError(
+                    "Event loop is present and already running, please use async version of the client"
+                )
+        except RuntimeError:
+            self.event_loop = asyncio.new_event_loop()
 
     def _iter_over_async(self, ait: AsyncIterable[T]) -> Iterable[T]:
         ait = ait.__aiter__()

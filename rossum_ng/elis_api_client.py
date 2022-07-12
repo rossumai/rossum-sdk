@@ -6,6 +6,9 @@ from enum import Enum
 
 import aiofiles
 
+from rossum_ng.models.automation_blocker import AutomationBlocker, AutomationBlockerContent
+from rossum_ng.models.document import Document
+
 if typing.TYPE_CHECKING:
     import pathlib
     from typing import Any, AsyncIterable, Dict, Optional, Sequence, Tuple, Union
@@ -222,12 +225,40 @@ class ElisAPIClient:
     async def list_all_annotations(
         self,
         ordering: Sequence[str] = (),
-        sideloads: Optional[Sequence[APIObject]] = None,
+        sideloads: Sequence[str] = (),
+        content_schema_ids: Sequence[str] = (),
         **filters: Any,
     ) -> AsyncIterable[Annotation]:
         """https://elis.rossum.ai/api/docs/#list-all-annotations"""
-        async for a in self._http_client.fetch_all("annotations", ordering, **filters):
-            yield Annotation(**a)
+        if sideloads and "content" in sideloads and not content_schema_ids:
+            raise ValueError(
+                'When content sideloading is requested, "content_schema_ids" must be provided'
+            )
+        async for a in self._http_client.fetch_all(
+            "annotations", ordering, sideloads, content_schema_ids, **filters
+        ):
+            annotation = Annotation(**a)
+            if sideloads:
+                if "modifiers" in sideloads:
+                    if a["modifier"]:
+                        annotation.modifier = User(**a["modifier"])
+                if "documents" in sideloads:
+                    if a["document"]:
+                        document = Document(**a["document"])
+                        annotation.document = document
+                if "automation_blockers" in sideloads:
+                    if a["automation_blocker"]:
+                        automation_blocker = AutomationBlocker(**a["automation_blocker"])
+                        automation_blocker.content = [
+                            AutomationBlockerContent(**content)
+                            for content in a["automation_blocker"]["content"]
+                        ]
+                        annotation.automation_blocker = automation_blocker
+                if "content" in sideloads:
+                    annotation.content = [
+                        AutomationBlockerContent(**content) for content in a["content"]
+                    ]
+            yield annotation
 
     async def retrieve_annotation(
         self, annotation_id: int, sideloads: Optional[Sequence[APIObject]] = None

@@ -38,7 +38,7 @@ library by Rossum for all the users.
 
 
 ### Examples
-You can choose between asynchronous and synchronous client. Both are exactly the same in terms of features.
+You can choose between asynchronous and synchronous client. Both are exactly the same in terms of features. If you try to use synchronous client in the environment, where event loop is already present and running (for example Jupyter Notebook), exception will be thrown advising to use the async version.
 
 Async version:
 ```python

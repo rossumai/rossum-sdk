@@ -1,12 +1,5 @@
 from __future__ import annotations
 
-"""
-TODO
-* convert datetimes to ISO 8601
-* enum with resource types instead of strings
-* password reset
-* rate limiting?
-"""
 import asyncio
 import functools
 import itertools

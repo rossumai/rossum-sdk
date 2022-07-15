@@ -47,21 +47,21 @@ from rossum_ng.elis_api_client import ElisAPIClient
 
 WORKSPACE = {
     "name": "Rossum Client NG Test",
-    "organization": "https://elis.develop.r8.lol/api/v1/organizations/116390",
+    "organization": "https://elis.rossum.ai/api/v1/organizations/116390",
 }
 
 async def main_with_async_client():
     client = ElisAPIClient(
         os.environ["ELIS_USERNAME"],
         os.environ["ELIS_PASSWORD"],
-        base_url="https://elis.develop.r8.lol/api/v1",
+        base_url="https://elis.rossum.ai/api/v1",
     )
     ws = await client.create_new_workspace(data=WORKSPACE)
     workspace_id = ws.id
     ws = await client.retrieve_workspace(workspace_id)
     print("GET result:", ws)
     print("LIST results:")
-    async for w in client.list_all_workspaces(["-id"], None, name=WORKSPACE["name"]):
+    async for w in client.list_all_workspaces(ordering=["-id"], name=WORKSPACE["name"]):
         print(w)
     await client.delete_workspace(workspace_id)
     print(f"Workspace {workspace_id} deleted.")
@@ -75,21 +75,21 @@ from rossum_ng.elis_api_client_sync import ElisAPIClientSync
 
 WORKSPACE = {
     "name": "Rossum Client NG Test",
-    "organization": "https://elis.develop.r8.lol/api/v1/organizations/116390",
+    "organization": "https://elis.rossum.ai/api/v1/organizations/116390",
 }
 
 def main_with_sync_client():
     client = ElisAPIClientSync(
         os.environ["ELIS_USERNAME"],
         os.environ["ELIS_PASSWORD"],
-        base_url="https://elis.develop.r8.lol/api/v1",
+        base_url="https://elis.rossum.ai/api/v1",
     )
     ws = client.create_new_workspace(data=WORKSPACE)
     workspace_id = ws.id
     ws = client.retrieve_workspace(workspace_id)
     print("GET result:", ws)
     print("LIST results:")
-    for w in client.list_all_workspaces(["-id"], None, name=WORKSPACE["name"]):
+    for w in client.list_all_workspaces(ordering=["-id"], name=WORKSPACE["name"]):
         print(w)
     client.delete_workspace(workspace_id)
     print(f"Workspace {workspace_id} deleted.")

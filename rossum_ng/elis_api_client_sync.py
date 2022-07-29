@@ -7,7 +7,7 @@ if typing.TYPE_CHECKING:
     import pathlib
     from typing import Any, AsyncIterable, Dict, Iterable, Optional, Sequence, Tuple, TypeVar, Union
 
-    from rossum_ng.elis_api_client import APIObject
+    from rossum_ng.elis_api_client import APIObject, ExportFileFormats
 
     T = TypeVar("T")
 
@@ -117,9 +117,23 @@ class ElisAPIClientSync:
             self.elis_api_client.import_document(queue_id, files, values, metadata)
         )
 
-    # TODO: specific method in APICLient
-    def export_annotations(self, id_: int, annotation_ids: Sequence[int], format_: str) -> dict:
-        return {}
+    def export_annotations_to_json(self, queue_id: int) -> Iterable[Annotation]:
+        """https://elis.rossum.ai/api/docs/#export-annotations
+
+        JSON export is paginated and returns the result in a way similar to other list_all methods.
+        """
+        return self._iter_over_async(self.elis_api_client.export_annotations_to_json(queue_id))
+
+    def export_annotations_to_file(
+        self, queue_id: int, export_format: ExportFileFormats
+    ) -> Iterable[bytes]:
+        """https://elis.rossum.ai/api/docs/#export-annotations
+
+        XLSX/CSV/XML exports can be huge, therefore byte streaming is used to keep memory consumption low.
+        """
+        return self._iter_over_async(
+            self.elis_api_client.export_annotations_to_file(queue_id, export_format)
+        )
 
     # ##### ORGANIZATIONS #####
     def list_all_organizations(

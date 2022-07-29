@@ -1,3 +1,4 @@
+import aiofiles
 import pytest
 import pytest_asyncio
 from mock import MagicMock
@@ -27,7 +28,17 @@ def elis_client_sync(http_client):
 @pytest_asyncio.fixture
 async def mock_generator():
     async def f(item):
-        for org in [item]:
-            yield org
+        for i in [item]:
+            yield i
+
+    return f
+
+
+@pytest_asyncio.fixture
+async def mock_file_read():
+    async def f(path):
+        async with aiofiles.open(path, "rb") as fp:
+            async for line in fp:
+                yield line
 
     return f

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<export>
+  <results>
+    <annotation url="https://elis.rossum.ai/api/v1/annotations/315777">
+      <status>exported</status>
+      <arrived_at>2019-10-13T21:33:01.509886Z</arrived_at>
+      <exported_at>2019-10-13T12:00:01.000133Z</exported_at>
+      <document url="https://elis.rossum.ai/api/v1/documents/315877">
+        <file_name>template_invoice.pdf</file_name>
+        <file>https://elis.rossum.ai/api/v1/documents/315877/content</file>
+      </document>
+      <modifier/>
+      <schema url="https://elis.rossum.ai/api/v1/schemas/31336"/>
+      <metadata/>
+      <content>
+        <section schema_id="invoice_details_section">
+          <datapoint schema_id="document_id" type="string" rir_confidence="0.99">12345</datapoint>
+        </section>
+      </content>
+    </annotation>
+  </results>
+  <pagination>
+    <next/>
+    <previous/>
+    <total>1</total>
+    <total_pages>1</total_pages>
+  </pagination>
+</export>

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import typing
+from enum import Enum
 
 import aiofiles
 
@@ -25,6 +26,12 @@ if typing.TYPE_CHECKING:
     APIObject = Union[
         Annotation, Connector, Hook, Inbox, Organization, Queue, Schema, UserRole, Workspace
     ]
+
+
+class ExportFileFormats(Enum):
+    CSV = "csv"
+    XML = "xml"
+    XLSX = "xlsx"
 
 
 class Sideload:
@@ -102,9 +109,27 @@ class ElisAPIClient:
         async with aiofiles.open(file, "rb") as fp:
             await self._http_client.upload("queues", queue_id, fp, filename, values, metadata)
 
-    # TODO: specific method in APICLient
-    def export_annotations(self, id_: int, annotation_ids: Sequence[int], format_: str) -> dict:
-        return {}
+    async def export_annotations_to_json(
+        self,
+        queue_id: int,
+    ) -> AsyncIterable[Annotation]:
+        """https://elis.rossum.ai/api/docs/#export-annotations
+
+        JSON export is paginated and returns the result in a way similar to other list_all methods.
+        """
+        async for chunk in self._http_client.export("queues", queue_id, "json"):
+            # JSON export can be translated directly to Annotation object
+            yield Annotation(**typing.cast(typing.Dict, chunk))
+
+    async def export_annotations_to_file(
+        self, queue_id: int, export_format: ExportFileFormats
+    ) -> AsyncIterable[bytes]:
+        """https://elis.rossum.ai/api/docs/#export-annotations
+
+        XLSX/CSV/XML exports can be huge, therefore byte streaming is used to keep memory consumption low.
+        """
+        async for chunk in self._http_client.export("queues", queue_id, str(export_format)):
+            yield typing.cast(bytes, chunk)
 
     # ##### ORGANIZATIONS #####
     async def list_all_organizations(

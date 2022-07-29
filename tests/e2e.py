@@ -2,7 +2,9 @@ import logging
 import os
 from typing import Optional
 
+import aiofiles
 import pytest
+from aiofiles import os as aios
 
 from rossum_ng.models.queue import Queue
 from rossum_ng.models.schema import Schema
@@ -45,6 +47,18 @@ class TestE2E:
             files = {("./tests/data/sample_invoice.pdf", f"e2etest_doc_{i}.pdf") for i in range(2)}
 
             await client.import_document(queue.id, files)
+            async for annotation in client.export_annotations_to_json(queue.id):
+                assert annotation.document["file_name"] in [
+                    f"e2etest_doc_{i}.pdf" for i in range(2)
+                ]
+
+            async with aiofiles.tempfile.TemporaryFile("wb") as f:
+                tempfile_name = f.name
+                async for chunk in client.export_annotations_to_file(queue.id, "xml"):
+                    await f.write(chunk)
+
+                await f.flush()
+                assert (await aios.stat(tempfile_name)).st_size > 0
         finally:
             # cleanup of created entities
             if queue:

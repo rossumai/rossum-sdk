@@ -14,6 +14,7 @@ class User:
     organization: str
     last_login: str
     is_active: bool = True
+    email_verified: Optional[bool] = False
     password: Optional[str] = None
     groups: List[str] = field(default_factory=list)
     queues: List[str] = field(default_factory=list)

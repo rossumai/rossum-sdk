@@ -225,12 +225,15 @@ class ElisAPIClientSync:
     def list_all_annotations(
         self,
         ordering: Sequence[str] = (),
-        sideloads: Optional[Sequence[APIObject]] = None,
+        sideloads: Sequence[str] = (),
+        content_schema_ids: Sequence[str] = (),
         **filters: Dict[str, Any],
     ) -> Iterable[Annotation]:
         """https://elis.rossum.ai/api/docs/#list-all-annotations"""
         return self._iter_over_async(
-            self.elis_api_client.list_all_annotations(ordering, sideloads, **filters)
+            self.elis_api_client.list_all_annotations(
+                ordering, sideloads, content_schema_ids, **filters
+            )
         )
 
     def retrieve_annotation(

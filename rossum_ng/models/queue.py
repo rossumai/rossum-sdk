@@ -28,3 +28,4 @@ class Queue:
     generic_engine: Optional[Dict[str, str]] = None
     use_confirmed_state: bool = False
     document_lifetime: Optional[int] = None
+    delete_after: Optional[str] = None

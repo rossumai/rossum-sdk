@@ -44,12 +44,13 @@ class Sideload:
 class ElisAPIClient:
     def __init__(
         self,
-        username: str,
-        password: str,
-        base_url: Optional[str],
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        token: Optional[str] = None,
+        base_url: Optional[str] = None,
         http_client: Optional[APIClient] = None,
     ):
-        self._http_client = http_client or APIClient(username, password, base_url)
+        self._http_client = http_client or APIClient(username, password, token, base_url)
 
     # ##### QUEUE #####
     async def retrieve_queue(

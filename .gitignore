@@ -103,6 +103,7 @@ _leptonica_cffi*
 
 # VS Code
 .vscode/
+.devcontainer
 
 # ctags/exuberant-ctags
 tags

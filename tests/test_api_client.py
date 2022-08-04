@@ -117,12 +117,13 @@ UPLOAD_RESPONSE = {
 EXPECTED_UPLOAD_CONTENT = b'--313131\r\nContent-Disposition: form-data; name="content"; filename="filename.pdf"\r\nContent-Type: application/octet-stream\r\n\r\nFake PDF.\r\n--313131\r\nContent-Disposition: form-data; name="values"\r\nContent-Type: application/json\r\n\r\n{"upload:organization_unit": "Sales"}\r\n--313131\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n{"project": "Market ABC"}\r\n--313131--\r\n'
 
 CSV_EXPORT = b"meta_file_name,Invoice number\r\nfilename_1.pdf,11111\r\nfilename_2.pdf,22222"
+FAKE_TOKEN = "fake-token"
 
 
 @pytest.fixture
 def client():
     client = APIClient("username", "password")
-    client.token = "fake-token"
+    client.token = FAKE_TOKEN
     return client
 
 
@@ -146,6 +147,21 @@ async def test_authenticate(client, httpx_mock):
     )
     with pytest.raises(APIClientError, match="401"):
         await client._authenticate()
+
+
+@pytest.mark.asyncio
+async def test_init_token(httpx_mock):
+    """Verifies that we can create client using token and call API without 'auth' call."""
+    client = APIClient(token=FAKE_TOKEN)
+
+    httpx_mock.add_response(
+        method="GET",
+        url="https://elis.rossum.ai/api/v1/users/1",
+        json={},
+    )
+    await client.fetch_one("users", 1)
+    assert len(httpx_mock.get_requests()) == 1
+    assert httpx_mock.get_requests()[0].headers["Authorization"] == f"token {FAKE_TOKEN}"
 
 
 @pytest.mark.asyncio

@@ -36,12 +36,13 @@ class AsyncRuntimeError(Exception):
 class ElisAPIClientSync:
     def __init__(
         self,
-        username: str,
-        password: str,
-        base_url: Optional[str],
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        token: Optional[str] = None,
+        base_url: Optional[str] = None,
         http_client: Optional[APIClient] = None,
     ):
-        self.elis_api_client = ElisAPIClient(username, password, base_url, http_client)
+        self.elis_api_client = ElisAPIClient(username, password, token, base_url, http_client)
 
         try:
             self.event_loop = asyncio.get_running_loop()

@@ -1,12 +1,5 @@
 from __future__ import annotations
 
-"""
-TODO
-* convert datetimes to ISO 8601
-* enum with resource types instead of strings
-* password reset
-* rate limiting?
-"""
 import asyncio
 import functools
 import itertools
@@ -92,14 +85,20 @@ class APIClient:
 
     def __init__(
         self,
-        username: str,
-        password: str,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        token: Optional[str] = None,
         base_url: Optional[str] = "https://elis.rossum.ai/api/v1",
     ):
+        if token is None and (username is None and password is None):
+            raise TypeError(
+                "__init__() missing arguments: 'username' + 'password' OR 'token' must be specified!"
+            )
+
         self.base_url = base_url
         self.username = username
         self.password = password
-        self.token: Optional[str] = None
+        self.token = token
         self.client = httpx.AsyncClient()
 
     @property
@@ -298,7 +297,7 @@ class APIClient:
             async for bytes_chunk in self._stream(method, url, params=query_params):
                 yield bytes_chunk
 
-    async def _authenticate(self):
+    async def _authenticate(self) -> None:
         response = await self.client.post(
             f"{self.base_url}/auth/login",
             data={"username": self.username, "password": self.password},

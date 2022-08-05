@@ -1,9 +1,11 @@
-from dataclasses import dataclass, field
 from typing import List, Optional
 
+from pydantic import Field
 
-@dataclass
-class Organization:
+from rossum_ng.models.base import Base
+
+
+class Organization(Base):
     id: int
     name: str
     url: str
@@ -15,5 +17,5 @@ class Organization:
     trial_expires_at: str
     expires_at: Optional[str] = None
     oidc_provider: Optional[str] = None
-    ui_settings: dict = field(default_factory=dict)
-    metadata: dict = field(default_factory=dict)
+    ui_settings: dict = Field(default_factory=dict)
+    metadata: dict = Field(default_factory=dict)

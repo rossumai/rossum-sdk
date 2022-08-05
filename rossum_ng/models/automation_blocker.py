@@ -1,20 +1,21 @@
-from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+from pydantic import Field
 
-@dataclass
-class AutomationBlockerContent:
+from rossum_ng.models.base import Base
+
+
+class AutomationBlockerContent(Base):
     level: str
     type: str
     schema_id: Optional[str] = None
     samples_truncated: Optional[bool] = False
-    samples: Dict[str, Any] = field(default_factory=dict)
-    details: Dict[str, Any] = field(default_factory=dict)
+    samples: Dict[str, Any] = Field(default_factory=dict)
+    details: Dict[str, Any] = Field(default_factory=dict)
 
 
-@dataclass
-class AutomationBlocker:
+class AutomationBlocker(Base):
     id: int
     url: str
     annotation: str
-    content: List[AutomationBlockerContent] = field(default_factory=list)
+    content: List[AutomationBlockerContent] = Field(default_factory=list)

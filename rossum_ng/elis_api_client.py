@@ -6,9 +6,6 @@ from enum import Enum
 
 import aiofiles
 
-from rossum_ng.models.automation_blocker import AutomationBlocker, AutomationBlockerContent
-from rossum_ng.models.document import Document
-
 if typing.TYPE_CHECKING:
     import pathlib
     from typing import Any, AsyncIterable, Dict, Optional, Sequence, Tuple, Union
@@ -238,28 +235,7 @@ class ElisAPIClient:
         async for a in self._http_client.fetch_all(
             "annotations", ordering, sideloads, content_schema_ids, **filters
         ):
-            annotation = Annotation(**a)
-            if sideloads:
-                if "modifiers" in sideloads:
-                    if a["modifier"]:
-                        annotation.modifier = User(**a["modifier"])
-                if "documents" in sideloads:
-                    if a["document"]:
-                        document = Document(**a["document"])
-                        annotation.document = document
-                if "automation_blockers" in sideloads:
-                    if a["automation_blocker"]:
-                        automation_blocker = AutomationBlocker(**a["automation_blocker"])
-                        automation_blocker.content = [
-                            AutomationBlockerContent(**content)
-                            for content in a["automation_blocker"]["content"]
-                        ]
-                        annotation.automation_blocker = automation_blocker
-                if "content" in sideloads:
-                    annotation.content = [
-                        AutomationBlockerContent(**content) for content in a["content"]
-                    ]
-            yield annotation
+            yield Annotation(**a)
 
     async def retrieve_annotation(
         self, annotation_id: int, sideloads: Optional[Sequence[APIObject]] = None

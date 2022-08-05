@@ -1,9 +1,11 @@
-from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+from pydantic import Field
 
-@dataclass
-class Inbox:
+from rossum_ng.models.base import Base
+
+
+class Inbox(Base):
     id: int
     name: str
     url: str
@@ -15,6 +17,6 @@ class Inbox:
     bounce_postponed_annotations: bool = False
     bounce_deleted_annotations: bool = False
     bounce_email_with_no_attachments: bool = True
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    filters: Dict[str, Any] = field(default_factory=dict)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    filters: Dict[str, Any] = Field(default_factory=dict)
     dmarc_check_action: str = "accept"

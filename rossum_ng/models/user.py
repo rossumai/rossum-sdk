@@ -1,9 +1,11 @@
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import List, Optional
+
+from pydantic import Field
+
+from rossum_ng.models.base import Base
 
 
-@dataclass
-class User:
+class User(Base):
     id: int
     url: str
     first_name: str
@@ -16,9 +18,9 @@ class User:
     is_active: bool = True
     email_verified: Optional[bool] = False
     password: Optional[str] = None
-    groups: List[str] = field(default_factory=list)
-    queues: List[str] = field(default_factory=list)
-    ui_settings: List[Dict] = field(default_factory=list)
-    metadata: dict = field(default_factory=dict)
+    groups: List[str] = Field(default_factory=list)
+    queues: List[str] = Field(default_factory=list)
+    ui_settings: dict = Field(default_factory=dict)
+    metadata: dict = Field(default_factory=dict)
     oidc_id: Optional[str] = None
     auth_type: str = "password"

@@ -1,13 +1,15 @@
-from dataclasses import dataclass, field
 from typing import Any, Dict, List
 
+from pydantic import Field
 
-@dataclass
-class Workspace:
+from rossum_ng.models.base import Base
+
+
+class Workspace(Base):
     id: int
     name: str
     url: str
     autopilot: bool
     organization: str
-    queues: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    queues: List[str] = Field(default_factory=list)
+    metadata: Dict[str, Any] = Field(default_factory=dict)

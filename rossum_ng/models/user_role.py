@@ -1,8 +1,7 @@
-from dataclasses import dataclass
+from rossum_ng.models.base import Base
 
 
-@dataclass
-class UserRole:
+class UserRole(Base):
     id: int
     name: str
     url: str

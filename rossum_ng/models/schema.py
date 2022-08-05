@@ -1,12 +1,14 @@
-from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
+from pydantic import Field
 
-@dataclass
-class Schema:
+from rossum_ng.models.base import Base
+
+
+class Schema(Base):
     id: int
     name: Optional[str] = None
-    queues: List[str] = field(default_factory=list)
+    queues: List[str] = Field(default_factory=list)
     url: Optional[str] = None
-    content: List[Dict] = field(default_factory=list)
-    metadata: dict = field(default_factory=dict)
+    content: List[Dict] = Field(default_factory=list)
+    metadata: dict = Field(default_factory=dict)

@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import aiofiles
 import pytest
 import pytest_asyncio
@@ -20,7 +22,9 @@ def elis_client(http_client):
 
 
 @pytest.fixture
-def elis_client_sync(http_client):
+def elis_client_sync(
+    http_client,
+) -> Tuple[ElisAPIClientSync, MagicMock]:
     client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
     return (client, http_client)
 

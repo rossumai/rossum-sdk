@@ -2,9 +2,6 @@ import pytest
 from mock.mock import MagicMock
 
 from rossum_ng.models.annotation import Annotation
-from rossum_ng.models.automation_blocker import AutomationBlocker, AutomationBlockerContent
-from rossum_ng.models.document import Document
-from rossum_ng.models.user import User
 
 
 @pytest.fixture
@@ -141,18 +138,6 @@ class TestAnnotations:
 
         async for a in annotations:
             annotation = Annotation(**dummy_annotation_with_sideloads)
-            modifier = User(**annotation.modifier)
-            annotation.modifier = modifier
-            automation_blocker = Document(**annotation.document)
-            annotation.document = automation_blocker
-            automation_blocker = AutomationBlocker(**annotation.automation_blocker)
-            automation_blocker.content = [
-                AutomationBlockerContent(**content) for content in automation_blocker.content
-            ]
-            annotation.automation_blocker = automation_blocker
-            annotation.content = [
-                AutomationBlockerContent(**content) for content in annotation.content
-            ]
             assert a == annotation
 
         http_client.fetch_all.assert_called_with(
@@ -241,18 +226,6 @@ class TestAnnotationsSync:
 
         for a in annotations:
             annotation = Annotation(**dummy_annotation_with_sideloads)
-            modifier = User(**annotation.modifier)
-            annotation.modifier = modifier
-            automation_blocker = Document(**annotation.document)
-            annotation.document = automation_blocker
-            automation_blocker = AutomationBlocker(**annotation.automation_blocker)
-            automation_blocker.content = [
-                AutomationBlockerContent(**content) for content in automation_blocker.content
-            ]
-            annotation.automation_blocker = automation_blocker
-            annotation.content = [
-                AutomationBlockerContent(**content) for content in annotation.content
-            ]
             assert a == annotation
 
         http_client.fetch_all.assert_called_with(

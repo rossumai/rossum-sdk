@@ -1,7 +1,7 @@
 """Test APIClient methods.
 
 * all HTTP calls are mocked using httpx_mock which results into nicer code that using unittest.mock
-* `workspace` is used as resource in most tests to make the examples respresentative.
+* `workspace` is used as resource in most tests to make the examples representative.
 * all CRUD methods are tested for both a happy path and an error (400 or 404)
 """
 import copy
@@ -162,6 +162,29 @@ async def test_init_token(httpx_mock):
     await client.fetch_one("users", 1)
     assert len(httpx_mock.get_requests()) == 1
     assert httpx_mock.get_requests()[0].headers["Authorization"] == f"token {FAKE_TOKEN}"
+
+
+@pytest.mark.asyncio
+async def test_not_possible_to_reauth(httpx_mock):
+    """Invalid token used, trying to to re-auth without password, get error. Transparently displays it."""
+    client = APIClient(token=FAKE_TOKEN)
+
+    httpx_mock.add_response(
+        method="GET",
+        url="https://elis.rossum.ai/api/v1/users/1",
+        status_code=401,
+        content=b"unauth!",
+    )
+    httpx_mock.add_response(
+        url="https://elis.rossum.ai/api/v1/auth/login",
+        status_code=400,
+        json={"password": ["This field may not be blank."]},
+    )
+    with pytest.raises(APIClientError) as err:
+        await client.fetch_one("users", 1)
+
+    assert err.value.status_code == 400
+    assert err.value.error == '{"password": ["This field may not be blank."]}'
 
 
 @pytest.mark.asyncio

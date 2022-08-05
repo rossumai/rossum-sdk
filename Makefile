@@ -26,10 +26,6 @@ test: .venv
 	@$(VENV_PATH)/bin/tox -e py39
 .PHONY: test
 
-test-all: .venv
-	@TOXPATH=$(VENV_PATH)/bin/tox sh ./scripts/runtox.sh
-.PHONY: test-all
-
 lint: .venv
 	@set -e && $(VENV_PATH)/bin/tox -e linting || ( \
 		echo "================================"; \

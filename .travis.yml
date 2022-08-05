@@ -46,7 +46,7 @@ jobs:
 # See e.g. https://app.travis-ci.com/github/rossumai/rossum/jobs/560023987
 install:
   - pip install tox-travis "setuptools<60" --upgrade
-  - pip install -r test-requirements.txt
+  - pip install .[tests]
 
 # command to run tests
 script:

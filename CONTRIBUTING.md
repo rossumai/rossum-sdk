@@ -89,7 +89,7 @@ source .env/bin/activate
 pip install -e .
 
 # install requirements
-pip install -r test-requirements.txt
+pip install -e ."[tests]"
 
 # run tests
 pytest tests/

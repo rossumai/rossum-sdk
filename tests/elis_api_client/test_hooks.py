@@ -1,6 +1,6 @@
 import pytest
 
-from rossum_ng.models.hook import Hook
+from rossum_api.models.hook import Hook
 
 
 @pytest.fixture

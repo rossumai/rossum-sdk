@@ -1,6 +1,6 @@
 import pytest
 
-from rossum_ng.models.organization import Organization
+from rossum_api.models.organization import Organization
 
 
 @pytest.fixture

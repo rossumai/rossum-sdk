@@ -1,6 +1,6 @@
 import pytest
 
-from rossum_ng.models.workspace import Workspace
+from rossum_api.models.workspace import Workspace
 
 
 @pytest.fixture

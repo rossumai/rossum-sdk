@@ -1,10 +1,10 @@
 import pytest
 from mock.mock import MagicMock
 
-from rossum_ng.models.annotation import Annotation
-from rossum_ng.models.automation_blocker import AutomationBlocker, AutomationBlockerContent
-from rossum_ng.models.document import Document
-from rossum_ng.models.user import User
+from rossum_api.models.annotation import Annotation
+from rossum_api.models.automation_blocker import AutomationBlocker, AutomationBlockerContent
+from rossum_api.models.document import Document
+from rossum_api.models.user import User
 
 
 @pytest.fixture

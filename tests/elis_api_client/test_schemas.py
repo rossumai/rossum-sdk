@@ -1,6 +1,6 @@
 import pytest
 
-from rossum_ng.models.schema import Schema
+from rossum_api.models.schema import Schema
 
 
 @pytest.fixture

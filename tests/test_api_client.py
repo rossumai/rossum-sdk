@@ -12,7 +12,7 @@ import mock
 import pytest
 import pytest_httpx
 
-from rossum_ng.api_client import APIClient, APIClientError
+from rossum_api.api_client import APIClient, APIClientError
 
 WORKSPACES = [
     {

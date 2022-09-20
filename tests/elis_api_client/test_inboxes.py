@@ -1,6 +1,6 @@
 import pytest
 
-from rossum_ng.models.inbox import Inbox
+from rossum_api.models.inbox import Inbox
 
 
 @pytest.fixture

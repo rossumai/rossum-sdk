@@ -2,7 +2,7 @@ import pytest
 from mock import patch
 from mock.mock import MagicMock
 
-from rossum_ng.elis_api_client_sync import AsyncRuntimeError, ElisAPIClientSync
+from rossum_api.elis_api_client_sync import AsyncRuntimeError, ElisAPIClientSync
 
 
 class TestClientSync:

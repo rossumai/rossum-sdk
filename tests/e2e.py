@@ -6,14 +6,14 @@ import aiofiles
 import pytest
 from aiofiles import os as aios
 
-from rossum_ng.models.queue import Queue
-from rossum_ng.models.schema import Schema
-from rossum_ng.models.workspace import Workspace
+from rossum_api.models.queue import Queue
+from rossum_api.models.schema import Schema
+from rossum_api.models.workspace import Workspace
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
 
-from rossum_ng.elis_api_client import ElisAPIClient
+from rossum_api.elis_api_client import ElisAPIClient
 
 WORKSPACE = {
     "name": "Rossum Client NG Test",

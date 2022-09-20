@@ -1,6 +1,6 @@
 import pytest
 
-from rossum_ng.models.connector import Connector
+from rossum_api.models.connector import Connector
 
 
 @pytest.fixture

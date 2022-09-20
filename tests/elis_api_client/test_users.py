@@ -1,6 +1,6 @@
 import pytest
 
-from rossum_ng.models.user import User
+from rossum_api.models.user import User
 
 
 @pytest.fixture

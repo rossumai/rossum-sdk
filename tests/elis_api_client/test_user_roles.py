@@ -1,6 +1,6 @@
 import pytest
 
-from rossum_ng.models.user_role import UserRole
+from rossum_api.models.user_role import UserRole
 
 
 @pytest.fixture

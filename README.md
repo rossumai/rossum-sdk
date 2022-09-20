@@ -7,38 +7,42 @@
 ![PyPI - supported python versions](https://img.shields.io/pypi/pyversions/rossum.svg)
 ![MIT licence](https://img.shields.io/pypi/l/rossum.svg)
 
-**rossum-sdk** is a Python package delivering programmatic access to the [Rossum API](https://api.elis.rossum.ai/docs). This package is focused on accessing HTTP API only, if you need more advanced usage like Schema Transformations or interactive CLI tool, please refer to [Rossum package](https://github.com/rossumai/rossum).
+**rossum-sdk** is a repository for libraries useful when integrating Rossum platform into other Python applications. The following packages are provided:
 
-## Installation
+
+* `rossum-api` -- delivers programmatic access to the [Rossum API](https://api.elis.rossum.ai/docs).
+  * This package is focused on accessing HTTP API only, if you need more advanced usage like Schema Transformations or interactive CLI tool, please refer to [Rossum package](https://github.com/rossumai/rossum).
+
+
+## rossum-api
+
+### Installation
 
 The easiest way is to install the package from PyPI:
 
 ```bash
-pip install rossum-sdk
+pip install git+https://github.com/rossumai/rossum-sdk#egg=rossum-api
 ```
 
-You can eventually download an installation file from
-[GitHub releases](https://github.com/rossumai/rossum-sdk/releases).
+You can eventually download an installation file from [GitHub releases](https://github.com/rossumai/rossum-sdk/releases).
 and install it manually.
 
-## Usage
+### Usage
 
-### Python API SDK
+#### Python API SDK
 
-The **rossum-sdk** library can be used to communicate with Rossum API,
-instead of using `requests` library directly. The advantages of using **rossum-sdk**:
+The **rossum-api** library can be used to communicate with Rossum API, instead of using `requests` library directly. The advantages of using **rossum-sdk**:
 
-* it contains a function that merges the paginated results into one list so the user does not need
-to get results page by page and take care of their merging,
+* it contains a function that merges the paginated results into one list so the user does not need to get results page by page and take care of their merging,
 * it comes with both synchronous and asynchronous API, so you can choose the flavour you need,
 * it takes care of authenticating the user,
 * it includes many methods for frequent actions that you don't need to write by yourself from scratch,
 * it returns the result as a Python first class object - Dataclass, so you don't need to parse the JSON by yourself,
 * it maps method naming as close as possible to [API docs](https://elis.rossum.ai/api/docs),
-* in case the API version changes, the change will be implemented to the
-library by Rossum for all the users.
+* in case the API version changes, the change will be implemented to the library by Rossum for all the users.
+* it has minimal dependencies
 
-### Examples
+#### Examples
 
 You can choose between asynchronous and synchronous client. Both are exactly the same in terms of features. If you try to use synchronous client in the environment, where event loop is already present and running (for example Jupyter Notebook), exception will be thrown advising to use the async version.
 
@@ -46,7 +50,7 @@ Async version:
 
 ```python
 import asyncio
-from rossum_ng.elis_api_client import ElisAPIClient
+from rossum_api.elis_api_client import ElisAPIClient
 
 WORKSPACE = {
     "name": "Rossum Client NG Test",
@@ -75,7 +79,7 @@ asyncio.run(main_with_async_client())
 Sync version:
 
 ```python
-from rossum_ng.elis_api_client_sync import ElisAPIClientSync
+from rossum_api.elis_api_client_sync import ElisAPIClientSync
 
 WORKSPACE = {
     "name": "Rossum Client NG Test",
@@ -101,12 +105,12 @@ def main_with_sync_client():
 main_with_sync_client()
 ```
 
-## License
-
-MIT
-
-## TODO
+### TODO
 
 * convert datetimes to ISO 8601 string in `APIClient` to allow users passing standard datetime objects
 * implement password reset
 * rate limiting?
+
+## License
+
+MIT

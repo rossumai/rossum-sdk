@@ -9,9 +9,9 @@ import random
 
 import aiofiles
 
-from rossum_ng.api_client import APIClient
-from rossum_ng.elis_api_client import ElisAPIClient
-from rossum_ng.elis_api_client_sync import ElisAPIClientSync
+from rossum_api.api_client import APIClient
+from rossum_api.elis_api_client import ElisAPIClient
+from rossum_api.elis_api_client_sync import ElisAPIClientSync
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)

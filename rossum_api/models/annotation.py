@@ -2,9 +2,9 @@ import datetime as dt
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
-from rossum_ng.models.automation_blocker import AutomationBlocker, AutomationBlockerContent
-from rossum_ng.models.document import Document
-from rossum_ng.models.user import User
+from rossum_api.models.automation_blocker import AutomationBlocker, AutomationBlockerContent
+from rossum_api.models.document import Document
+from rossum_api.models.user import User
 
 
 @dataclass

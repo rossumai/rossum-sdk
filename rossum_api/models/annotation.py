@@ -8,6 +8,12 @@ from rossum_api.models.user import User
 
 
 @dataclass
+class Prediction:
+    source: str
+    version: Optional[str] = None
+
+
+@dataclass
 class Annotation:
     url: str
     status: str
@@ -39,3 +45,5 @@ class Annotation:
     automated: bool = False
     automation_blocker: Optional[Union[AutomationBlocker, str]] = None
     related_emails: List[str] = field(default_factory=list)
+    automatically_rejected: Optional[bool] = None
+    prediction: Optional[Prediction] = None

@@ -1,6 +1,7 @@
 # Rossum SDK
 
 [![Build Status](https://api.travis-ci.com/rossumai/rossum-sdk.svg?branch=main)](https://travis-ci.com/rossumai/rossum-sdk)
+[![Coverage](https://codecov.io/gh/rossumai/rossum-sdk/branch/main/graph/badge.svg)](https://codecov.io/gh/rossumai/rossum-sdk)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 ![MIT licence](https://img.shields.io/pypi/l/rossum.svg)
 

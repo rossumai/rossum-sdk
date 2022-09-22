@@ -117,7 +117,7 @@ def dummy_annotation_with_sideloads():
 
 @pytest.mark.asyncio
 class TestAnnotations:
-    async def test_get_annotations(self, elis_client, dummy_annotation, mock_generator):
+    async def test_list_all_annotations(self, elis_client, dummy_annotation, mock_generator):
         client, http_client = elis_client
         http_client.fetch_all.return_value = mock_generator(dummy_annotation)
 
@@ -128,7 +128,7 @@ class TestAnnotations:
 
         http_client.fetch_all.assert_called_with("annotations", (), (), ())
 
-    async def test_get_annotations_with_sideloads(
+    async def test_list_all_annotations_with_sideloads(
         self, elis_client, dummy_annotation_with_sideloads, mock_generator
     ):
         client, http_client = elis_client
@@ -162,7 +162,9 @@ class TestAnnotations:
             ["325164"],
         )
 
-    async def test_get_annotations_with_content_sideloads_without_schema_ids(self, elis_client):
+    async def test_list_all_annotations_with_content_sideloads_without_schema_ids(
+        self, elis_client
+    ):
         client, http_client = elis_client
         http_client.fetch_all = MagicMock()
 
@@ -174,7 +176,7 @@ class TestAnnotations:
 
         assert not http_client.fetch_all.called
 
-    async def test_get_annotation(self, elis_client, dummy_annotation):
+    async def test_retrieve_annotation(self, elis_client, dummy_annotation):
         client, http_client = elis_client
         http_client.fetch_one.return_value = dummy_annotation
 
@@ -217,7 +219,7 @@ class TestAnnotations:
 
 
 class TestAnnotationsSync:
-    def test_get_annotations(self, elis_client_sync, dummy_annotation, mock_generator):
+    def test_list_all_annotations(self, elis_client_sync, dummy_annotation, mock_generator):
         client, http_client = elis_client_sync
         http_client.fetch_all.return_value = mock_generator(dummy_annotation)
 
@@ -228,7 +230,7 @@ class TestAnnotationsSync:
 
         http_client.fetch_all.assert_called_with("annotations", (), (), ())
 
-    def test_get_annotations_with_sideloads(
+    def test_list_all_annotations_with_sideloads(
         self, elis_client_sync, dummy_annotation_with_sideloads, mock_generator
     ):
         client, http_client = elis_client_sync
@@ -262,7 +264,7 @@ class TestAnnotationsSync:
             ["325164"],
         )
 
-    def test_get_annotations_with_content_sideloads_without_schema_ids(self, elis_client_sync):
+    def test_list_all_annotations_with_content_sideloads_without_schema_ids(self, elis_client_sync):
         client, http_client = elis_client_sync
         http_client.fetch_all = MagicMock()
 
@@ -274,7 +276,7 @@ class TestAnnotationsSync:
 
         assert not http_client.fetch_all.called
 
-    def test_get_annotation(self, elis_client_sync, dummy_annotation):
+    def test_retrieve_annotation(self, elis_client_sync, dummy_annotation):
         client, http_client = elis_client_sync
         http_client.fetch_one.return_value = dummy_annotation
 

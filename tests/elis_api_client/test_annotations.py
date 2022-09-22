@@ -1,5 +1,5 @@
 import pytest
-from mock.mock import MagicMock
+from mock.mock import MagicMock, patch
 
 from rossum_api.models.annotation import Annotation
 from rossum_api.models.automation_blocker import AutomationBlocker, AutomationBlockerContent
@@ -187,6 +187,23 @@ class TestAnnotations:
 
         http_client.fetch_one.assert_called_with("annotations", aid)
 
+    async def test_poll_annotation(self, elis_client, dummy_annotation):
+        def is_imported(annotation):
+            return annotation.status != "importing"
+
+        client, http_client = elis_client
+        in_progress_annotation = {**dummy_annotation, "status": "importing"}
+        http_client.fetch_one.side_effect = [in_progress_annotation, dummy_annotation]
+
+        with patch("asyncio.sleep") as sleep_mock:
+            annotation = await client.poll_annotation(
+                dummy_annotation["id"], is_imported, sleep_s=2
+            )
+
+        assert annotation == Annotation(**dummy_annotation)
+
+        sleep_mock.assert_called_once_with(2)
+
     async def test_update_annotation(self, elis_client, dummy_annotation):
         client, http_client = elis_client
         http_client.replace.return_value = dummy_annotation
@@ -286,6 +303,21 @@ class TestAnnotationsSync:
         assert annotation == Annotation(**dummy_annotation)
 
         http_client.fetch_one.assert_called_with("annotations", aid)
+
+    def test_poll_annotation(self, elis_client_sync, dummy_annotation):
+        def is_imported(annotation):
+            return annotation.status != "importing"
+
+        client, http_client = elis_client_sync
+        in_progress_annotation = {**dummy_annotation, "status": "importing"}
+        http_client.fetch_one.side_effect = [in_progress_annotation, dummy_annotation]
+
+        with patch("asyncio.sleep") as sleep_mock:
+            annotation = client.poll_annotation(dummy_annotation["id"], is_imported, sleep_s=2)
+
+        assert annotation == Annotation(**dummy_annotation)
+
+        sleep_mock.assert_called_once_with(2)
 
     def test_update_annotation(self, elis_client_sync, dummy_annotation):
         client, http_client = elis_client_sync

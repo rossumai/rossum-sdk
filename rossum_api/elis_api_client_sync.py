@@ -5,7 +5,18 @@ import typing
 
 if typing.TYPE_CHECKING:
     import pathlib
-    from typing import Any, AsyncIterable, Dict, Iterable, Optional, Sequence, Tuple, TypeVar, Union
+    from typing import (
+        Any,
+        AsyncIterable,
+        Callable,
+        Dict,
+        Iterable,
+        Optional,
+        Sequence,
+        Tuple,
+        TypeVar,
+        Union,
+    )
 
     from rossum_api.elis_api_client import APIObject, ExportFileFormats
 
@@ -243,6 +254,14 @@ class ElisAPIClientSync:
         """https://elis.rossum.ai/api/docs/#retrieve-an-annotation"""
         return self.event_loop.run_until_complete(
             self.elis_api_client.retrieve_annotation(annotation_id, sideloads)
+        )
+
+    def poll_annotation(
+        self, annotation_id: int, predicate: Callable[[Annotation], bool], sleep_s: int = 3
+    ) -> Annotation:
+        """https://elis.rossum.ai/api/docs/#retrieve-an-annotation"""
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.poll_annotation(annotation_id, predicate, sleep_s)
         )
 
     def update_annotation(self, annotation_id: int, data: Dict[str, Any]) -> Annotation:

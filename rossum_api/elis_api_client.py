@@ -11,7 +11,8 @@ from rossum_api.models.document import Document
 
 if typing.TYPE_CHECKING:
     import pathlib
-    from typing import Any, AsyncIterable, Dict, Optional, Sequence, Tuple, Union
+
+    from typing import Any, AsyncIterable, Callable, Dict, Optional, Sequence, Tuple, Union
 
 from rossum_api.api_client import APIClient
 from rossum_api.models.annotation import Annotation
@@ -272,6 +273,15 @@ class ElisAPIClient:
         annotation = await self._http_client.fetch_one("annotations", annotation_id)
 
         return dict_to_dataclass(Annotation, annotation)
+
+    async def poll_annotation(
+        self, annotation_id: int, predicate: Callable[[Annotation], bool], sleep_s: int = 3
+    ) -> Annotation:
+        annotation = await self.retrieve_annotation(annotation_id)
+        while not predicate(annotation):
+            await asyncio.sleep(sleep_s)
+            annotation = await self.retrieve_annotation(annotation_id)
+        return annotation
 
     async def update_annotation(self, annotation_id: int, data: Dict[str, Any]) -> Annotation:
         """https://elis.rossum.ai/api/docs/#update-an-annotation"""

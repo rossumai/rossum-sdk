@@ -1,16 +1,13 @@
 # Rossum SDK
 
-[![PyPI - version](https://img.shields.io/pypi/v/rossum.svg)](https://pypi.python.org/pypi/rossum)
-[![Build Status](https://travis-ci.com/rossumai/rossum.svg?branch=master)](https://travis-ci.com/rossumai/rossum)
+[![Build Status](https://api.travis-ci.com/rossumai/rossum-sdk.svg?branch=main)](https://travis-ci.com/rossumai/rossum-sdk)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
-[![codecov](https://codecov.io/gh/rossumai/rossum/branch/master/graph/badge.svg)](https://codecov.io/gh/rossumai/rossum)
-![PyPI - supported python versions](https://img.shields.io/pypi/pyversions/rossum.svg)
 ![MIT licence](https://img.shields.io/pypi/l/rossum.svg)
 
 **rossum-sdk** is a repository for libraries useful when integrating Rossum platform into other Python applications. The following packages are provided:
 
 
-* `rossum-api` -- delivers programmatic access to the [Rossum API](https://api.elis.rossum.ai/docs).
+* `rossum-api` – delivers programmatic access to the [Rossum API](https://api.elis.rossum.ai/docs).
   * This package is focused on accessing HTTP API only, if you need more advanced usage like Schema Transformations or interactive CLI tool, please refer to [Rossum package](https://github.com/rossumai/rossum).
 
 

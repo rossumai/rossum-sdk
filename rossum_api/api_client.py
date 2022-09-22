@@ -89,6 +89,7 @@ class APIClient:
         password: Optional[str] = None,
         token: Optional[str] = None,
         base_url: Optional[str] = "https://elis.rossum.ai/api/v1",
+        timeout: Optional[float] = None,
     ):
         if token is None and (username is None and password is None):
             raise TypeError(
@@ -99,7 +100,7 @@ class APIClient:
         self.username = username
         self.password = password
         self.token = token
-        self.client = httpx.AsyncClient()
+        self.client = httpx.AsyncClient(timeout=timeout)
 
     @property
     def _headers(self):

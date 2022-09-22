@@ -29,3 +29,4 @@ class Queue:
     use_confirmed_state: bool = False
     document_lifetime: Optional[int] = None
     delete_after: Optional[str] = None
+    status: Optional[str] = None

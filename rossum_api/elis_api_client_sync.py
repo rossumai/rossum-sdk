@@ -11,6 +11,7 @@ if typing.TYPE_CHECKING:
         Callable,
         Dict,
         Iterable,
+        List,
         Optional,
         Sequence,
         Tuple,
@@ -103,17 +104,22 @@ class ElisAPIClientSync:
         files: Sequence[Tuple[Union[str, pathlib.Path], str]],
         values: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-    ) -> None:
+    ) -> List[int]:
         """https://elis.rossum.ai/api/docs/#import-a-document
 
         arguments
         ---------
             files
-                2-tuple containing current filename and name to be used by elis for the uploaded file
+                2-tuple containing current filepath and name to be used by Elis for the uploaded file
             metadata
                 metadata will be set to newly created annotation object
             values
                 may be used to initialize datapoint values by setting the value of rir_field_names in the schema
+
+        returns
+        -------
+            annotation_ids
+                list of IDs of created annotations, respects the order of `files` argument
         """
         return self.event_loop.run_until_complete(
             self.elis_api_client.import_document(queue_id, files, values, metadata)

@@ -12,7 +12,8 @@ import httpx
 if typing.TYPE_CHECKING:
     from typing import Any, AsyncIterator, Dict, List, Optional, Sequence, Tuple, Union
 
-    from aiofiles.threadpool.binary import AsyncFileIO
+    from aiofiles.threadpool.binary import AsyncBufferedReader
+
 
 logger = logging.getLogger(__name__)
 
@@ -240,7 +241,7 @@ class APIClient:
         self,
         resource: str,
         id_: int,
-        fp: AsyncFileIO,
+        fp: AsyncBufferedReader,
         filename: str,
         values: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None,

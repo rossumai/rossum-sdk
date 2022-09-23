@@ -12,7 +12,7 @@ from rossum_api.models.document import Document
 if typing.TYPE_CHECKING:
     import pathlib
 
-    from typing import Any, AsyncIterable, Callable, Dict, Optional, Sequence, Tuple, Union
+    from typing import Any, AsyncIterable, Callable, Dict, Optional, Sequence, Tuple, Union, List
 
 from rossum_api.api_client import APIClient
 from rossum_api.models.annotation import Annotation
@@ -84,7 +84,7 @@ class ElisAPIClient:
         files: Sequence[Tuple[Union[str, pathlib.Path], str]],
         values: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-    ) -> None:
+    ) -> List[int]:
         """https://elis.rossum.ai/api/docs/#import-a-document
 
         arguments
@@ -95,16 +95,26 @@ class ElisAPIClient:
                 metadata will be set to newly created annotation object
             values
                 may be used to initialize datapoint values by setting the value of rir_field_names in the schema
+
+        returns
+        -------
+            annotation_ids
+                list of IDs of created annotations, respects the order of `files` argument
         """
-        tasks = set()
-        for file, filename in files:
-            tasks.add(asyncio.create_task(self._upload(file, queue_id, filename, values, metadata)))
+        tasks = [
+            asyncio.create_task(self._upload(file, queue_id, filename, values, metadata))
+            for file, filename in files
+        ]
 
-        await asyncio.gather(*tasks)
+        return await asyncio.gather(*tasks)
 
-    async def _upload(self, file, queue_id, filename, values, metadata):
+    async def _upload(self, file, queue_id, filename, values, metadata) -> int:
         async with aiofiles.open(file, "rb") as fp:
-            await self._http_client.upload("queues", queue_id, fp, filename, values, metadata)
+            results = await self._http_client.upload(
+                "queues", queue_id, fp, filename, values, metadata
+            )
+            (result,) = results["results"]  # We're uploading 1 file in 1 request, we can unpack
+            return int(result["annotation"].split("/")[-1])
 
     async def export_annotations_to_json(
         self,

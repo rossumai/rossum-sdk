@@ -115,15 +115,30 @@ async def main_with_async_client():
         os.environ["ELIS_PASSWORD"],
         base_url="https://elis.develop.r8.lol/api/v1",
     )
-    ws = await client.create_new_workspace(data=WORKSPACE)
-    workspace_id = ws.id
-    ws = await client.retrieve_workspace(workspace_id)
-    print("GET result:", ws)
+    workspace = await client.create_new_workspace(data=WORKSPACE)
+    workspace = await client.retrieve_workspace(workspace.id)
+    print("GET result:", workspace)
     print("LIST results:")
     async for w in client.list_all_workspaces(["-id"], None, name=WORKSPACE["name"]):
         print(w)
-    await client.delete_workspace(workspace_id)
-    print(f"Workspace {workspace_id} deleted.")
+
+    schema = await client.create_new_schema(SCHEMA)
+    queue = await client.create_new_queue(
+        {"workspace": workspace.url, "name": "Rossum Client NG Test", "schema": schema.url}
+    )
+    (annotation_id,) = await client.import_document(
+        queue.id, [("tests/data/sample_invoice.pdf", "Sample Invoice")]
+    )
+
+    print("Polling until annotation is ready to review...")
+    annotation = await client.poll_annotation(annotation_id, lambda a: a.status != "importing")
+    print(f"Annotation ready to review: {annotation}")
+
+    # Cleanup
+    await client.delete_queue(queue.id)
+    print(f"Workspace {workspace.id} deleted.")
+    await client.delete_workspace(workspace.id)
+    print(f"Workspace {workspace.id} deleted.")
 
 
 def main_with_sync_client():

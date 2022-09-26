@@ -154,6 +154,12 @@ class ElisAPIClient:
 
         return dict_to_dataclass(Organization, organization)
 
+    async def retrieve_own_organization(self) -> Organization:
+        """Retrive organization of currently logged in user."""
+        user: Dict[Any, Any] = await self._http_client.fetch_one("auth", "user")
+        organization_id = user["organization"].split("/")[-1]
+        return await self.retrieve_organization(organization_id)
+
     # ##### SCHEMAS #####
     async def list_all_schemas(
         self,

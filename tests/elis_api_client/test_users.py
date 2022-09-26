@@ -3,27 +3,6 @@ import pytest
 from rossum_api.models.user import User
 
 
-@pytest.fixture
-def dummy_user():
-    return {
-        "id": 10775,
-        "url": "https://elis.rossum.ai/api/v1/users/10775",
-        "first_name": "John",
-        "last_name": "Doe",
-        "email": "john-doe@east-west-trading.com",
-        "date_joined": "2018-09-19T13:44:56.000000Z",
-        "username": "john-doe@east-west-trading.com",
-        "groups": ["https://elis.rossum.ai/api/v1/groups/3"],
-        "organization": "https://elis.rossum.ai/api/v1/organizations/406",
-        "queues": ["https://elis.rossum.ai/api/v1/queues/8199"],
-        "is_active": True,
-        "last_login": "2019-02-07T16:20:18.652253Z",
-        "ui_settings": {},
-        "metadata": {},
-        "oidc_id": None,
-    }
-
-
 @pytest.mark.asyncio
 class TestUsers:
     async def test_list_all_users(self, elis_client, dummy_user, mock_generator):

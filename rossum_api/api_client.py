@@ -107,7 +107,7 @@ class APIClient:
     def _headers(self):
         return {"Authorization": f"token {self.token}"}
 
-    async def fetch_one(self, resource: str, id_: int) -> Dict[str, Any]:
+    async def fetch_one(self, resource: str, id_: Union[int, str]) -> Dict[str, Any]:
         """Retrieve a single object in a specific resource."""
         response = await self._request("GET", f"{resource}/{id_}")
         return response.json()

@@ -163,6 +163,10 @@ class ElisAPIClientSync:
             self.elis_api_client.retrieve_organization(org_id)
         )
 
+    def retrieve_own_organization(self) -> Organization:
+        """Retrive organization of currently logged in user."""
+        return self.event_loop.run_until_complete(self.elis_api_client.retrieve_own_organization())
+
     # ##### SCHEMAS #####
     def list_all_schemas(
         self,

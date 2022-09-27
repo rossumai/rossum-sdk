@@ -228,18 +228,25 @@ class ElisAPIClientSync:
             )
         )
 
-    def retrieve_annotation(self, annotation_id: int) -> Annotation:
+    def retrieve_annotation(self, annotation_id: int, sideloads: Sequence[str] = ()) -> Annotation:
         """https://elis.rossum.ai/api/docs/#retrieve-an-annotation"""
         return self.event_loop.run_until_complete(
-            self.elis_api_client.retrieve_annotation(annotation_id)
+            self.elis_api_client.retrieve_annotation(annotation_id, sideloads)
         )
 
     def poll_annotation(
-        self, annotation_id: int, predicate: Callable[[Annotation], bool], sleep_s: int = 3
+        self,
+        annotation_id: int,
+        predicate: Callable[[Annotation], bool],
+        sleep_s: int = 3,
+        sideloads: Sequence[str] = (),
     ) -> Annotation:
-        """https://elis.rossum.ai/api/docs/#retrieve-an-annotation"""
+        """Poll on annotation until predicate is true.
+
+        Sideloading is done only once after the predicate becomes true to avoid spaming the server.
+        """
         return self.event_loop.run_until_complete(
-            self.elis_api_client.poll_annotation(annotation_id, predicate, sleep_s)
+            self.elis_api_client.poll_annotation(annotation_id, predicate, sleep_s, sideloads)
         )
 
     def update_annotation(self, annotation_id: int, data: Dict[str, Any]) -> Annotation:

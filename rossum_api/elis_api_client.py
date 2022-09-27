@@ -232,19 +232,38 @@ class ElisAPIClient:
         ):
             yield dacite.from_dict(Annotation, a)
 
-    async def retrieve_annotation(self, annotation_id: int) -> Annotation:
+    async def retrieve_annotation(
+        self, annotation_id: int, sideloads: Sequence[str] = ()
+    ) -> Annotation:
         """https://elis.rossum.ai/api/docs/#retrieve-an-annotation"""
         annotation_json = await self._http_client.fetch_one("annotations", annotation_id)
+        if sideloads:
+            await self._sideload(annotation_json, sideloads)
         return dacite.from_dict(Annotation, annotation_json)
 
     async def poll_annotation(
-        self, annotation_id: int, predicate: Callable[[Annotation], bool], sleep_s: int = 3
+        self,
+        annotation_id: int,
+        predicate: Callable[[Annotation], bool],
+        sleep_s: int = 3,
+        sideloads: Sequence[str] = (),
     ) -> Annotation:
-        annotation = await self.retrieve_annotation(annotation_id)
+        """Poll on annotation until predicate is true.
+
+        Sideloading is done only once after the predicate becomes true to avoid spaming the server.
+        """
+        annotation_json = await self._http_client.fetch_one("annotations", annotation_id)
+        # Parse early, we want predicate to work with Annotation instances for convenience
+        annotation = dacite.from_dict(Annotation, annotation_json)
+
         while not predicate(annotation):
             await asyncio.sleep(sleep_s)
-            annotation = await self.retrieve_annotation(annotation_id)
-        return annotation
+            annotation_json = await self._http_client.fetch_one("annotations", annotation_id)
+            annotation = dacite.from_dict(Annotation, annotation_json)
+
+        if sideloads:
+            await self._sideload(annotation_json, sideloads)
+        return dacite.from_dict(Annotation, annotation_json)
 
     async def update_annotation(self, annotation_id: int, data: Dict[str, Any]) -> Annotation:
         """https://elis.rossum.ai/api/docs/#update-an-annotation"""
@@ -345,3 +364,18 @@ class ElisAPIClient:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles"""
         async for u in self._http_client.fetch_all("groups", ordering, **filters):
             yield dacite.from_dict(UserRole, u)
+
+    async def _sideload(self, resource: Dict[str, Any], sideloads: Sequence[str]) -> None:
+        """The API does not support sideloading when fetching a single resource, we need to load
+        it manually.
+        """
+        sideload_tasks = [
+            asyncio.create_task(self._http_client.request_json("GET", resource[sideload]))
+            for sideload in sideloads
+        ]
+        sideloaded_jsons = await asyncio.gather(*sideload_tasks)
+
+        for sideload, sideloaded_json in zip(sideloads, sideloaded_jsons):
+            if sideload == "content":  # Content (i.e. list of sections is wrapped in a dict)
+                sideloaded_json = sideloaded_json["content"]
+            resource[sideload] = sideloaded_json

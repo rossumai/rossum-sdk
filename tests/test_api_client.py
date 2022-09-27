@@ -532,6 +532,15 @@ async def test_authenticate_generator_if_needed_no_token(client, httpx_mock):
 
 
 @pytest.mark.asyncio
+async def test_request_json_full_url(client, httpx_mock):
+    httpx_mock.add_response(
+        method="GET", url="https://elis.rossum.ai/api/v1/workspaces/123", json=WORKSPACES[0]
+    )
+    data = await client.request_json("GET", "https://elis.rossum.ai/api/v1/workspaces/123")
+    assert data == WORKSPACES[0]
+
+
+@pytest.mark.asyncio
 async def test_request_repacks_exception(client, httpx_mock):
     httpx_mock.add_response(
         method="GET",

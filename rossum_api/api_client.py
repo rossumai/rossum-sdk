@@ -109,8 +109,7 @@ class APIClient:
 
     async def fetch_one(self, resource: str, id_: Union[int, str]) -> Dict[str, Any]:
         """Retrieve a single object in a specific resource."""
-        response = await self._request("GET", f"{resource}/{id_}")
-        return response.json()
+        return await self.request_json("GET", f"{resource}/{id_}")
 
     async def fetch_all(
         self,
@@ -174,8 +173,7 @@ class APIClient:
         query_params: Dict[str, Any],
         sideload_groups: Sequence[str],
     ) -> Tuple[List[Dict[str, Any]], int]:
-        response = await self._request(method, resource, params=query_params)
-        data = response.json()
+        data = await self.request_json(method, resource, params=query_params)
         self._embed_sideloads(data, sideload_groups)
         return data["results"], data["pagination"]["total_pages"]
 
@@ -217,18 +215,15 @@ class APIClient:
 
     async def create(self, resource: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """Create a new object."""
-        response = await self._request("POST", resource, json=data)
-        return response.json()
+        return await self.request_json("POST", resource, json=data)
 
     async def replace(self, resource: str, id_: int, data: Dict[str, Any]) -> Dict[str, Any]:
         "Modify an entire existing object."
-        response = await self._request("PUT", f"{resource}/{id_}", json=data)
-        return response.json()
+        return await self.request_json("PUT", f"{resource}/{id_}", json=data)
 
     async def update(self, resource: str, id_: int, data: Dict[str, Any]) -> Dict[str, Any]:
         "Modify particular fields of an existing object."
-        response = await self._request("PATCH", f"{resource}/{id_}", json=data)
-        return response.json()
+        return await self.request_json("PATCH", f"{resource}/{id_}", json=data)
 
     async def delete(self, resource: str, id_: int) -> None:
         """Delete a particular object.
@@ -268,8 +263,7 @@ class APIClient:
             files["values"] = ("", json.dumps(values).encode("utf-8"), "application/json")
         if metadata is not None:
             files["metadata"] = ("", json.dumps(metadata).encode("utf-8"), "application/json")
-        response = await self._request("POST", url, files=files)
-        return response.json()
+        return await self.request_json("POST", url, files=files)
 
     async def export(
         self,
@@ -299,6 +293,10 @@ class APIClient:
             async for bytes_chunk in self._stream(method, url, params=query_params):
                 yield bytes_chunk
 
+    async def request_json(self, method: str, *args, **kwargs) -> Dict[str, Any]:
+        response = await self._request(method, *args, **kwargs)
+        return response.json()
+
     async def _authenticate(self) -> None:
         response = await self.client.post(
             f"{self.base_url}/auth/login",
@@ -308,10 +306,17 @@ class APIClient:
         self.token = response.json()["key"]
 
     @authenticate_if_needed
-    async def _request(self, method: str, url_part: str, *args, **kwargs) -> httpx.Response:
-        """Performs the actual HTTP call and does error handling."""
+    async def _request(self, method: str, url: str, *args, **kwargs) -> httpx.Response:
+        """Performs the actual HTTP call and does error handling.
+
+        Arguments:
+        ----------
+        url
+            base URL is prepended with base_url if needed
+        """
         # Do not force the calling site to alway prepend the base URL
-        url = f"{self.base_url}/{url_part}"
+        if not url.startswith("https://"):
+            url = f"{self.base_url}/{url}"
         headers = kwargs.pop("headers", {})
         headers["Authorization"] = f"token {self.token}"
         response = await self.client.request(method, url, headers=headers, *args, **kwargs)
@@ -319,10 +324,11 @@ class APIClient:
         return response
 
     @authenticate_generator_if_needed
-    async def _stream(self, method: str, url_part: str, *args, **kwargs) -> AsyncIterator[bytes]:
+    async def _stream(self, method: str, url: str, *args, **kwargs) -> AsyncIterator[bytes]:
         """Performs a streaming HTTP call"""
         # Do not force the calling site to alway prepend the base URL
-        url = f"{self.base_url}/{url_part}"
+        if not url.startswith("https://"):
+            url = f"{self.base_url}/{url}"
         headers = kwargs.pop("headers", {})
         headers["Authorization"] = f"token {self.token}"
         async with self.client.stream(method, url, headers=headers, *args, **kwargs) as response:

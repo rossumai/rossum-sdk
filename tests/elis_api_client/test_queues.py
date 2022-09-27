@@ -22,7 +22,7 @@ def dummy_queue():
         "rir_url": "https://all.rir.rossum.ai",
         "rir_params": None,
         "dedicated_engine": None,
-        "generic_engine": None,
+        "generic_engine": "https://api.elis.develop.r8.lol/v1/generic_engines/1",
         "counts": {
             "importing": 0,
             "split": 0,
@@ -69,13 +69,9 @@ def dummy_annotation():
         "status": "exported",
         "arrived_at": "2019-10-13T21:33:01.509886Z",
         "exported_at": "2019-10-14T12:00:01.000133Z",
-        "document": {
-            "url": "https://elis.rossum.ai/api/v1/documents/315877",
-            "file_name": "template_invoice.pdf",
-            "file": "https://elis.rossum.ai/api/v1/documents/315877/content",
-        },
+        "document": "https://elis.rossum.ai/api/v1/documents/315877",
         "modifier": None,
-        "schema": {"url": "https://elis.rossum.ai/api/v1/schemas/31336"},
+        "schema": "https://elis.rossum.ai/api/v1/schemas/31336",
         "metadata": {},
         "content": [
             {

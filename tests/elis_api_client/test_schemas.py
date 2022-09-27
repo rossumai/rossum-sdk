@@ -25,10 +25,8 @@ def dummy_schema():
                         "constraints": {"required": False},
                         "default_value": None,
                     },
-                    ...,
                 ],
             },
-            ...,
         ],
         "metadata": {},
     }

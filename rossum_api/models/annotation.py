@@ -2,7 +2,7 @@ import datetime as dt
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
-from rossum_api.models.automation_blocker import AutomationBlocker, AutomationBlockerContent
+from rossum_api.models.automation_blocker import AutomationBlocker
 from rossum_api.models.document import Document
 from rossum_api.models.user import User
 
@@ -18,8 +18,8 @@ class Annotation:
     url: str
     status: str
     schema: str
-    modifier: Union[str, User]
-    content: Union[List[AutomationBlockerContent], str]
+    modifier: Optional[Union[str, User]]
+    content: Union[List[Dict[str, Any]], str]  # No dataclass for Annotation content yet
     id: Optional[int] = None
     queue: Optional[str] = None
     creator: Optional[str] = None
@@ -30,7 +30,7 @@ class Annotation:
     has_email_thread_with_replies: bool = False
     has_email_thread_with_new_replies: bool = False
     suggested_edit: Optional[str] = None
-    messages: List[Dict] = field(default_factory=list)
+    messages: Optional[List[dict]] = None
     time_spent: float = 0
     relations: List[str] = field(default_factory=list)
     pages: List[str] = field(default_factory=list)

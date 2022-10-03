@@ -27,11 +27,6 @@ from rossum_api.models.user import User
 from rossum_api.models.user_role import UserRole
 from rossum_api.models.workspace import Workspace
 
-if typing.TYPE_CHECKING:
-    APIObject = Union[
-        Annotation, Connector, Hook, Inbox, Organization, Queue, Schema, UserRole, Workspace
-    ]
-
 
 class ExportFileFormats(Enum):
     CSV = "csv"
@@ -56,7 +51,8 @@ class ElisAPIClient:
 
     # ##### QUEUE #####
     async def retrieve_queue(
-        self, queue_id: int, sideloads: Optional[Sequence[APIObject]] = None
+        self,
+        queue_id: int,
     ) -> Queue:
         """https://elis.rossum.ai/api/docs/#retrieve-a-queue-2"""
         queue = await self._http_client.fetch_one("queues", queue_id)
@@ -66,24 +62,19 @@ class ElisAPIClient:
     async def list_all_queues(
         self,
         ordering: Sequence[str] = (),
-        sideloads: Optional[Sequence[APIObject]] = None,
         **filters: Any,
     ) -> AsyncIterable[Queue]:
         """https://elis.rossum.ai/api/docs/#list-all-queues"""
         async for q in self._http_client.fetch_all("queues", ordering, **filters):
             yield dict_to_dataclass(Queue, q)
 
-    async def create_new_queue(
-        self, data: Dict[str, Any], sideloads: Optional[Sequence[APIObject]] = None
-    ) -> Queue:
+    async def create_new_queue(self, data: Dict[str, Any]) -> Queue:
         """https://elis.rossum.ai/api/docs/#create-new-queue"""
         queue = await self._http_client.create("queues", data)
 
         return dict_to_dataclass(Queue, queue)
 
-    async def delete_queue(
-        self, queue_id: int, sideloads: Optional[Sequence[APIObject]] = None
-    ) -> None:
+    async def delete_queue(self, queue_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-queue"""
         return await self._http_client.delete("queues", queue_id)
 
@@ -141,16 +132,13 @@ class ElisAPIClient:
     async def list_all_organizations(
         self,
         ordering: Sequence[str] = (),
-        sideloads: Optional[Sequence[APIObject]] = None,
         **filters: Any,
     ):
         """https://elis.rossum.ai/api/docs/#list-all-organizations"""
         async for o in self._http_client.fetch_all("organizations", ordering, **filters):
             yield dict_to_dataclass(Organization, o)
 
-    async def retrieve_organization(
-        self, org_id: int, sideloads: Optional[Sequence[APIObject]] = None
-    ) -> Organization:
+    async def retrieve_organization(self, org_id: int) -> Organization:
         """https://elis.rossum.ai/api/docs/#retrieve-an-organization"""
         organization: Dict[Any, Any] = await self._http_client.fetch_one("organizations", org_id)
 
@@ -160,32 +148,25 @@ class ElisAPIClient:
     async def list_all_schemas(
         self,
         ordering: Sequence[str] = (),
-        sideloads: Optional[Sequence[APIObject]] = None,
         **filters: Any,
     ) -> AsyncIterable[Schema]:
         """https://elis.rossum.ai/api/docs/#list-all-schemas"""
         async for s in self._http_client.fetch_all("schemas", ordering, **filters):
             yield dict_to_dataclass(Schema, s)
 
-    async def retrieve_schema(
-        self, schema_id: int, sideloads: Optional[Sequence[APIObject]] = None
-    ) -> Schema:
+    async def retrieve_schema(self, schema_id: int) -> Schema:
         """https://elis.rossum.ai/api/docs/#retrieve-a-schema"""
         schema: Dict[Any, Any] = await self._http_client.fetch_one("schemas", schema_id)
 
         return dict_to_dataclass(Schema, schema)
 
-    async def create_new_schema(
-        self, data: Dict[str, Any], sideloads: Optional[Sequence[APIObject]] = None
-    ) -> Schema:
+    async def create_new_schema(self, data: Dict[str, Any]) -> Schema:
         """https://elis.rossum.ai/api/docs/#create-a-new-schema"""
         queue = await self._http_client.create("schemas", data)
 
         return dict_to_dataclass(Schema, queue)
 
-    async def delete_schema(
-        self, schema_id, sideloads: Optional[Sequence[APIObject]] = None
-    ) -> None:
+    async def delete_schema(self, schema_id) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-schema"""
         return await self._http_client.delete("schemas", schema_id)
 
@@ -193,24 +174,19 @@ class ElisAPIClient:
     async def list_all_users(
         self,
         ordering: Sequence[str] = (),
-        sideloads: Optional[Sequence[APIObject]] = None,
         **filters: Any,
     ) -> AsyncIterable[User]:
         """https://elis.rossum.ai/api/docs/#list-all-users"""
         async for u in self._http_client.fetch_all("users", ordering, **filters):
             yield dict_to_dataclass(User, u)
 
-    async def retrieve_user(
-        self, user_id: int, sideloads: Optional[Sequence[APIObject]] = None
-    ) -> User:
+    async def retrieve_user(self, user_id: int) -> User:
         """https://elis.rossum.ai/api/docs/#retrieve-a-user-2"""
         user = await self._http_client.fetch_one("users", user_id)
 
         return dict_to_dataclass(User, user)
 
-    async def create_new_user(
-        self, data: Dict[str, Any], sideloads: Optional[Sequence[APIObject]] = None
-    ) -> User:
+    async def create_new_user(self, data: Dict[str, Any]) -> User:
         """https://elis.rossum.ai/api/docs/#create-new-user"""
         user = await self._http_client.create("users", data)
 
@@ -266,9 +242,7 @@ class ElisAPIClient:
                     ]
             yield annotation
 
-    async def retrieve_annotation(
-        self, annotation_id: int, sideloads: Optional[Sequence[APIObject]] = None
-    ) -> Annotation:
+    async def retrieve_annotation(self, annotation_id: int) -> Annotation:
         """https://elis.rossum.ai/api/docs/#retrieve-an-annotation"""
         annotation = await self._http_client.fetch_one("annotations", annotation_id)
 
@@ -299,39 +273,30 @@ class ElisAPIClient:
     async def list_all_workspaces(
         self,
         ordering: Sequence[str] = (),
-        sideloads: Optional[Sequence[APIObject]] = None,
         **filters: Any,
     ) -> AsyncIterable[Workspace]:
         """https://elis.rossum.ai/api/docs/#list-all-workspaces"""
         async for w in self._http_client.fetch_all("workspaces", ordering, **filters):
             yield dict_to_dataclass(Workspace, w)
 
-    async def retrieve_workspace(
-        self, workspace_id, sideloads: Optional[Sequence[APIObject]] = None
-    ) -> Workspace:
+    async def retrieve_workspace(self, workspace_id) -> Workspace:
         """https://elis.rossum.ai/api/docs/#retrieve-a-workspace"""
         workspace = await self._http_client.fetch_one("workspaces", workspace_id)
 
         return dict_to_dataclass(Workspace, workspace)
 
-    async def create_new_workspace(
-        self, data: Dict[str, Any], sideloads: Optional[Sequence[APIObject]] = None
-    ) -> Workspace:
+    async def create_new_workspace(self, data: Dict[str, Any]) -> Workspace:
         """https://elis.rossum.ai/api/docs/#create-a-new-workspace"""
         workspace = await self._http_client.create("workspaces", data)
 
         return dict_to_dataclass(Workspace, workspace)
 
-    async def delete_workspace(
-        self, workspace_id, sideloads: Optional[Sequence[APIObject]] = None
-    ) -> None:
+    async def delete_workspace(self, workspace_id) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-workspace"""
         return await self._http_client.delete("workspaces", workspace_id)
 
     # ##### INBOX #####
-    async def create_new_inbox(
-        self, data: Dict[str, Any], sideloads: Optional[Sequence[APIObject]] = None
-    ) -> Inbox:
+    async def create_new_inbox(self, data: Dict[str, Any]) -> Inbox:
         """https://elis.rossum.ai/api/docs/#create-a-new-inbox"""
         inbox = await self._http_client.create("inboxes", data)
 
@@ -341,7 +306,6 @@ class ElisAPIClient:
     async def list_all_connectors(
         self,
         ordering: Sequence[str] = (),
-        sideloads: Optional[Sequence[APIObject]] = None,
         **filters: Any,
     ) -> AsyncIterable[Connector]:
         """https://elis.rossum.ai/api/docs/#list-all-connectors"""
@@ -349,17 +313,13 @@ class ElisAPIClient:
         async for c in self._http_client.fetch_all("connectors", ordering, **filters):
             yield dict_to_dataclass(Connector, c)
 
-    async def retrieve_connector(
-        self, connector_id, sideloads: Optional[Sequence[APIObject]] = None
-    ) -> Connector:
+    async def retrieve_connector(self, connector_id) -> Connector:
         """https://elis.rossum.ai/api/docs/#retrieve-a-connector"""
         connector = await self._http_client.fetch_one("connectors", connector_id)
 
         return dict_to_dataclass(Connector, connector)
 
-    async def create_new_connector(
-        self, data: Dict[str, Any], sideloads: Optional[Sequence[APIObject]] = None
-    ) -> Connector:
+    async def create_new_connector(self, data: Dict[str, Any]) -> Connector:
         """https://elis.rossum.ai/api/docs/#create-a-new-connector"""
         connector = await self._http_client.create("connectors", data)
 
@@ -369,22 +329,19 @@ class ElisAPIClient:
     async def list_all_hooks(
         self,
         ordering: Sequence[str] = (),
-        sideloads: Optional[Sequence[APIObject]] = None,
         **filters: Any,
     ) -> AsyncIterable[Hook]:
         """https://elis.rossum.ai/api/docs/#list-all-hooks"""
         async for h in self._http_client.fetch_all("hooks", ordering, **filters):
             yield dict_to_dataclass(Hook, h)
 
-    async def retrieve_hook(self, hook_id, sideloads: Optional[Sequence[APIObject]] = None) -> Hook:
+    async def retrieve_hook(self, hook_id) -> Hook:
         """https://elis.rossum.ai/api/docs/#retrieve-a-hook"""
         hook = await self._http_client.fetch_one("hooks", hook_id)
 
         return dict_to_dataclass(Hook, hook)
 
-    async def create_new_hook(
-        self, data: Dict[str, Any], sideloads: Optional[Sequence[APIObject]] = None
-    ) -> Hook:
+    async def create_new_hook(self, data: Dict[str, Any]) -> Hook:
         """https://elis.rossum.ai/api/docs/#create-a-new-hook"""
         hook = await self._http_client.create("hooks", data)
 
@@ -394,7 +351,6 @@ class ElisAPIClient:
     async def list_all_user_roles(
         self,
         ordering: Sequence[str] = (),
-        sideloads: Optional[Sequence[APIObject]] = None,
         **filters: Any,
     ) -> AsyncIterable[UserRole]:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles"""

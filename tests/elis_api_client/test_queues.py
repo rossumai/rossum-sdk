@@ -22,7 +22,7 @@ def dummy_queue():
         "rir_url": "https://all.rir.rossum.ai",
         "rir_params": None,
         "dedicated_engine": None,
-        "generic_engine": None,
+        "generic_engine": "https://api.elis.develop.r8.lol/v1/generic_engines/1",
         "counts": {
             "importing": 0,
             "split": 0,
@@ -69,13 +69,9 @@ def dummy_annotation():
         "status": "exported",
         "arrived_at": "2019-10-13T21:33:01.509886Z",
         "exported_at": "2019-10-14T12:00:01.000133Z",
-        "document": {
-            "url": "https://elis.rossum.ai/api/v1/documents/315877",
-            "file_name": "template_invoice.pdf",
-            "file": "https://elis.rossum.ai/api/v1/documents/315877/content",
-        },
+        "document": "https://elis.rossum.ai/api/v1/documents/315877",
         "modifier": None,
-        "schema": {"url": "https://elis.rossum.ai/api/v1/schemas/31336"},
+        "schema": "https://elis.rossum.ai/api/v1/schemas/31336",
         "metadata": {},
         "content": [
             {
@@ -145,7 +141,34 @@ class TestQueues:
 
     async def test_import_document(self, elis_client):
         client, http_client = elis_client
-        http_client.upload.return_value = None
+
+        results = [
+            {
+                "results": [
+                    {
+                        "annotation": "https://elis.rossum.ai/api/v1/annotations/111",
+                        "document": "https://elis.rossum.ai/api/v1/documents/315",
+                    }
+                ]
+            },
+            {
+                "results": [
+                    {
+                        "annotation": "https://elis.rossum.ai/api/v1/annotations/222",
+                        "document": "https://elis.rossum.ai/api/v1/documents/316",
+                    }
+                ]
+            },
+        ]
+
+        async def upload(resource, id_, fp, filename, *args, **kwargs):
+            # asyncio.gather returns results in same order as the submitted tasks, however, it's
+            # not guaranteed which request will fire first, we need to return correct result for
+            # each file so the order of annotation_ids actually match. We cannot use simple
+            # http_client.upload.side_effect = [list of results]
+            return results[1] if "🎁" in filename else results[0]
+
+        http_client.upload.side_effect = upload
 
         open_mock_first = MagicMock()
         open_mock_second = MagicMock()
@@ -157,9 +180,11 @@ class TestQueues:
                 ("tests/data/sample_invoice.pdf", "document.pdf"),
                 ("tests/data/sample_invoice.pdf", "document 🎁.pdf"),
             ]
-            await client.import_document(
+            annotation_ids = await client.import_document(
                 queue_id=123, files=files, values={"a": 1}, metadata={"b": 2}
             )
+
+        assert annotation_ids == [111, 222]
         calls = [
             call("queues", 123, open_mock_first, "document.pdf", {"a": 1}, {"b": 2}),
             call("queues", 123, open_mock_second, "document 🎁.pdf", {"a": 1}, {"b": 2}),
@@ -236,7 +261,34 @@ class TestQueuesSync:
 
     def test_import_document(self, elis_client_sync):
         client, http_client = elis_client_sync
-        http_client.upload.return_value = None
+
+        results = [
+            {
+                "results": [
+                    {
+                        "annotation": "https://elis.rossum.ai/api/v1/annotations/111",
+                        "document": "https://elis.rossum.ai/api/v1/documents/315",
+                    }
+                ]
+            },
+            {
+                "results": [
+                    {
+                        "annotation": "https://elis.rossum.ai/api/v1/annotations/222",
+                        "document": "https://elis.rossum.ai/api/v1/documents/316",
+                    }
+                ]
+            },
+        ]
+
+        async def upload(resource, id_, fp, filename, *args, **kwargs):
+            # asyncio.gather returns results in same order as the submitted tasks, however, it's
+            # not guaranteed which request will fire first, we need to return correct result for
+            # each file so the order of annotation_ids actually match. We cannot use simple
+            # http_client.upload.side_effect = [list of results]
+            return results[1] if "🎁" in filename else results[0]
+
+        http_client.upload.side_effect = upload
 
         open_mock_first = MagicMock()
         open_mock_second = MagicMock()
@@ -248,7 +300,11 @@ class TestQueuesSync:
                 ("tests/data/sample_invoice.pdf", "document.pdf"),
                 ("tests/data/sample_invoice.pdf", "document 🎁.pdf"),
             ]
-            client.import_document(queue_id=123, files=files, values={"a": 1}, metadata={"b": 2})
+            annotation_ids = client.import_document(
+                queue_id=123, files=files, values={"a": 1}, metadata={"b": 2}
+            )
+
+        assert annotation_ids == [111, 222]
         calls = [
             call("queues", 123, open_mock_first, "document.pdf", {"a": 1}, {"b": 2}),
             call("queues", 123, open_mock_second, "document 🎁.pdf", {"a": 1}, {"b": 2}),

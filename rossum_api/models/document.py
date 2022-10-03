@@ -9,8 +9,8 @@ class Document:
     id: int
     url: str
     s3_name: str
-    parent: str
-    email: str
+    parent: Optional[str]
+    email: Optional[str]
     mime_type: str
     creator: str
     created_at: str

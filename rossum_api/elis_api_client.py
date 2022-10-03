@@ -6,13 +6,12 @@ from enum import Enum
 
 import aiofiles
 
-from rossum_api.models.automation_blocker import AutomationBlocker, AutomationBlockerContent
-from rossum_api.models.document import Document
-
 if typing.TYPE_CHECKING:
     import pathlib
 
-    from typing import Any, AsyncIterable, Callable, Dict, Optional, Sequence, Tuple, Union
+    from typing import Any, AsyncIterable, Callable, Dict, Optional, Sequence, Tuple, Union, List
+
+import dacite
 
 from rossum_api.api_client import APIClient
 from rossum_api.models.annotation import Annotation
@@ -20,7 +19,6 @@ from rossum_api.models.connector import Connector
 from rossum_api.models.hook import Hook
 from rossum_api.models.inbox import Inbox
 from rossum_api.models.organization import Organization
-from rossum_api.models.parsing import dict_to_dataclass
 from rossum_api.models.queue import Queue
 from rossum_api.models.schema import Schema
 from rossum_api.models.user import User
@@ -57,7 +55,7 @@ class ElisAPIClient:
         """https://elis.rossum.ai/api/docs/#retrieve-a-queue-2"""
         queue = await self._http_client.fetch_one("queues", queue_id)
 
-        return dict_to_dataclass(Queue, queue)
+        return dacite.from_dict(Queue, queue)
 
     async def list_all_queues(
         self,
@@ -66,13 +64,13 @@ class ElisAPIClient:
     ) -> AsyncIterable[Queue]:
         """https://elis.rossum.ai/api/docs/#list-all-queues"""
         async for q in self._http_client.fetch_all("queues", ordering, **filters):
-            yield dict_to_dataclass(Queue, q)
+            yield dacite.from_dict(Queue, q)
 
     async def create_new_queue(self, data: Dict[str, Any]) -> Queue:
         """https://elis.rossum.ai/api/docs/#create-new-queue"""
         queue = await self._http_client.create("queues", data)
 
-        return dict_to_dataclass(Queue, queue)
+        return dacite.from_dict(Queue, queue)
 
     async def delete_queue(self, queue_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-queue"""
@@ -84,7 +82,7 @@ class ElisAPIClient:
         files: Sequence[Tuple[Union[str, pathlib.Path], str]],
         values: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-    ) -> None:
+    ) -> List[int]:
         """https://elis.rossum.ai/api/docs/#import-a-document
 
         arguments
@@ -95,16 +93,26 @@ class ElisAPIClient:
                 metadata will be set to newly created annotation object
             values
                 may be used to initialize datapoint values by setting the value of rir_field_names in the schema
+
+        returns
+        -------
+            annotation_ids
+                list of IDs of created annotations, respects the order of `files` argument
         """
-        tasks = set()
-        for file, filename in files:
-            tasks.add(asyncio.create_task(self._upload(file, queue_id, filename, values, metadata)))
+        tasks = [
+            asyncio.create_task(self._upload(file, queue_id, filename, values, metadata))
+            for file, filename in files
+        ]
 
-        await asyncio.gather(*tasks)
+        return await asyncio.gather(*tasks)
 
-    async def _upload(self, file, queue_id, filename, values, metadata):
+    async def _upload(self, file, queue_id, filename, values, metadata) -> int:
         async with aiofiles.open(file, "rb") as fp:
-            await self._http_client.upload("queues", queue_id, fp, filename, values, metadata)
+            results = await self._http_client.upload(
+                "queues", queue_id, fp, filename, values, metadata
+            )
+            (result,) = results["results"]  # We're uploading 1 file in 1 request, we can unpack
+            return int(result["annotation"].split("/")[-1])
 
     async def export_annotations_to_json(
         self,
@@ -116,7 +124,7 @@ class ElisAPIClient:
         """
         async for chunk in self._http_client.export("queues", queue_id, "json"):
             # JSON export can be translated directly to Annotation object
-            yield dict_to_dataclass(Annotation, typing.cast(typing.Dict, chunk))
+            yield dacite.from_dict(Annotation, typing.cast(typing.Dict, chunk))
 
     async def export_annotations_to_file(
         self, queue_id: int, export_format: ExportFileFormats
@@ -136,13 +144,19 @@ class ElisAPIClient:
     ):
         """https://elis.rossum.ai/api/docs/#list-all-organizations"""
         async for o in self._http_client.fetch_all("organizations", ordering, **filters):
-            yield dict_to_dataclass(Organization, o)
+            yield dacite.from_dict(Organization, o)
 
     async def retrieve_organization(self, org_id: int) -> Organization:
         """https://elis.rossum.ai/api/docs/#retrieve-an-organization"""
         organization: Dict[Any, Any] = await self._http_client.fetch_one("organizations", org_id)
 
-        return dict_to_dataclass(Organization, organization)
+        return dacite.from_dict(Organization, organization)
+
+    async def retrieve_own_organization(self) -> Organization:
+        """Retrive organization of currently logged in user."""
+        user: Dict[Any, Any] = await self._http_client.fetch_one("auth", "user")
+        organization_id = user["organization"].split("/")[-1]
+        return await self.retrieve_organization(organization_id)
 
     # ##### SCHEMAS #####
     async def list_all_schemas(
@@ -152,19 +166,19 @@ class ElisAPIClient:
     ) -> AsyncIterable[Schema]:
         """https://elis.rossum.ai/api/docs/#list-all-schemas"""
         async for s in self._http_client.fetch_all("schemas", ordering, **filters):
-            yield dict_to_dataclass(Schema, s)
+            yield dacite.from_dict(Schema, s)
 
     async def retrieve_schema(self, schema_id: int) -> Schema:
         """https://elis.rossum.ai/api/docs/#retrieve-a-schema"""
         schema: Dict[Any, Any] = await self._http_client.fetch_one("schemas", schema_id)
 
-        return dict_to_dataclass(Schema, schema)
+        return dacite.from_dict(Schema, schema)
 
     async def create_new_schema(self, data: Dict[str, Any]) -> Schema:
         """https://elis.rossum.ai/api/docs/#create-a-new-schema"""
         queue = await self._http_client.create("schemas", data)
 
-        return dict_to_dataclass(Schema, queue)
+        return dacite.from_dict(Schema, queue)
 
     async def delete_schema(self, schema_id) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-schema"""
@@ -178,19 +192,19 @@ class ElisAPIClient:
     ) -> AsyncIterable[User]:
         """https://elis.rossum.ai/api/docs/#list-all-users"""
         async for u in self._http_client.fetch_all("users", ordering, **filters):
-            yield dict_to_dataclass(User, u)
+            yield dacite.from_dict(User, u)
 
     async def retrieve_user(self, user_id: int) -> User:
         """https://elis.rossum.ai/api/docs/#retrieve-a-user-2"""
         user = await self._http_client.fetch_one("users", user_id)
 
-        return dict_to_dataclass(User, user)
+        return dacite.from_dict(User, user)
 
     async def create_new_user(self, data: Dict[str, Any]) -> User:
         """https://elis.rossum.ai/api/docs/#create-new-user"""
         user = await self._http_client.create("users", data)
 
-        return dict_to_dataclass(User, user)
+        return dacite.from_dict(User, user)
 
     # TODO: specific method in APICLient
     def change_user_password(self, new_password: str) -> dict:
@@ -216,58 +230,52 @@ class ElisAPIClient:
         async for a in self._http_client.fetch_all(
             "annotations", ordering, sideloads, content_schema_ids, **filters
         ):
-            annotation = dict_to_dataclass(Annotation, a)
-            if sideloads:
-                if "modifiers" in sideloads:
-                    if a["modifier"]:
-                        annotation.modifier = dict_to_dataclass(User, a["modifier"])
-                if "documents" in sideloads:
-                    if a["document"]:
-                        document = dict_to_dataclass(Document, a["document"])
-                        annotation.document = document
-                if "automation_blockers" in sideloads:
-                    if a["automation_blocker"]:
-                        automation_blocker = dict_to_dataclass(
-                            AutomationBlocker, a["automation_blocker"]
-                        )
-                        automation_blocker.content = [
-                            dict_to_dataclass(AutomationBlockerContent, content)
-                            for content in a["automation_blocker"]["content"]
-                        ]
-                        annotation.automation_blocker = automation_blocker
-                if "content" in sideloads:
-                    annotation.content = [
-                        dict_to_dataclass(AutomationBlockerContent, content)
-                        for content in a["content"]
-                    ]
-            yield annotation
+            yield dacite.from_dict(Annotation, a)
 
-    async def retrieve_annotation(self, annotation_id: int) -> Annotation:
+    async def retrieve_annotation(
+        self, annotation_id: int, sideloads: Sequence[str] = ()
+    ) -> Annotation:
         """https://elis.rossum.ai/api/docs/#retrieve-an-annotation"""
-        annotation = await self._http_client.fetch_one("annotations", annotation_id)
-
-        return dict_to_dataclass(Annotation, annotation)
+        annotation_json = await self._http_client.fetch_one("annotations", annotation_id)
+        if sideloads:
+            await self._sideload(annotation_json, sideloads)
+        return dacite.from_dict(Annotation, annotation_json)
 
     async def poll_annotation(
-        self, annotation_id: int, predicate: Callable[[Annotation], bool], sleep_s: int = 3
+        self,
+        annotation_id: int,
+        predicate: Callable[[Annotation], bool],
+        sleep_s: int = 3,
+        sideloads: Sequence[str] = (),
     ) -> Annotation:
-        annotation = await self.retrieve_annotation(annotation_id)
+        """Poll on annotation until predicate is true.
+
+        Sideloading is done only once after the predicate becomes true to avoid spaming the server.
+        """
+        annotation_json = await self._http_client.fetch_one("annotations", annotation_id)
+        # Parse early, we want predicate to work with Annotation instances for convenience
+        annotation = dacite.from_dict(Annotation, annotation_json)
+
         while not predicate(annotation):
             await asyncio.sleep(sleep_s)
-            annotation = await self.retrieve_annotation(annotation_id)
-        return annotation
+            annotation_json = await self._http_client.fetch_one("annotations", annotation_id)
+            annotation = dacite.from_dict(Annotation, annotation_json)
+
+        if sideloads:
+            await self._sideload(annotation_json, sideloads)
+        return dacite.from_dict(Annotation, annotation_json)
 
     async def update_annotation(self, annotation_id: int, data: Dict[str, Any]) -> Annotation:
         """https://elis.rossum.ai/api/docs/#update-an-annotation"""
         annotation = await self._http_client.replace("annotations", annotation_id, data)
 
-        return dict_to_dataclass(Annotation, annotation)
+        return dacite.from_dict(Annotation, annotation)
 
     async def update_part_annotation(self, annotation_id: int, data: Dict[str, Any]) -> Annotation:
         """https://elis.rossum.ai/api/docs/#update-part-of-an-annotation"""
         annotation = await self._http_client.update("annotations", annotation_id, data)
 
-        return dict_to_dataclass(Annotation, annotation)
+        return dacite.from_dict(Annotation, annotation)
 
     # ##### WORKSPACES #####
     async def list_all_workspaces(
@@ -277,19 +285,19 @@ class ElisAPIClient:
     ) -> AsyncIterable[Workspace]:
         """https://elis.rossum.ai/api/docs/#list-all-workspaces"""
         async for w in self._http_client.fetch_all("workspaces", ordering, **filters):
-            yield dict_to_dataclass(Workspace, w)
+            yield dacite.from_dict(Workspace, w)
 
     async def retrieve_workspace(self, workspace_id) -> Workspace:
         """https://elis.rossum.ai/api/docs/#retrieve-a-workspace"""
         workspace = await self._http_client.fetch_one("workspaces", workspace_id)
 
-        return dict_to_dataclass(Workspace, workspace)
+        return dacite.from_dict(Workspace, workspace)
 
     async def create_new_workspace(self, data: Dict[str, Any]) -> Workspace:
         """https://elis.rossum.ai/api/docs/#create-a-new-workspace"""
         workspace = await self._http_client.create("workspaces", data)
 
-        return dict_to_dataclass(Workspace, workspace)
+        return dacite.from_dict(Workspace, workspace)
 
     async def delete_workspace(self, workspace_id) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-workspace"""
@@ -300,7 +308,7 @@ class ElisAPIClient:
         """https://elis.rossum.ai/api/docs/#create-a-new-inbox"""
         inbox = await self._http_client.create("inboxes", data)
 
-        return dict_to_dataclass(Inbox, inbox)
+        return dacite.from_dict(Inbox, inbox)
 
     # ##### CONNECTORS #####
     async def list_all_connectors(
@@ -311,19 +319,19 @@ class ElisAPIClient:
         """https://elis.rossum.ai/api/docs/#list-all-connectors"""
 
         async for c in self._http_client.fetch_all("connectors", ordering, **filters):
-            yield dict_to_dataclass(Connector, c)
+            yield dacite.from_dict(Connector, c)
 
     async def retrieve_connector(self, connector_id) -> Connector:
         """https://elis.rossum.ai/api/docs/#retrieve-a-connector"""
         connector = await self._http_client.fetch_one("connectors", connector_id)
 
-        return dict_to_dataclass(Connector, connector)
+        return dacite.from_dict(Connector, connector)
 
     async def create_new_connector(self, data: Dict[str, Any]) -> Connector:
         """https://elis.rossum.ai/api/docs/#create-a-new-connector"""
         connector = await self._http_client.create("connectors", data)
 
-        return dict_to_dataclass(Connector, connector)
+        return dacite.from_dict(Connector, connector)
 
     # ##### HOOKS #####
     async def list_all_hooks(
@@ -333,19 +341,19 @@ class ElisAPIClient:
     ) -> AsyncIterable[Hook]:
         """https://elis.rossum.ai/api/docs/#list-all-hooks"""
         async for h in self._http_client.fetch_all("hooks", ordering, **filters):
-            yield dict_to_dataclass(Hook, h)
+            yield dacite.from_dict(Hook, h)
 
     async def retrieve_hook(self, hook_id) -> Hook:
         """https://elis.rossum.ai/api/docs/#retrieve-a-hook"""
         hook = await self._http_client.fetch_one("hooks", hook_id)
 
-        return dict_to_dataclass(Hook, hook)
+        return dacite.from_dict(Hook, hook)
 
     async def create_new_hook(self, data: Dict[str, Any]) -> Hook:
         """https://elis.rossum.ai/api/docs/#create-a-new-hook"""
         hook = await self._http_client.create("hooks", data)
 
-        return dict_to_dataclass(Hook, hook)
+        return dacite.from_dict(Hook, hook)
 
     # ##### USER ROLES #####
     async def list_all_user_roles(
@@ -355,4 +363,19 @@ class ElisAPIClient:
     ) -> AsyncIterable[UserRole]:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles"""
         async for u in self._http_client.fetch_all("groups", ordering, **filters):
-            yield dict_to_dataclass(UserRole, u)
+            yield dacite.from_dict(UserRole, u)
+
+    async def _sideload(self, resource: Dict[str, Any], sideloads: Sequence[str]) -> None:
+        """The API does not support sideloading when fetching a single resource, we need to load
+        it manually.
+        """
+        sideload_tasks = [
+            asyncio.create_task(self._http_client.request_json("GET", resource[sideload]))
+            for sideload in sideloads
+        ]
+        sideloaded_jsons = await asyncio.gather(*sideload_tasks)
+
+        for sideload, sideloaded_json in zip(sideloads, sideloaded_jsons):
+            if sideload == "content":  # Content (i.e. list of sections is wrapped in a dict)
+                sideloaded_json = sideloaded_json["content"]
+            resource[sideload] = sideloaded_json

@@ -18,7 +18,7 @@ class User:
     password: Optional[str] = None
     groups: List[str] = field(default_factory=list)
     queues: List[str] = field(default_factory=list)
-    ui_settings: List[Dict] = field(default_factory=list)
+    ui_settings: Dict = field(default_factory=dict)
     metadata: dict = field(default_factory=dict)
     oidc_id: Optional[str] = None
     auth_type: str = "password"

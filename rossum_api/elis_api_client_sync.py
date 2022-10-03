@@ -11,6 +11,7 @@ if typing.TYPE_CHECKING:
         Callable,
         Dict,
         Iterable,
+        List,
         Optional,
         Sequence,
         Tuple,
@@ -103,17 +104,22 @@ class ElisAPIClientSync:
         files: Sequence[Tuple[Union[str, pathlib.Path], str]],
         values: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-    ) -> None:
+    ) -> List[int]:
         """https://elis.rossum.ai/api/docs/#import-a-document
 
         arguments
         ---------
             files
-                2-tuple containing current filename and name to be used by elis for the uploaded file
+                2-tuple containing current filepath and name to be used by Elis for the uploaded file
             metadata
                 metadata will be set to newly created annotation object
             values
                 may be used to initialize datapoint values by setting the value of rir_field_names in the schema
+
+        returns
+        -------
+            annotation_ids
+                list of IDs of created annotations, respects the order of `files` argument
         """
         return self.event_loop.run_until_complete(
             self.elis_api_client.import_document(queue_id, files, values, metadata)
@@ -156,6 +162,10 @@ class ElisAPIClientSync:
         return self.event_loop.run_until_complete(
             self.elis_api_client.retrieve_organization(org_id)
         )
+
+    def retrieve_own_organization(self) -> Organization:
+        """Retrive organization of currently logged in user."""
+        return self.event_loop.run_until_complete(self.elis_api_client.retrieve_own_organization())
 
     # ##### SCHEMAS #####
     def list_all_schemas(
@@ -218,18 +228,25 @@ class ElisAPIClientSync:
             )
         )
 
-    def retrieve_annotation(self, annotation_id: int) -> Annotation:
+    def retrieve_annotation(self, annotation_id: int, sideloads: Sequence[str] = ()) -> Annotation:
         """https://elis.rossum.ai/api/docs/#retrieve-an-annotation"""
         return self.event_loop.run_until_complete(
-            self.elis_api_client.retrieve_annotation(annotation_id)
+            self.elis_api_client.retrieve_annotation(annotation_id, sideloads)
         )
 
     def poll_annotation(
-        self, annotation_id: int, predicate: Callable[[Annotation], bool], sleep_s: int = 3
+        self,
+        annotation_id: int,
+        predicate: Callable[[Annotation], bool],
+        sleep_s: int = 3,
+        sideloads: Sequence[str] = (),
     ) -> Annotation:
-        """https://elis.rossum.ai/api/docs/#retrieve-an-annotation"""
+        """Poll on annotation until predicate is true.
+
+        Sideloading is done only once after the predicate becomes true to avoid spaming the server.
+        """
         return self.event_loop.run_until_complete(
-            self.elis_api_client.poll_annotation(annotation_id, predicate, sleep_s)
+            self.elis_api_client.poll_annotation(annotation_id, predicate, sleep_s, sideloads)
         )
 
     def update_annotation(self, annotation_id: int, data: Dict[str, Any]) -> Annotation:

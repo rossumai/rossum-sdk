@@ -1,4 +1,3 @@
-import datetime as dt
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
@@ -35,7 +34,7 @@ class Annotation:
     relations: List[str] = field(default_factory=list)
     pages: List[str] = field(default_factory=list)
     document: Optional[Union[str, Document]] = None
-    confirmed_at: Optional[dt.datetime] = None
+    confirmed_at: Optional[str] = None
     modified_at: Optional[str] = None
     exported_at: Optional[str] = None
     arrived_at: Optional[str] = None

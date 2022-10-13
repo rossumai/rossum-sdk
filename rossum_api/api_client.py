@@ -5,16 +5,18 @@ import functools
 import itertools
 import json
 import logging
+import random
 import typing
 
 import httpx
 
 if typing.TYPE_CHECKING:
-    from typing import Any, AsyncIterator, Dict, List, Optional, Sequence, Tuple, Union
+    from typing import Any, AsyncIterator, Dict, Iterator, List, Optional, Sequence, Tuple, Union
 
     from aiofiles.threadpool.binary import AsyncBufferedReader
 
 
+RETRIED_HTTP_CODES = (408, 429, 500, 502, 503, 504)
 logger = logging.getLogger(__name__)
 
 
@@ -81,8 +83,19 @@ def authenticate_generator_if_needed(method):
     return authenticate_if_needed
 
 
+def exponential_backoff(factor: float) -> Iterator[float]:
+    yield 0
+    for n in itertools.count(2):
+        yield (factor * (2 ** (n - 2))) + (factor * random.random())
+
+
 class APIClient:
-    """Perform CRUD operations over resources provided by Elis API."""
+    """Perform CRUD operations over resources provided by Elis API.
+
+    Requests will be retried up to `n_retries` times with exponential backoff.
+    The backoff is applied after the second attempt and its length is determined
+    by following equation `retry_backoff_factor * (2 ** (nth_attempt - 1)) + random_jitter`.
+    """
 
     def __init__(
         self,
@@ -91,6 +104,8 @@ class APIClient:
         token: Optional[str] = None,
         base_url: Optional[str] = "https://elis.rossum.ai/api/v1",
         timeout: Optional[float] = None,
+        n_retries: int = 3,
+        retry_backoff_factor: float = 1.0,
     ):
         if token is None and (username is None and password is None):
             raise TypeError(
@@ -102,6 +117,8 @@ class APIClient:
         self.password = password
         self.token = token
         self.client = httpx.AsyncClient(timeout=timeout)
+        self.n_retries = n_retries
+        self.retry_backoff_factor = retry_backoff_factor
 
     @property
     def _headers(self):
@@ -319,7 +336,22 @@ class APIClient:
             url = f"{self.base_url}/{url}"
         headers = kwargs.pop("headers", {})
         headers["Authorization"] = f"token {self.token}"
-        response = await self.client.request(method, url, headers=headers, *args, **kwargs)
+
+        for attempt, backoff in zip(
+            range(1, self.n_retries + 1), exponential_backoff(self.retry_backoff_factor)
+        ):
+            remaining_attempts = self.n_retries - attempt
+
+            try:
+                response = await self.client.request(method, url, headers=headers, *args, **kwargs)
+                if response.status_code in RETRIED_HTTP_CODES:
+                    continue
+                break
+            except httpx.RequestError:
+                if not remaining_attempts:
+                    raise
+            asyncio.sleep(backoff)
+
         await self._raise_for_status(response)
         return response
 

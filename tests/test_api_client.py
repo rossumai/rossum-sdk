@@ -5,9 +5,11 @@
 * all CRUD methods are tested for both a happy path and an error (400 or 404)
 """
 import copy
+import functools
 import json
 
 import aiofiles
+import httpx
 import mock
 import pytest
 import pytest_httpx
@@ -120,9 +122,19 @@ CSV_EXPORT = b"meta_file_name,Invoice number\r\nfilename_1.pdf,11111\r\nfilename
 FAKE_TOKEN = "fake-token"
 
 
+def count_calls(func):
+    @functools.wraps(func)
+    def count_calls_(*args, **kwargs):
+        count_calls_.calls += 1
+        return func(*args, n_calls=count_calls_.calls, **kwargs)
+
+    count_calls_.calls = 0
+    return count_calls_
+
+
 @pytest.fixture
 def client():
-    client = APIClient("username", "password")
+    client = APIClient("username", "password", retry_backoff_factor=0)
     client.token = FAKE_TOKEN
     return client
 
@@ -185,6 +197,35 @@ async def test_not_possible_to_reauth(httpx_mock):
 
     assert err.value.status_code == 400
     assert err.value.error == '{"password": ["This field may not be blank."]}'
+
+
+@pytest.mark.asyncio
+async def test_retry_timeout(client, httpx_mock):
+    @count_calls
+    def custom_response(request: httpx.Request, n_calls: int):
+        if n_calls == 1:
+            raise httpx.ReadTimeout("Unable to read within timeout")
+
+        return httpx.Response(status_code=200, json=WORKSPACES[0])
+
+    httpx_mock.add_callback(custom_response)
+    workspace = await client.fetch_one("workspaces", id_=7694)
+    assert workspace == WORKSPACES[0]
+
+
+@pytest.mark.asyncio
+async def test_retry_n_attempts(client, httpx_mock):
+    @count_calls
+    def custom_response(request: httpx.Request, n_calls: int):
+        if n_calls <= 3:
+            raise httpx.ReadTimeout("Unable to read within timeout")
+
+        return httpx.Response(status_code=200, json=WORKSPACES[0])
+
+    httpx_mock.add_callback(custom_response)
+
+    with pytest.raises(httpx.ReadTimeout):
+        await client.fetch_one("workspaces", id_=7694)
 
 
 @pytest.mark.asyncio

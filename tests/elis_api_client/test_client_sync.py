@@ -32,3 +32,12 @@ class TestClientSync:
                 ElisAPIClientSync("", "", None)
 
             assert not new_event_loop_mock.called
+
+    def test_request_json(self, elis_client_sync):
+        client, http_client = elis_client_sync
+        http_client.request_json.return_value = {"some": "json"}
+        args = ["some/non/standard/url"]
+        kwargs = {"whatever": "kwarg"}
+        data = client.request_json("GET", *args, **kwargs)
+        assert data == {"some": "json"}
+        http_client.request_json.assert_called_with("GET", *args, **kwargs)

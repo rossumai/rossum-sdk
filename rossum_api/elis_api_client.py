@@ -365,6 +365,12 @@ class ElisAPIClient:
         async for u in self._http_client.fetch_all("groups", ordering, **filters):
             yield dacite.from_dict(UserRole, u)
 
+    async def request_json(self, method: str, *args, **kwargs) -> Dict[str, Any]:
+        """Use to perform requests to seldomly used or experimental endpoints that do not have
+        direct support in the client.
+        """
+        return await self._http_client.request_json(method, *args, **kwargs)
+
     async def _sideload(self, resource: Dict[str, Any], sideloads: Sequence[str]) -> None:
         """The API does not support sideloading when fetching a single resource, we need to load
         it manually.

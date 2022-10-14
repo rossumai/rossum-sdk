@@ -312,6 +312,8 @@ class APIClient:
 
     async def request_json(self, method: str, *args, **kwargs) -> Dict[str, Any]:
         response = await self._request(method, *args, **kwargs)
+        if response.status_code == 204:
+            return {}
         return response.json()
 
     async def _authenticate(self) -> None:

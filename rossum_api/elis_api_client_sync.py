@@ -333,3 +333,11 @@ class ElisAPIClientSync:
     ) -> Iterable[UserRole]:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles"""
         return self._iter_over_async(self.elis_api_client.list_all_user_roles(ordering, **filters))
+
+    def request_json(self, method: str, *args, **kwargs) -> Dict[str, Any]:
+        """Use to perform requests to seldomly used or experimental endpoints that do not have
+        direct support in the client.
+        """
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.request_json(method, *args, **kwargs)
+        )

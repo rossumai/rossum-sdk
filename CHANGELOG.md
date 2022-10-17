@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.0 (2022-10-17)
+### Feature
+* Add request_json method to ElisAPIClient ([`6c2df87`](https://github.com/rossumai/rossum-sdk/commit/6c2df874934cc5bc2640aeee074cc57cd9cb4faa))
+
 ## v0.2.0 (2022-10-13)
 ### Feature
 * Implement retrying of failed requests ([`09ab473`](https://github.com/rossumai/rossum-sdk/commit/09ab47332fce0c9700107b47ca06d7a1712d653a))

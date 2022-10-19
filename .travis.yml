@@ -4,7 +4,7 @@ conditions: v1
 stages:
   - name: test
   - name: deploy
-    if: tag IS present
+    if: branch = main AND type = push
 
 sudo: required
 dist: xenial
@@ -41,6 +41,13 @@ jobs:
       env: TOXENV=py37 TOXCFG=tox.ini
       stage: test
 
+    - stage: deploy
+      script:
+      - git config --global user.name "semantic-release (via TravisCI)"
+      - git config --global user.email "semantic-release@travis"
+      - pip install python-semantic-release
+      - semantic-release publish
+
 
 # Hotfix: setuptools is capped at version 59, as newer versions seem to have issues with importlib_metadata in python 3.7.
 # See e.g. https://app.travis-ci.com/github/rossumai/rossum/jobs/560023987
@@ -51,9 +58,3 @@ install:
 # command to run tests
 script:
   - tox -c ${TOXCFG}
-
-after_success:
-  - git config --global user.name "semantic-release (via TravisCI)"
-  - git config --global user.email "semantic-release@travis"
-  - pip install python-semantic-release
-  - semantic-release publish

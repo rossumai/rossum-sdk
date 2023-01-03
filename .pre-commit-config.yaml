@@ -19,9 +19,13 @@ repos:
       - id: bandit
         args: [-lll]
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.812
+    rev: v0.940
     hooks:
       - id: mypy
+        additional_dependencies: [
+            types-aiofiles,
+            types-mock,
+        ]
   - repo: https://github.com/timothycrosley/isort
     rev: 5.10.1
     hooks:
@@ -33,7 +37,7 @@ repos:
         name: commitizen conditionally check branch
         description: >
           Commitizen fails when there are no new commits. To overcome this, we created
-          tiny wrapper that verifies there are commits to check. 
+          tiny wrapper that verifies there are commits to check.
 
           Original description from Commitizen:
           Check all commit messages that are already on the current branch but not the

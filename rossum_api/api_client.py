@@ -316,6 +316,12 @@ class APIClient:
             return {}
         return response.json()
 
+    async def get_token(self, refresh: bool = False) -> str:
+        """Returns the current token. Authenticate if needed."""
+        if refresh or self.token is None:
+            await self._authenticate()
+        return self.token  # type: ignore[return-value] # self.token is set in _authenticate method
+
     async def _authenticate(self) -> None:
         response = await self.client.post(
             f"{self.base_url}/auth/login",

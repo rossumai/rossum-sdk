@@ -317,7 +317,13 @@ class APIClient:
         return response.json()
 
     async def get_token(self, refresh: bool = False) -> str:
-        """Returns the current token. Authenticate if needed."""
+        """Returns the current token. Authentication is done automatically if needed.
+
+        Arguments:
+        ----------
+        refresh
+            force refreshing the token
+        """
         if refresh or self.token is None:
             await self._authenticate()
         return self.token  # type: ignore[return-value] # self.token is set in _authenticate method

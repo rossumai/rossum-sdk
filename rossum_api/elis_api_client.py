@@ -372,7 +372,13 @@ class ElisAPIClient:
         return await self._http_client.request_json(method, *args, **kwargs)
 
     async def get_token(self, refresh: bool = False) -> str:
-        """Returns the current token. Authentication is done automatically if needed."""
+        """Returns the current token. Authentication is done automatically if needed.
+
+        Arguments:
+        ----------
+        refresh
+            force refreshing the token
+        """
         return await self._http_client.get_token(refresh)
 
     async def _sideload(self, resource: Dict[str, Any], sideloads: Sequence[str]) -> None:

@@ -120,7 +120,7 @@ EXPECTED_UPLOAD_CONTENT = b'--313131\r\nContent-Disposition: form-data; name="co
 
 CSV_EXPORT = b"meta_file_name,Invoice number\r\nfilename_1.pdf,11111\r\nfilename_2.pdf,22222"
 FAKE_TOKEN = "fake-token"
-OUR_TOKEN = "our-token"
+NEW_TOKEN = "our-token"
 
 
 def count_calls(func):
@@ -146,7 +146,7 @@ def login_mock(httpx_mock):
         method="POST",
         url="https://elis.rossum.ai/api/v1/auth/login",
         json={
-            "key": OUR_TOKEN,
+            "key": NEW_TOKEN,
             "domain": "custom-domain.app.rossum.ai",
         },
     )
@@ -627,8 +627,8 @@ async def test_stream_repacks_exception(client, httpx_mock):
 async def test_get_token_new(client, login_mock):
     client.token = None
     token = await client.get_token()
-    assert token == OUR_TOKEN
-    assert client.token == OUR_TOKEN
+    assert token == NEW_TOKEN
+    assert client.token == NEW_TOKEN
 
 
 @pytest.mark.asyncio
@@ -638,6 +638,6 @@ async def test_get_token_old(client):
 
 
 @pytest.mark.asyncio
-async def test_get_token_refreshed(client, login_mock):
+async def test_get_token_force_refresh(client, login_mock):
     token = await client.get_token(refresh=True)
-    assert token == OUR_TOKEN
+    assert token == NEW_TOKEN

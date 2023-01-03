@@ -241,11 +241,11 @@ async def test_fetch_one(client, httpx_mock):
 
 @pytest.mark.asyncio
 async def test_fetch_all(client, httpx_mock):
-    second_page = "https://elis.rossum.ai/api/v1/workspaces?page=2&page_size=100"
-    third_page = "https://elis.rossum.ai/api/v1/workspaces?page=3&page_size=100"
+    second_page = "https://elis.rossum.ai/api/v1/workspaces?page=2&page_size=100&ordering=&sideload=&content.schema_id="
+    third_page = "https://elis.rossum.ai/api/v1/workspaces?page=3&page_size=100&ordering=&sideload=&content.schema_id="
     httpx_mock.add_response(
         method="GET",
-        url="https://elis.rossum.ai/api/v1/workspaces?page_size=100",
+        url="https://elis.rossum.ai/api/v1/workspaces?page_size=100&ordering=&sideload=&content.schema_id=",
         json={
             "pagination": {"total": 3, "total_pages": 3, "next": second_page, "previous": None},
             "results": WORKSPACES[:1],
@@ -275,7 +275,7 @@ async def test_fetch_all(client, httpx_mock):
 async def test_fetch_all_ordering(client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
-        url="https://elis.rossum.ai/api/v1/workspaces?page_size=100&ordering=-id,name",
+        url="https://elis.rossum.ai/api/v1/workspaces?page_size=100&ordering=-id,name&sideload=&content.schema_id=",
         json={
             "pagination": {"total": 3, "total_pages": 1, "next": None, "previous": None},
             "results": WORKSPACES,
@@ -289,7 +289,7 @@ async def test_fetch_all_ordering(client, httpx_mock):
 async def test_fetch_all_filters(client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
-        url="https://elis.rossum.ai/api/v1/workspaces?page_size=100&name=Test&autopilot=1",
+        url="https://elis.rossum.ai/api/v1/workspaces?page_size=100&name=Test&autopilot=1&ordering=&sideload=&content.schema_id=",
         json={
             "pagination": {"total": 3, "total_pages": 1, "next": None, "previous": None},
             "results": WORKSPACES,
@@ -303,7 +303,7 @@ async def test_fetch_all_filters(client, httpx_mock):
 async def test_fetch_all_sideload(client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
-        url="https://elis.rossum.ai/api/v1/workspaces?page_size=100&sideload=content,automation_blockers&content.schema_id=invoice_id,date_issue",
+        url="https://elis.rossum.ai/api/v1/workspaces?page_size=100&sideload=content,automation_blockers&content.schema_id=invoice_id,date_issue&ordering=",
         json={
             "pagination": {"total": 3, "total_pages": 1, "next": None, "previous": None},
             "results": ANNOTATIONS,
@@ -419,14 +419,14 @@ async def test_upload(client, httpx_mock):
         (
             {},
             "GET",
-            "https://elis.rossum.ai/api/v1/queues/123/export?format=json&page_size=100&columns=col1%2Ccol2&id=456%2C789",
-            "https://elis.rossum.ai/api/v1/queues/123/export?format=json&page_size=100&page=2&columns=col1%2Ccol2&id=456%2C789",
+            "https://elis.rossum.ai/api/v1/queues/123/export?format=json&page_size=100&columns=col1%2Ccol2&id=456%2C789&ordering=&sideload=&content.schema_id=",
+            "https://elis.rossum.ai/api/v1/queues/123/export?format=json&page_size=100&page=2&columns=col1%2Ccol2&id=456%2C789&ordering=&sideload=&content.schema_id=",
         ),
         (
             {"to_status": "exported"},
             "POST",
-            "https://elis.rossum.ai/api/v1/queues/123/export?format=json&page_size=100&columns=col1%2Ccol2&id=456%2C789&to_status=exported",
-            "https://elis.rossum.ai/api/v1/queues/123/export?format=json&page_size=100&page=2&columns=col1%2Ccol2&id=456%2C789&to_status=exported",
+            "https://elis.rossum.ai/api/v1/queues/123/export?format=json&page_size=100&columns=col1%2Ccol2&id=456%2C789&to_status=exported&ordering=&sideload=&content.schema_id=",
+            "https://elis.rossum.ai/api/v1/queues/123/export?format=json&page_size=100&page=2&columns=col1%2Ccol2&id=456%2C789&to_status=exported&ordering=&sideload=&content.schema_id=",
         ),
     ],
 )

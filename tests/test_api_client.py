@@ -120,6 +120,7 @@ EXPECTED_UPLOAD_CONTENT = b'--313131\r\nContent-Disposition: form-data; name="co
 
 CSV_EXPORT = b"meta_file_name,Invoice number\r\nfilename_1.pdf,11111\r\nfilename_2.pdf,22222"
 FAKE_TOKEN = "fake-token"
+NEW_TOKEN = "our-token"
 
 
 def count_calls(func):
@@ -139,22 +140,27 @@ def client():
     return client
 
 
-@pytest.mark.asyncio
-async def test_authenticate(client, httpx_mock):
+@pytest.fixture
+def login_mock(httpx_mock):
     httpx_mock.add_response(
         method="POST",
         url="https://elis.rossum.ai/api/v1/auth/login",
         json={
-            "key": "our-token",
+            "key": NEW_TOKEN,
             "domain": "custom-domain.app.rossum.ai",
         },
     )
+    return httpx_mock
+
+
+@pytest.mark.asyncio
+async def test_authenticate(client, login_mock):
     assert client.token != "our-token"
     await client._authenticate()
     assert client.token == "our-token"
 
     # HTTP 401 is propagated via an exception
-    httpx_mock.add_response(
+    login_mock.add_response(
         method="POST", url="https://elis.rossum.ai/api/v1/auth/login", status_code=401
     )
     with pytest.raises(APIClientError, match="401"):
@@ -615,3 +621,23 @@ async def test_stream_repacks_exception(client, httpx_mock):
         async for w in client._stream("GET", "queues/123/export?format=csv&exported_at=invalid"):
             pass
     assert str(err.value) == "HTTP 404, content: exported_at: Enter a valid date/time"
+
+
+@pytest.mark.asyncio
+async def test_get_token_new(client, login_mock):
+    client.token = None
+    token = await client.get_token()
+    assert token == NEW_TOKEN
+    assert client.token == NEW_TOKEN
+
+
+@pytest.mark.asyncio
+async def test_get_token_old(client):
+    token = await client.get_token()
+    assert token == FAKE_TOKEN
+
+
+@pytest.mark.asyncio
+async def test_get_token_force_refresh(client, login_mock):
+    token = await client.get_token(refresh=True)
+    assert token == NEW_TOKEN

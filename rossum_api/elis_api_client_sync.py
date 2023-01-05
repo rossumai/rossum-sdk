@@ -341,3 +341,13 @@ class ElisAPIClientSync:
         return self.event_loop.run_until_complete(
             self.elis_api_client.request_json(method, *args, **kwargs)
         )
+
+    def get_token(self, refresh: bool = False) -> str:
+        """Returns the current token. Authentication is done automatically if needed.
+
+        Arguments:
+        ----------
+        refresh
+            force refreshing the token
+        """
+        return self.event_loop.run_until_complete(self.elis_api_client.get_token(refresh))

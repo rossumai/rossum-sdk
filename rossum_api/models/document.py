@@ -12,7 +12,7 @@ class Document:
     parent: Optional[str]
     email: Optional[str]
     mime_type: str
-    creator: str
+    creator: Optional[str]
     created_at: str
     arrived_at: str
     original_file_name: str

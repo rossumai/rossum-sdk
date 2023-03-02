@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.0 (2023-03-02)
+### Feature
+* Add get_token method to Api client ([`a1bc957`](https://github.com/rossumai/rossum-sdk/commit/a1bc957540f84ba2ff0be7540d509a84580c1cef))
+
+### Fix
+* **models:hook:** Define some attributes (guide, read_more_url, extension_image_url) as optional ([`b16a456`](https://github.com/rossumai/rossum-sdk/commit/b16a456344b41908c16c32b4d5be70d31f3b07b3))
+* Define `Document.creator` as optional ([#35](https://github.com/rossumai/rossum-sdk/issues/35)) ([`d797e99`](https://github.com/rossumai/rossum-sdk/commit/d797e99112416602487409aaa668327fd80663aa))
+
 ## v0.3.0 (2022-10-17)
 ### Feature
 * Add request_json method to ElisAPIClient ([`6c2df87`](https://github.com/rossumai/rossum-sdk/commit/6c2df874934cc5bc2640aeee074cc57cd9cb4faa))

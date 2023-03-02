@@ -10,9 +10,9 @@ class Hook:
     active: bool
     config: Dict[str, Any]
     test: Dict[str, Any]
-    guide: str
-    read_more_url: str
-    extension_image_url: str
+    guide: Optional[str]
+    read_more_url: Optional[str]
+    extension_image_url: Optional[str]
     type: str = "webhook"
     metadata: Dict[str, Any] = field(default_factory=dict)
     queues: List[str] = field(default_factory=list)

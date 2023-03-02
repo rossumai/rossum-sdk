@@ -386,7 +386,7 @@ class ElisAPIClient:
         it manually.
         """
         sideload_tasks = [
-            asyncio.create_task(self._http_client.request_json("GET", resource[sideload]))
+            asyncio.create_task(self._http_client.request_json("GET", resource[sideload.rstrip("s")]))
             for sideload in sideloads
         ]
         sideloaded_jsons = await asyncio.gather(*sideload_tasks)

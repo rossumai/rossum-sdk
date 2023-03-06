@@ -3,6 +3,8 @@ from __future__ import annotations
 import asyncio
 import typing
 
+import httpx
+
 if typing.TYPE_CHECKING:
     import pathlib
     from typing import (
@@ -336,10 +338,18 @@ class ElisAPIClientSync:
 
     def request_json(self, method: str, *args, **kwargs) -> Dict[str, Any]:
         """Use to perform requests to seldomly used or experimental endpoints that do not have
-        direct support in the client.
+        direct support in the client and return JSON.
         """
         return self.event_loop.run_until_complete(
             self.elis_api_client.request_json(method, *args, **kwargs)
+        )
+
+    def request(self, method: str, *args, **kwargs) -> httpx.Response:
+        """Use to perform requests to seldomly used or experimental endpoints that do not have
+        direct support in the client and return the raw response.
+        """
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.request(method, *args, **kwargs)
         )
 
     def get_token(self, refresh: bool = False) -> str:

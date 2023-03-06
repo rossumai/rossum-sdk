@@ -5,6 +5,7 @@ import typing
 from enum import Enum
 
 import aiofiles
+import httpx
 
 if typing.TYPE_CHECKING:
     import pathlib
@@ -367,9 +368,15 @@ class ElisAPIClient:
 
     async def request_json(self, method: str, *args, **kwargs) -> Dict[str, Any]:
         """Use to perform requests to seldomly used or experimental endpoints that do not have
-        direct support in the client.
+        direct support in the client and return JSON.
         """
         return await self._http_client.request_json(method, *args, **kwargs)
+
+    async def request(self, method: str, *args, **kwargs) -> httpx.Response:
+        """Use to perform requests to seldomly used or experimental endpoints that do not have
+        direct support in the client and return the raw response.
+        """
+        return await self._http_client.request(method, *args, **kwargs)
 
     async def get_token(self, refresh: bool = False) -> str:
         """Returns the current token. Authentication is done automatically if needed.

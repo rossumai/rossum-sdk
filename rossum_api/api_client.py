@@ -316,6 +316,10 @@ class APIClient:
             return {}
         return response.json()
 
+    async def request(self, method: str, *args, **kwargs) -> httpx.Response:
+        response = await self._request(method, *args, **kwargs)
+        return response
+
     async def get_token(self, refresh: bool = False) -> str:
         """Returns the current token. Authentication is done automatically if needed.
 

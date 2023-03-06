@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.0 (2023-03-06)
+### Feature
+* **rossum_sdk/api_client:** Add `request` method to ElisApiClient ([`5d11c3e`](https://github.com/rossumai/rossum-sdk/commit/5d11c3e5e70e22f2875787b8ee960b8184ddb99d))
+
 ## v0.4.0 (2023-03-02)
 ### Feature
 * Add get_token method to Api client ([`a1bc957`](https://github.com/rossumai/rossum-sdk/commit/a1bc957540f84ba2ff0be7540d509a84580c1cef))

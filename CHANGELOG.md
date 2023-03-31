@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.1 (2023-03-31)
+### Fix
+* Switch from TravisCI to Github Workflows ([`64d5eae`](https://github.com/rossumai/rossum-sdk/commit/64d5eaee8fcc6fc1fde6d5055156c7098fc91860))
+
 ## v0.5.0 (2023-03-06)
 ### Feature
 * **rossum_sdk/api_client:** Add `request` method to ElisApiClient ([`5d11c3e`](https://github.com/rossumai/rossum-sdk/commit/5d11c3e5e70e22f2875787b8ee960b8184ddb99d))

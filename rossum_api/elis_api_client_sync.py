@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import typing
 
-import httpx
+from rossum_api.elis_api_client import ElisAPIClient
 
 if typing.TYPE_CHECKING:
     import pathlib
@@ -21,22 +21,22 @@ if typing.TYPE_CHECKING:
         Union,
     )
 
+    import httpx
+
+    from rossum_api.api_client import APIClient
     from rossum_api.elis_api_client import ExportFileFormats
+    from rossum_api.models.annotation import Annotation
+    from rossum_api.models.connector import Connector
+    from rossum_api.models.hook import Hook
+    from rossum_api.models.inbox import Inbox
+    from rossum_api.models.organization import Organization
+    from rossum_api.models.queue import Queue
+    from rossum_api.models.schema import Schema
+    from rossum_api.models.user import User
+    from rossum_api.models.user_role import UserRole
+    from rossum_api.models.workspace import Workspace
 
     T = TypeVar("T")
-
-from rossum_api.api_client import APIClient
-from rossum_api.elis_api_client import ElisAPIClient
-from rossum_api.models.annotation import Annotation
-from rossum_api.models.connector import Connector
-from rossum_api.models.hook import Hook
-from rossum_api.models.inbox import Inbox
-from rossum_api.models.organization import Organization
-from rossum_api.models.queue import Queue
-from rossum_api.models.schema import Schema
-from rossum_api.models.user import User
-from rossum_api.models.user_role import UserRole
-from rossum_api.models.workspace import Workspace
 
 
 class Sideload:
@@ -78,7 +78,7 @@ class ElisAPIClientSync:
 
     # ##### QUEUE #####
     def retrieve_queue(self, queue_id: int) -> Queue:
-        """https://elis.rossum.ai/api/docs/#retrieve-a-queue-2"""
+        """https://elis.rossum.ai/api/docs/#retrieve-a-queue-2."""
         return self.event_loop.run_until_complete(self.elis_api_client.retrieve_queue(queue_id))
 
     def list_all_queues(
@@ -86,18 +86,18 @@ class ElisAPIClientSync:
         ordering: Sequence[str] = (),
         **filters: Dict[str, Any],
     ) -> Iterable[Queue]:
-        """https://elis.rossum.ai/api/docs/#list-all-queues"""
+        """https://elis.rossum.ai/api/docs/#list-all-queues."""
         return self._iter_over_async(self.elis_api_client.list_all_queues(ordering, **filters))
 
     def create_new_queue(
         self,
         data: Dict[str, Any],
     ) -> Queue:
-        """https://elis.rossum.ai/api/docs/#create-new-queue"""
+        """https://elis.rossum.ai/api/docs/#create-new-queue."""
         return self.event_loop.run_until_complete(self.elis_api_client.create_new_queue(data))
 
     def delete_queue(self, queue_id) -> None:
-        """https://elis.rossum.ai/api/docs/#delete-a-queue"""
+        """https://elis.rossum.ai/api/docs/#delete-a-queue."""
         return self.event_loop.run_until_complete(self.elis_api_client.delete_queue(queue_id))
 
     def import_document(
@@ -107,7 +107,7 @@ class ElisAPIClientSync:
         values: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None,
     ) -> List[int]:
-        """https://elis.rossum.ai/api/docs/#import-a-document
+        """https://elis.rossum.ai/api/docs/#import-a-document.
 
         arguments
         ---------
@@ -118,7 +118,7 @@ class ElisAPIClientSync:
             values
                 may be used to initialize datapoint values by setting the value of rir_field_names in the schema
 
-        returns
+        Returns
         -------
             annotation_ids
                 list of IDs of created annotations, respects the order of `files` argument
@@ -128,7 +128,7 @@ class ElisAPIClientSync:
         )
 
     def export_annotations_to_json(self, queue_id: int) -> Iterable[Annotation]:
-        """https://elis.rossum.ai/api/docs/#export-annotations
+        """https://elis.rossum.ai/api/docs/#export-annotations.
 
         JSON export is paginated and returns the result in a way similar to other list_all methods.
         """
@@ -137,7 +137,7 @@ class ElisAPIClientSync:
     def export_annotations_to_file(
         self, queue_id: int, export_format: ExportFileFormats
     ) -> Iterable[bytes]:
-        """https://elis.rossum.ai/api/docs/#export-annotations
+        """https://elis.rossum.ai/api/docs/#export-annotations.
 
         XLSX/CSV/XML exports can be huge, therefore byte streaming is used to keep memory consumption low.
         """
@@ -151,7 +151,7 @@ class ElisAPIClientSync:
         ordering: Sequence[str] = (),
         **filters: Dict[str, Any],
     ):
-        """https://elis.rossum.ai/api/docs/#list-all-organizations"""
+        """https://elis.rossum.ai/api/docs/#list-all-organizations."""
         return self._iter_over_async(
             self.elis_api_client.list_all_organizations(ordering, **filters)
         )
@@ -160,7 +160,7 @@ class ElisAPIClientSync:
         self,
         org_id: int,
     ) -> Organization:
-        """https://elis.rossum.ai/api/docs/#retrieve-an-organization"""
+        """https://elis.rossum.ai/api/docs/#retrieve-an-organization."""
         return self.event_loop.run_until_complete(
             self.elis_api_client.retrieve_organization(org_id)
         )
@@ -175,19 +175,19 @@ class ElisAPIClientSync:
         ordering: Sequence[str] = (),
         **filters: Dict[str, Any],
     ) -> Iterable[Schema]:
-        """https://elis.rossum.ai/api/docs/#list-all-schemas"""
+        """https://elis.rossum.ai/api/docs/#list-all-schemas."""
         return self._iter_over_async(self.elis_api_client.list_all_schemas(ordering, **filters))
 
     def retrieve_schema(self, schema_id: int) -> Schema:
-        """https://elis.rossum.ai/api/docs/#retrieve-a-schema"""
+        """https://elis.rossum.ai/api/docs/#retrieve-a-schema."""
         return self.event_loop.run_until_complete(self.elis_api_client.retrieve_schema(schema_id))
 
     def create_new_schema(self, data: Dict[str, Any]) -> Schema:
-        """https://elis.rossum.ai/api/docs/#create-a-new-schema"""
+        """https://elis.rossum.ai/api/docs/#create-a-new-schema."""
         return self.event_loop.run_until_complete(self.elis_api_client.create_new_schema(data))
 
     def delete_schema(self, id) -> None:
-        """https://elis.rossum.ai/api/docs/#delete-a-schema"""
+        """https://elis.rossum.ai/api/docs/#delete-a-schema."""
         return self.event_loop.run_until_complete(self.elis_api_client.delete_schema(id))
 
     # ##### USERS #####
@@ -196,15 +196,15 @@ class ElisAPIClientSync:
         ordering: Sequence[str] = (),
         **filters: Dict[str, Any],
     ) -> Iterable[User]:
-        """https://elis.rossum.ai/api/docs/#list-all-users"""
+        """https://elis.rossum.ai/api/docs/#list-all-users."""
         return self._iter_over_async(self.elis_api_client.list_all_users(ordering, **filters))
 
     def retrieve_user(self, user_id: int) -> User:
-        """https://elis.rossum.ai/api/docs/#retrieve-a-user-2"""
+        """https://elis.rossum.ai/api/docs/#retrieve-a-user-2."""
         return self.event_loop.run_until_complete(self.elis_api_client.retrieve_user(user_id))
 
     def create_new_user(self, data: Dict[str, Any]) -> User:
-        """https://elis.rossum.ai/api/docs/#create-new-user"""
+        """https://elis.rossum.ai/api/docs/#create-new-user."""
         return self.event_loop.run_until_complete(self.elis_api_client.create_new_user(data))
 
     # TODO: specific method in APICLient
@@ -223,7 +223,7 @@ class ElisAPIClientSync:
         content_schema_ids: Sequence[str] = (),
         **filters: Dict[str, Any],
     ) -> Iterable[Annotation]:
-        """https://elis.rossum.ai/api/docs/#list-all-annotations"""
+        """https://elis.rossum.ai/api/docs/#list-all-annotations."""
         return self._iter_over_async(
             self.elis_api_client.list_all_annotations(
                 ordering, sideloads, content_schema_ids, **filters
@@ -231,7 +231,7 @@ class ElisAPIClientSync:
         )
 
     def retrieve_annotation(self, annotation_id: int, sideloads: Sequence[str] = ()) -> Annotation:
-        """https://elis.rossum.ai/api/docs/#retrieve-an-annotation"""
+        """https://elis.rossum.ai/api/docs/#retrieve-an-annotation."""
         return self.event_loop.run_until_complete(
             self.elis_api_client.retrieve_annotation(annotation_id, sideloads)
         )
@@ -252,13 +252,13 @@ class ElisAPIClientSync:
         )
 
     def update_annotation(self, annotation_id: int, data: Dict[str, Any]) -> Annotation:
-        """https://elis.rossum.ai/api/docs/#update-an-annotation"""
+        """https://elis.rossum.ai/api/docs/#update-an-annotation."""
         return self.event_loop.run_until_complete(
             self.elis_api_client.update_annotation(annotation_id, data)
         )
 
     def update_part_annotation(self, annotation_id: int, data: Dict[str, Any]) -> Annotation:
-        """https://elis.rossum.ai/api/docs/#update-part-of-an-annotation"""
+        """https://elis.rossum.ai/api/docs/#update-part-of-an-annotation."""
         return self.event_loop.run_until_complete(
             self.elis_api_client.update_part_annotation(annotation_id, data)
         )
@@ -269,19 +269,19 @@ class ElisAPIClientSync:
         ordering: Sequence[str] = (),
         **filters: Dict[str, Any],
     ) -> Iterable[Workspace]:
-        """https://elis.rossum.ai/api/docs/#list-all-workspaces"""
+        """https://elis.rossum.ai/api/docs/#list-all-workspaces."""
         return self._iter_over_async(self.elis_api_client.list_all_workspaces(ordering, **filters))
 
     def retrieve_workspace(self, id) -> Workspace:
-        """https://elis.rossum.ai/api/docs/#retrieve-a-workspace"""
+        """https://elis.rossum.ai/api/docs/#retrieve-a-workspace."""
         return self.event_loop.run_until_complete(self.elis_api_client.retrieve_workspace(id))
 
     def create_new_workspace(self, data: Dict[str, Any]) -> Workspace:
-        """https://elis.rossum.ai/api/docs/#create-a-new-workspace"""
+        """https://elis.rossum.ai/api/docs/#create-a-new-workspace."""
         return self.event_loop.run_until_complete(self.elis_api_client.create_new_workspace(data))
 
     def delete_workspace(self, id) -> None:
-        """https://elis.rossum.ai/api/docs/#retrieve-a-workspace"""
+        """https://elis.rossum.ai/api/docs/#retrieve-a-workspace."""
         return self.event_loop.run_until_complete(self.elis_api_client.delete_workspace(id))
 
     # ##### INBOX #####
@@ -289,7 +289,7 @@ class ElisAPIClientSync:
         self,
         data: Dict[str, Any],
     ) -> Inbox:
-        """https://elis.rossum.ai/api/docs/#create-a-new-inbox"""
+        """https://elis.rossum.ai/api/docs/#create-a-new-inbox."""
         return self.event_loop.run_until_complete(self.elis_api_client.create_new_inbox(data))
 
     # ##### CONNECTORS #####
@@ -298,16 +298,15 @@ class ElisAPIClientSync:
         ordering: Sequence[str] = (),
         **filters: Dict[str, Any],
     ) -> Iterable[Connector]:
-        """https://elis.rossum.ai/api/docs/#list-all-connectors"""
-
+        """https://elis.rossum.ai/api/docs/#list-all-connectors."""
         return self._iter_over_async(self.elis_api_client.list_all_connectors(ordering, **filters))
 
     def retrieve_connector(self, id) -> Connector:
-        """https://elis.rossum.ai/api/docs/#retrieve-a-connector"""
+        """https://elis.rossum.ai/api/docs/#retrieve-a-connector."""
         return self.event_loop.run_until_complete(self.elis_api_client.retrieve_connector(id))
 
     def create_new_connector(self, data: Dict[str, Any]) -> Connector:
-        """https://elis.rossum.ai/api/docs/#create-a-new-connector"""
+        """https://elis.rossum.ai/api/docs/#create-a-new-connector."""
         return self.event_loop.run_until_complete(self.elis_api_client.create_new_connector(data))
 
     # ##### HOOKS #####
@@ -316,15 +315,15 @@ class ElisAPIClientSync:
         ordering: Sequence[str] = (),
         **filters: Dict[str, Any],
     ) -> Iterable[Hook]:
-        """https://elis.rossum.ai/api/docs/#list-all-hooks"""
+        """https://elis.rossum.ai/api/docs/#list-all-hooks."""
         return self._iter_over_async(self.elis_api_client.list_all_hooks(ordering, **filters))
 
     def retrieve_hook(self, id) -> Hook:
-        """https://elis.rossum.ai/api/docs/#retrieve-a-hook"""
+        """https://elis.rossum.ai/api/docs/#retrieve-a-hook."""
         return self.event_loop.run_until_complete(self.elis_api_client.retrieve_hook(id))
 
     def create_new_hook(self, data: Dict[str, Any]) -> Hook:
-        """https://elis.rossum.ai/api/docs/#create-a-new-hook"""
+        """https://elis.rossum.ai/api/docs/#create-a-new-hook."""
         return self.event_loop.run_until_complete(self.elis_api_client.create_new_hook(data))
 
     # ##### USER ROLES #####
@@ -333,7 +332,7 @@ class ElisAPIClientSync:
         ordering: Sequence[str] = (),
         **filters: Dict[str, Any],
     ) -> Iterable[UserRole]:
-        """https://elis.rossum.ai/api/docs/#list-all-user-roles"""
+        """https://elis.rossum.ai/api/docs/#list-all-user-roles."""
         return self._iter_over_async(self.elis_api_client.list_all_user_roles(ordering, **filters))
 
     def request_json(self, method: str, *args, **kwargs) -> Dict[str, Any]:

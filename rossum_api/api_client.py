@@ -270,7 +270,6 @@ class APIClient:
                 may be used to initialize values of the object created from the uploaded file,
                 semantics is different for each resource
         """
-
         url = f"{resource}/{id_}/upload"
         files = {"content": (filename, await fp.read(), "application/octet-stream")}
 
@@ -375,7 +374,7 @@ class APIClient:
 
     @authenticate_generator_if_needed
     async def _stream(self, method: str, url: str, *args, **kwargs) -> AsyncIterator[bytes]:
-        """Performs a streaming HTTP call"""
+        """Performs a streaming HTTP call."""
         # Do not force the calling site to alway prepend the base URL
         if not url.startswith("https://"):
             url = f"{self.base_url}/{url}"

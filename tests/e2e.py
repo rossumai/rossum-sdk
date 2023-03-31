@@ -1,19 +1,25 @@
+from __future__ import annotations
+
 import logging
 import os
-from typing import Optional
+from typing import TYPE_CHECKING
 
 import aiofiles
 import pytest
 from aiofiles import os as aios
 
-from rossum_api.models.queue import Queue
-from rossum_api.models.schema import Schema
-from rossum_api.models.workspace import Workspace
+from rossum_api.elis_api_client import ElisAPIClient
+
+if TYPE_CHECKING:
+    from typing import Optional
+
+    from rossum_api.models.queue import Queue
+    from rossum_api.models.schema import Schema
+    from rossum_api.models.workspace import Workspace
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
 
-from rossum_api.elis_api_client import ElisAPIClient
 
 WORKSPACE = {
     "name": "Rossum Client NG Test",

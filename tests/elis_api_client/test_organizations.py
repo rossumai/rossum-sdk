@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 from mock import call
 
@@ -54,7 +56,9 @@ class TestOrganizations:
 
         assert organization == Organization(**dummy_organization)
 
-        http_client.fetch_one.assert_has_calls([call("auth", "user"), call("organizations", "406")])
+        http_client.fetch_one.assert_has_calls(
+            [call("auth", "user"), call("organizations", "406")]
+        )
 
 
 class TestOrganizationsSync:
@@ -88,4 +92,6 @@ class TestOrganizationsSync:
 
         assert organization == Organization(**dummy_organization)
 
-        http_client.fetch_one.assert_has_calls([call("auth", "user"), call("organizations", "406")])
+        http_client.fetch_one.assert_has_calls(
+            [call("auth", "user"), call("organizations", "406")]
+        )

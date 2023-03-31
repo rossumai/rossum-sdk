@@ -2,6 +2,8 @@
 
 It could evolve in time into an E2E test.
 """
+from __future__ import annotations
+
 import asyncio
 import logging
 import os

@@ -1,0 +1,62 @@
+# Per-service ruff linting
+select = [
+    "B",  # bugbear
+    "C",  # mccabe
+    "E",  # PEP8 (pycodestyle)
+    "F",  # pyflakes
+    "I",  # isort
+    "W",  # PEP8  (pycodestyle)
+]
+extend-select = [
+    "ARG",  # unused arguments
+    "C4",  # comprehensions
+    "ERA",  # eradicate,
+    "EXE",  # executable
+    "G",  # logging-format
+    "T",  # print
+    "T10",  # breakpoint
+    "TID252",  # absolute imports
+    "TCH",  # type-checking
+    "UP031",  # f-strings (flynt)
+    "UP032",  # f-strings (flynt)
+]
+unfixable = ["ERA"]
+
+ignore = [
+    "ARG001", # Unused function argument
+    "ARG002", # Unused method argument
+    "B026",  # Star-arg unpacking after a keyword argument is strongly discouraged
+    "B905",  # `zip()` without an explicit `strict=` parameter
+    "D105",  # Missing docstring in magic method
+    "D107",  # Missing docstring in __init__
+    "E501",  # Long literals which Black can't split
+]
+
+line-length = 99
+target-version = "py37"
+ignore-init-module-imports = true
+extend-exclude = [
+    ".git",
+    ".mypy_cache",
+    "__pycache__",
+    ".pytest_cache",
+]
+
+[flake8-type-checking]
+exempt-modules = []  # default is `typing`, but we want to include these under guards if possible
+runtime-evaluated-decorators = ["dataclasses.dataclass"]
+
+[isort]
+required-imports = ["from __future__ import annotations"]
+
+[pydocstyle]
+# Use numpy-style docstrings.
+convention = "numpy"
+
+[mccabe]
+# Unlike Flake8, default to a complexity level of 10.
+max-complexity = 10
+
+[per-file-ignores]
+# commons module files
+"test.py" = ["ERA001", "T201"]

@@ -21,6 +21,7 @@ tests = [
   "pytest-asyncio",
   "pytest-httpx",
   "pytest-cov",
+  "ruff",
   "types-aiofiles",
 ]
 
@@ -35,7 +36,7 @@ pythonpath = [
 ]
 
 [tool.black]
-line-length = 100
+line-length = 99
 target-version = ["py37"]
 include = '\.pyi?$'
 

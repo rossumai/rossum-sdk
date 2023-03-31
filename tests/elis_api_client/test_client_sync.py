@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import httpx
 import pytest
 from mock import patch
@@ -42,7 +44,7 @@ class TestClientSync:
         data = client.request_json("GET", *args, **kwargs)
         assert data == {"some": "json"}
         http_client.request_json.assert_called_with("GET", *args, **kwargs)
-        
+
     def test_request(self, elis_client_sync):
         client, http_client = elis_client_sync
         http_client.request.return_value = httpx.Response(200, content=b"some content")
@@ -51,5 +53,3 @@ class TestClientSync:
         data = client.request("GET", *args, **kwargs)
         assert data.content == b"some content"
         http_client.request.assert_called_with("GET", *args, **kwargs)
-            
-        

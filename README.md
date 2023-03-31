@@ -1,6 +1,6 @@
 # Rossum SDK
 
-[![Build Status](https://api.travis-ci.com/rossumai/rossum-sdk.svg?branch=main)](https://travis-ci.com/rossumai/rossum-sdk)
+[![Build Status](https://github.com/rossumai/rossum-sdk/actions/workflows/lint-and-test.yaml/badge.svg)](https://github.com/rossumai/rossum-sdk/actions)
 [![Coverage](https://codecov.io/gh/rossumai/rossum-sdk/branch/main/graph/badge.svg)](https://codecov.io/gh/rossumai/rossum-sdk)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 ![MIT licence](https://img.shields.io/pypi/l/rossum.svg)

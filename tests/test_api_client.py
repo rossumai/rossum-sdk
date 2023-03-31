@@ -4,6 +4,8 @@
 * `workspace` is used as resource in most tests to make the examples representative.
 * all CRUD methods are tested for both a happy path and an error (400 or 404)
 """
+from __future__ import annotations
+
 import copy
 import functools
 import json
@@ -595,15 +597,15 @@ async def test_request_json_204(client, httpx_mock):
     data = await client.request_json("DELETE", "https://elis.rossum.ai/api/v1/workspaces/123")
     assert data == {}
 
+
 @pytest.mark.asyncio
 async def test_request_binary_data(client, httpx_mock):
     httpx_mock.add_response(
         method="GET", url="https://elis.rossum.ai/api/v1/pages/123/preview", content=b"binary data"
     )
-    data = await client.request(
-        "GET", "https://elis.rossum.ai/api/v1/pages/123/preview"
-    )
+    data = await client.request("GET", "https://elis.rossum.ai/api/v1/pages/123/preview")
     assert data.content == b"binary data"
+
 
 @pytest.mark.asyncio
 async def test_request_repacks_exception(client, httpx_mock):
@@ -627,7 +629,7 @@ async def test_stream_repacks_exception(client, httpx_mock):
         content=b"exported_at: Enter a valid date/time",
     )
     with pytest.raises(APIClientError) as err:
-        async for w in client._stream("GET", "queues/123/export?format=csv&exported_at=invalid"):
+        async for _w in client._stream("GET", "queues/123/export?format=csv&exported_at=invalid"):
             pass
     assert str(err.value) == "HTTP 404, content: exported_at: Enter a valid date/time"
 

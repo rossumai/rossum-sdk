@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 from mock.mock import MagicMock, patch
 
@@ -296,7 +298,9 @@ class TestAnnotationsSync:
             ["325164"],
         )
 
-    def test_list_all_annotations_with_content_sideloads_without_schema_ids(self, elis_client_sync):
+    def test_list_all_annotations_with_content_sideloads_without_schema_ids(
+        self, elis_client_sync
+    ):
         client, http_client = elis_client_sync
         http_client.fetch_all = MagicMock()
 

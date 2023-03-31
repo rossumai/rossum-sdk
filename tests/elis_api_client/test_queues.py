@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 from mock import MagicMock, call, patch
 
@@ -211,7 +213,9 @@ class TestQueues:
         export_format = "xml"
 
         result = []
-        async for a in client.export_annotations_to_file(queue_id=qid, export_format=export_format):
+        async for a in client.export_annotations_to_file(
+            queue_id=qid, export_format=export_format
+        ):
             result += a
 
         http_client.export.assert_called_with("queues", qid, export_format)

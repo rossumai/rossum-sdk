@@ -32,9 +32,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          token: ${{ secrets.PUBLISH_TOKEN }}
       - name: Semantic release
-        run: |
-          git config --global user.name "semantic-release (via GitHub Actions)"
-          git config --global user.email "semantic-release@github"
-          pip install python-semantic-release
-          semantic-release publish
+        uses: relekang/python-semantic-release@master
+        with:
+            # Personal Access Token that belongs to an admin of the repo must
+            # be set in PUBLISH_TOKEN secret to bypass `main` branch protection
+            github_token: ${{ secrets.PUBLISH_TOKEN }}

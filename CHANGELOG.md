@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.0 (2023-04-28)
+### Feature
+* **api_client:** Allow to set max pages limit in filters ([`090114f`](https://github.com/rossumai/rossum-sdk/commit/090114fbaecc3d84706715e80f119e623882826a))
+
 ## v0.5.1 (2023-03-31)
 ### Fix
 * Switch from TravisCI to Github Workflows ([`de09e69`](https://github.com/rossumai/rossum-sdk/commit/de09e698f20c587932d5ad050d68f96e043ad645))

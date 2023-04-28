@@ -135,6 +135,7 @@ class APIClient:
         sideloads: Sequence[str] = (),
         content_schema_ids: Sequence[str] = (),
         method: str = "GET",
+        max_pages: Optional[int] = None,
         **filters: Any,
     ) -> AsyncIterator[Dict[str, Any]]:
         """Retrieve a list of objects in a specific resource.
@@ -154,6 +155,8 @@ class APIClient:
         method
             export endpoints have different semantics when POST is used, allow customization of
             method so that export() can re-use fetch_all() implementation
+        max_pages
+            maximum number of pages to fetch
         filters
             mapping from resource field to value used to filter records
         """
@@ -168,11 +171,12 @@ class APIClient:
             f"{resource}", method, query_params, sideloads
         )
         # Fire async tasks to fetch the rest of the pages and start yielding results from page 1
+        last_page = min(total_pages, max_pages or total_pages)
         page_requests = [
             asyncio.create_task(
                 self._fetch_page(f"{resource}", method, {**query_params, "page": i}, sideloads)
             )
-            for i in range(2, total_pages + 1)
+            for i in range(2, last_page + 1)
         ]
         for r in results:
             yield r
@@ -301,7 +305,7 @@ class APIClient:
         if export_format == "json":
             # JSON export is paginated just like a regular fetch_all, it abuses **filters kwargs of
             # fetch_all to pass export-specific query params
-            async for result in self.fetch_all(url, method=method, **query_params):
+            async for result in self.fetch_all(url, method=method, max_pages=None, **query_params):
                 yield result
         else:
             # In CSV/XML/XLSX case, all annotations are returned, i.e. the response can be large,

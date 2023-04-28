@@ -280,6 +280,21 @@ async def test_fetch_all(client, httpx_mock):
 
 
 @pytest.mark.asyncio
+async def test_fetch_all_with_max_pages_limit(client, httpx_mock):
+    second_page = "https://elis.rossum.ai/api/v1/workspaces?page=2&page_size=100&ordering=&sideload=&content.schema_id="
+    httpx_mock.add_response(
+        method="GET",
+        url="https://elis.rossum.ai/api/v1/workspaces?page_size=100&ordering=&sideload=&content.schema_id=",
+        json={
+            "pagination": {"total": 3, "total_pages": 3, "next": second_page, "previous": None},
+            "results": WORKSPACES[:1],
+        },
+    )
+    workspaces = [w async for w in client.fetch_all("workspaces", max_pages=1)]
+    assert workspaces == WORKSPACES[:1]
+
+
+@pytest.mark.asyncio
 async def test_fetch_all_ordering(client, httpx_mock):
     httpx_mock.add_response(
         method="GET",

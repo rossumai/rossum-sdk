@@ -36,6 +36,13 @@ class TestClientSync:
 
             assert not new_event_loop_mock.called
 
+    def test_request_paginated(self, elis_client_sync, mock_generator):
+        client, http_client = elis_client_sync
+        http_client.fetch_all.return_value = mock_generator({"some": "json"})
+        kwargs = {"whatever": "kwarg"}
+        data = client.request_paginated("hook_templates", **kwargs)
+        assert list(data) == [{"some": "json"}]
+
     def test_request_json(self, elis_client_sync):
         client, http_client = elis_client_sync
         http_client.request_json.return_value = {"some": "json"}

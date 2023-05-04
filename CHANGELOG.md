@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.0 (2023-05-04)
+### Feature
+* **elis_api_client:** Add generic method for requests to paginated resources ([`6b290e8`](https://github.com/rossumai/rossum-sdk/commit/6b290e8cb340f7be81768b311678163a3bfc41a8))
+
 ## v0.6.0 (2023-04-28)
 ### Feature
 * **api_client:** Allow to set max pages limit in filters ([`090114f`](https://github.com/rossumai/rossum-sdk/commit/090114fbaecc3d84706715e80f119e623882826a))

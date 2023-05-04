@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from setuptools import setup
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 
 setup(
     version=__version__,

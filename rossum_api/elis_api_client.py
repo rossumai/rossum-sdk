@@ -364,6 +364,14 @@ class ElisAPIClient:
         async for u in self._http_client.fetch_all("groups", ordering, **filters):
             yield dacite.from_dict(UserRole, u)
 
+    # ##### GENERIC METHODS #####
+    async def request_paginated(self, resource: str, *args, **kwargs) -> AsyncIterable[dict]:
+        """Use to perform requests to seldomly used or experimental endpoints with paginated response that do not have
+        direct support in the client and return iterable.
+        """
+        async for element in self._http_client.fetch_all(resource, *args, **kwargs):
+            yield element
+
     async def request_json(self, method: str, *args, **kwargs) -> Dict[str, Any]:
         """Use to perform requests to seldomly used or experimental endpoints that do not have
         direct support in the client and return JSON.

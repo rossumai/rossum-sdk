@@ -9,7 +9,7 @@ class Queue:
     id: int
     name: str
     url: str
-    workspace: str
+    workspace: Optional[str]
     connector: Optional[str]
     schema: str
     inbox: Optional[str]

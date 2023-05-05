@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.1 (2023-05-05)
+### Fix
+* **models:** Allow null workspace in Queue model ([`dea0027`](https://github.com/rossumai/rossum-sdk/commit/dea00275c23d8b121ad29c1e624e74431923a4b0))
+* **models:** Allow Any in metadata dict values in Queue model ([`7abaa13`](https://github.com/rossumai/rossum-sdk/commit/7abaa135a5f5f30f6e001afa9d22258dc89fcbc1))
+
 ## v0.7.0 (2023-05-04)
 ### Feature
 * **elis_api_client:** Add generic method for requests to paginated resources ([`6b290e8`](https://github.com/rossumai/rossum-sdk/commit/6b290e8cb340f7be81768b311678163a3bfc41a8))

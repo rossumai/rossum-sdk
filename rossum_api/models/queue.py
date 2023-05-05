@@ -24,7 +24,7 @@ class Queue:
     automation_level: str = "never"
     default_score_threshold: float = 0.8
     locale: str = "en_GB"
-    metadata: Dict[str, str] = field(default_factory=dict)
+    metadata: Dict[str, Any] = field(default_factory=dict)
     settings: Dict[str, Any] = field(default_factory=dict)
     dedicated_engine: Optional[Union[str, Dict[str, Any]]] = None
     generic_engine: Optional[Union[str, Dict[str, Any]]] = None

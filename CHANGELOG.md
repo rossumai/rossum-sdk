@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.2 (2023-06-02)
+
+### Fix
+
+* Add await to asyncio.sleep ([`4a537ab`](https://github.com/rossumai/rossum-sdk/commit/4a537ab6641e7745383a45dba7dd77bc0d6eb28c))
+
 ## v0.7.1 (2023-05-05)
 ### Fix
 * **models:** Allow null workspace in Queue model ([`dea0027`](https://github.com/rossumai/rossum-sdk/commit/dea00275c23d8b121ad29c1e624e74431923a4b0))

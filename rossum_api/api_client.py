@@ -371,7 +371,7 @@ class APIClient:
             except httpx.RequestError:
                 if not remaining_attempts:
                     raise
-            asyncio.sleep(backoff)
+            await asyncio.sleep(backoff)
 
         await self._raise_for_status(response)
         return response

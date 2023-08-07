@@ -32,7 +32,7 @@ class Annotation:
     has_email_thread_with_new_replies: bool = False
     suggested_edit: Optional[str] = None
     messages: Optional[List[dict]] = None
-    time_spent: float = 0
+    time_spent: Optional[float] = 0
     relations: List[str] = field(default_factory=list)
     pages: List[str] = field(default_factory=list)
     document: Optional[Union[str, Document]] = None

@@ -26,4 +26,5 @@ class Hook:
     extension_source: str = "custom"
     sideload: List[str] = field(default_factory=list)
     token_owner: Optional[str] = None
+    token_lifetime_s: Optional[int] = None
     description: Optional[str] = None

@@ -2,6 +2,19 @@
 
 
 
+## v0.8.0 (2023-08-11)
+
+### Feature
+
+* feat(models): add token_lifetime_s attribute to hook model ([`f75dcfd`](https://github.com/rossumai/rossum-sdk/commit/f75dcfd5d346edadef9e56532316b217d069fbbb))
+
+### Unknown
+
+* Merge pull request #48 from uhlikfil/main
+
+feat(models): add token_lifetime_s attribute to hook model ([`ae35fc4`](https://github.com/rossumai/rossum-sdk/commit/ae35fc4e6ae269389904e0df88df548fab67d9e4))
+
+
 ## v0.7.3 (2023-08-07)
 
 ### Fix

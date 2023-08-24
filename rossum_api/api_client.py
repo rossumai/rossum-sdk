@@ -136,6 +136,7 @@ class APIClient:
         content_schema_ids: Sequence[str] = (),
         method: str = "GET",
         max_pages: Optional[int] = None,
+        json: Optional[dict] = None,
         **filters: Any,
     ) -> AsyncIterator[Dict[str, Any]]:
         """Retrieve a list of objects in a specific resource.
@@ -157,6 +158,8 @@ class APIClient:
             method so that export() can re-use fetch_all() implementation
         max_pages
             maximum number of pages to fetch
+        json
+            json payload sent with the request. Used for POST requests.
         filters
             mapping from resource field to value used to filter records
         """
@@ -168,13 +171,15 @@ class APIClient:
             **filters,
         }
         results, total_pages = await self._fetch_page(
-            f"{resource}", method, query_params, sideloads
+            f"{resource}", method, query_params, sideloads, json=json
         )
         # Fire async tasks to fetch the rest of the pages and start yielding results from page 1
         last_page = min(total_pages, max_pages or total_pages)
         page_requests = [
             asyncio.create_task(
-                self._fetch_page(f"{resource}", method, {**query_params, "page": i}, sideloads)
+                self._fetch_page(
+                    f"{resource}", method, {**query_params, "page": i}, sideloads, json=json
+                )
             )
             for i in range(2, last_page + 1)
         ]
@@ -193,8 +198,9 @@ class APIClient:
         method: str,
         query_params: Dict[str, Any],
         sideload_groups: Sequence[str],
+        json: Optional[dict] = None,
     ) -> Tuple[List[Dict[str, Any]], int]:
-        data = await self.request_json(method, resource, params=query_params)
+        data = await self.request_json(method, resource, params=query_params, json=json)
         self._embed_sideloads(data, sideload_groups)
         return data["results"], data["pagination"]["total_pages"]
 
@@ -305,7 +311,7 @@ class APIClient:
         if export_format == "json":
             # JSON export is paginated just like a regular fetch_all, it abuses **filters kwargs of
             # fetch_all to pass export-specific query params
-            async for result in self.fetch_all(url, method=method, max_pages=None, **query_params):
+            async for result in self.fetch_all(url, method=method, **query_params):  # type: ignore
                 yield result
         else:
             # In CSV/XML/XLSX case, all annotations are returned, i.e. the response can be large,

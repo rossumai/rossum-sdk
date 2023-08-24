@@ -178,6 +178,23 @@ class TestAnnotations:
 
         assert not http_client.fetch_all.called
 
+    async def test_search_for_annotations(self, elis_client, dummy_annotation, mock_generator):
+        client, http_client = elis_client
+        http_client.fetch_all.return_value = mock_generator(dummy_annotation)
+
+        annotations = client.search_for_annotations({"$and": []}, {"string": "expl"})
+
+        async for a in annotations:
+            assert a == Annotation(**dummy_annotation)
+
+        http_client.fetch_all.assert_called_with(
+            "annotations/search",
+            (),
+            (),
+            json={"query": {"$and": []}, "query_string": {"string": "expl"}},
+            method="POST",
+        )
+
     async def test_retrieve_annotation(self, elis_client, dummy_annotation):
         client, http_client = elis_client
         http_client.fetch_one.return_value = dummy_annotation
@@ -311,6 +328,23 @@ class TestAnnotationsSync:
                 pass
 
         assert not http_client.fetch_all.called
+
+    def test_search_for_annotations(self, elis_client_sync, dummy_annotation, mock_generator):
+        client, http_client = elis_client_sync
+        http_client.fetch_all.return_value = mock_generator(dummy_annotation)
+
+        annotations = client.search_for_annotations({"$and": []}, {"string": "expl"})
+
+        for a in annotations:
+            assert a == Annotation(**dummy_annotation)
+
+        http_client.fetch_all.assert_called_with(
+            "annotations/search",
+            (),
+            (),
+            json={"query": {"$and": []}, "query_string": {"string": "expl"}},
+            method="POST",
+        )
 
     def test_retrieve_annotation(self, elis_client_sync, dummy_annotation):
         client, http_client = elis_client_sync

@@ -230,6 +230,21 @@ class ElisAPIClientSync:
             )
         )
 
+    def search_for_annotations(
+        self,
+        query: Optional[dict] = None,
+        query_string: Optional[dict] = None,
+        ordering: Sequence[str] = (),
+        sideloads: Sequence[str] = (),
+        **kwargs: Any,
+    ) -> Iterable[Annotation]:
+        """https://elis.rossum.ai/api/docs/internal/#search-for-annotations."""
+        return self._iter_over_async(
+            self.elis_api_client.search_for_annotations(
+                query, query_string, ordering, sideloads, **kwargs
+            )
+        )
+
     def retrieve_annotation(self, annotation_id: int, sideloads: Sequence[str] = ()) -> Annotation:
         """https://elis.rossum.ai/api/docs/#retrieve-an-annotation."""
         return self.event_loop.run_until_complete(

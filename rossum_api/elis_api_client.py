@@ -232,6 +232,28 @@ class ElisAPIClient:
         ):
             yield dacite.from_dict(Annotation, a)
 
+    async def search_for_annotations(
+        self,
+        query: Optional[dict] = None,
+        query_string: Optional[dict] = None,
+        ordering: Sequence[str] = (),
+        sideloads: Sequence[str] = (),
+        **kwargs: Any,
+    ) -> AsyncIterable[Annotation]:
+        """https://elis.rossum.ai/api/docs/#search-for-annotations."""
+        if not query and not query_string:
+            raise ValueError("Either query or query_string must be provided")
+        json_payload = {}
+        if query:
+            json_payload["query"] = query
+        if query_string:
+            json_payload["query_string"] = query_string
+
+        async for a in self._http_client.fetch_all(
+            "annotations/search", ordering, sideloads, json=json_payload, method="POST", **kwargs
+        ):
+            yield dacite.from_dict(Annotation, a)
+
     async def retrieve_annotation(
         self, annotation_id: int, sideloads: Sequence[str] = ()
     ) -> Annotation:

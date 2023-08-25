@@ -2,7 +2,22 @@
 
 
 
-## v0.8.0 (2023-08-11)
+## v0.8.0 (2023-08-25)
+
+### Feature
+
+* feat(elis_api_clients): add new `search_for_annotations` method ([`34b3f72`](https://github.com/rossumai/rossum-sdk/commit/34b3f7249c149d0fa2da6fa1a171b92f0a0a2ffa))
+
+* feat(api_client): allow passing json argument in `fetch_all` as request payload ([`e433f85`](https://github.com/rossumai/rossum-sdk/commit/e433f858bbca35c7cf3211a7dabbbea921ec431d))
+
+### Unknown
+
+* Merge pull request #49 from OndraSlama/ondra-add-search-for-query-method
+
+Add search_for_annotations method ([`b994053`](https://github.com/rossumai/rossum-sdk/commit/b994053c779af2c8e6a66d94728e7f6658d617ff))
+
+
+## v0.7.4 (2023-08-11)
 
 ### Feature
 

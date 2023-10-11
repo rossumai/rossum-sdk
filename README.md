@@ -48,7 +48,7 @@ Async version:
 
 ```python
 import asyncio
-from rossum_api.elis_api_client import ElisAPIClient
+from rossum_api import ElisAPIClient
 
 WORKSPACE = {
     "name": "Rossum Client NG Test",
@@ -77,7 +77,7 @@ asyncio.run(main_with_async_client())
 Sync version:
 
 ```python
-from rossum_api.elis_api_client_sync import ElisAPIClientSync
+from rossum_api import ElisAPIClientSync
 
 WORKSPACE = {
     "name": "Rossum Client NG Test",

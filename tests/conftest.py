@@ -5,9 +5,8 @@ import pytest
 import pytest_asyncio
 from mock import MagicMock
 
+from rossum_api import ElisAPIClient, ElisAPIClientSync
 from rossum_api.api_client import APIClient
-from rossum_api.elis_api_client import ElisAPIClient
-from rossum_api.elis_api_client_sync import ElisAPIClientSync
 
 
 @pytest.fixture

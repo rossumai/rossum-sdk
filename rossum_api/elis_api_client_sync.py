@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import typing
 
-from rossum_api.elis_api_client import ElisAPIClient
+from rossum_api import ElisAPIClient
 
 if typing.TYPE_CHECKING:
     import pathlib
@@ -23,8 +23,8 @@ if typing.TYPE_CHECKING:
 
     import httpx
 
+    from rossum_api import ExportFileFormats
     from rossum_api.api_client import APIClient
-    from rossum_api.elis_api_client import ExportFileFormats
     from rossum_api.models.annotation import Annotation
     from rossum_api.models.connector import Connector
     from rossum_api.models.hook import Hook

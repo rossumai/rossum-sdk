@@ -8,7 +8,7 @@ import aiofiles
 import pytest
 from aiofiles import os as aios
 
-from rossum_api.elis_api_client import ElisAPIClient
+from rossum_api import ElisAPIClient
 
 if TYPE_CHECKING:
     from typing import Optional

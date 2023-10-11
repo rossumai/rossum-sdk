@@ -2,6 +2,22 @@
 
 
 
+## v0.9.1 (2023-10-11)
+
+### Fix
+
+* fix(api_client): limit in-flight requests
+
+Limit the maximum number of fetch_all page requests running at in
+parallel. ([`56244d0`](https://github.com/rossumai/rossum-sdk/commit/56244d07569ad075ecd4703c3794a344eb609acd))
+
+### Unknown
+
+* Merge pull request #50 from opichals/limit-maximum-number-of-in-flight-requests-in-fetch_all
+
+fix(api_client): limit in-flight requests ([`3c1a10a`](https://github.com/rossumai/rossum-sdk/commit/3c1a10a5ba3d3787a6bf1796666e458d1f531d62))
+
+
 ## v0.9.0 (2023-10-11)
 
 ### Feature

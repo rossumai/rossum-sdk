@@ -106,6 +106,7 @@ class APIClient:
         timeout: Optional[float] = None,
         n_retries: int = 3,
         retry_backoff_factor: float = 1.0,
+        max_in_flight_requests: int = 4,
     ):
         if token is None and (username is None and password is None):
             raise TypeError(
@@ -119,6 +120,7 @@ class APIClient:
         self.client = httpx.AsyncClient(timeout=timeout)
         self.n_retries = n_retries
         self.retry_backoff_factor = retry_backoff_factor
+        self.max_in_flight_requests = max_in_flight_requests
 
     @property
     def _headers(self):
@@ -175,14 +177,20 @@ class APIClient:
         )
         # Fire async tasks to fetch the rest of the pages and start yielding results from page 1
         last_page = min(total_pages, max_pages or total_pages)
-        page_requests = [
-            asyncio.create_task(
-                self._fetch_page(
-                    f"{resource}", method, {**query_params, "page": i}, sideloads, json=json
+
+        in_flight_guard = asyncio.Semaphore(self.max_in_flight_requests)
+
+        async def _fetch_page(page_number):
+            async with in_flight_guard:
+                return await self._fetch_page(
+                    f"{resource}",
+                    method,
+                    {**query_params, "page": page_number},
+                    sideloads,
+                    json=json,
                 )
-            )
-            for i in range(2, last_page + 1)
-        ]
+
+        page_requests = [asyncio.create_task(_fetch_page(i)) for i in range(2, last_page + 1)]
         for r in results:
             yield r
         # Await requests one by one to yield results in correct order to ensure the same order of

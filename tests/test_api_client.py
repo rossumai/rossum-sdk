@@ -6,6 +6,8 @@
 """
 from __future__ import annotations
 
+import asyncio
+import contextlib
 import copy
 import functools
 import json
@@ -351,6 +353,71 @@ async def test_fetch_all_sideload(client, httpx_mock):
     expected_annotations[2]["content"] = []
 
     assert workspaces == expected_annotations
+
+
+@pytest.mark.asyncio
+async def test_fetch_all_limit_in_flight_requests(client, httpx_mock):
+    page_count = 10
+    page_url = "https://elis.rossum.ai/api/v1/workspaces?page_size=100&ordering=&sideload=&content.schema_id="
+    for i in range(2, page_count + 1):
+        next_page_url = f"https://elis.rossum.ai/api/v1/workspaces?page={i}&page_size=100&ordering=&sideload=&content.schema_id="
+        httpx_mock.add_response(
+            method="GET",
+            url=page_url,
+            json={
+                "pagination": {
+                    "total": page_count,
+                    "total_pages": page_count,
+                    "next": next_page_url,
+                    "previous": None,
+                },
+                "results": WORKSPACES[:1],
+            },
+        )
+        page_url = next_page_url
+    httpx_mock.add_response(
+        method="GET",
+        url=page_url,
+        json={
+            "pagination": {
+                "total": page_count,
+                "total_pages": page_count,
+                "next": None,
+                "previous": None,
+            },
+            "results": WORKSPACES[-1:],
+        },
+    )
+
+    @contextlib.contextmanager
+    def track_concurrency(client):
+        concurrency_lock = asyncio.Semaphore(1)
+        concurrency = {"current": 0, "max": 0}
+        request_method = client._request
+
+        async def _request(*args, **kwargs):
+            async with concurrency_lock:
+                concurrency["current"] += 1
+                concurrency["max"] = max(concurrency["current"], concurrency["max"])
+            await asyncio.sleep(0)  # ensure the concurrency is measurable
+            results = await request_method(*args, **kwargs)
+            async with concurrency_lock:
+                concurrency["current"] -= 1
+            return results
+
+        with mock.patch.object(client, "_request", side_effect=_request):
+            yield concurrency
+
+    with track_concurrency(client) as concurrency:
+        workspaces = [w async for w in client.fetch_all("workspaces")]
+        assert workspaces == [WORKSPACES[0]] * (page_count - 1) + WORKSPACES[-1:]
+        assert concurrency["max"] == 4, "default max_in_flight_requests is 4"
+
+    with track_concurrency(client) as concurrency:
+        client.max_in_flight_requests = 3
+        workspaces = [w async for w in client.fetch_all("workspaces")]
+        assert workspaces == [WORKSPACES[0]] * (page_count - 1) + WORKSPACES[-1:]
+        assert concurrency["max"] == 3, "based on overridden max_in_flight_requests to 3"
 
 
 @pytest.mark.asyncio

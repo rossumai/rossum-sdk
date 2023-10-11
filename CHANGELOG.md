@@ -2,6 +2,19 @@
 
 
 
+## v0.9.0 (2023-10-11)
+
+### Feature
+
+* feat: export public interface in root package ([`f85fc58`](https://github.com/rossumai/rossum-sdk/commit/f85fc58f017b5108b46819af8cf592e34de3f3e5))
+
+### Unknown
+
+* Merge pull request #51 from uhlikfil/main
+
+feat: export public interface in root package ([`977824f`](https://github.com/rossumai/rossum-sdk/commit/977824f166663f0da2e237ef3276577e01d7b187))
+
+
 ## v0.8.0 (2023-08-25)
 
 ### Feature

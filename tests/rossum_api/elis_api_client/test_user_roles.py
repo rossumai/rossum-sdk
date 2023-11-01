@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from rossum_api.models.user_role import UserRole
+from rossum_sdk.rossum_api.models.user_role import UserRole
 
 
 @pytest.fixture

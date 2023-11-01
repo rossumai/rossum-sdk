@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from rossum_api.models.hook import Hook
+from rossum_sdk.rossum_api.models.hook import Hook
 
 
 @pytest.fixture

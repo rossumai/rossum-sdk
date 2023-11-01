@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 import aiofiles
 import pytest
 from aiofiles import os as aios
-
 from rossum_api import ElisAPIClient
 
 if TYPE_CHECKING:

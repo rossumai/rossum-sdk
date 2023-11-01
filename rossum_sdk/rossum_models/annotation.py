@@ -3,9 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
-from rossum_api.models.automation_blocker import AutomationBlocker
-from rossum_api.models.document import Document
-from rossum_api.models.user import User
+from rossum_sdk.rossum_models.automation_blocker import AutomationBlocker
+from rossum_sdk.rossum_models.document import Document
+from rossum_sdk.rossum_models.user import User
 
 
 @dataclass

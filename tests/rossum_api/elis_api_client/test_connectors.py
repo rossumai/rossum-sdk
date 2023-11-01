@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from rossum_api.models.connector import Connector
+from rossum_sdk.rossum_api.models.connector import Connector
 
 
 @pytest.fixture

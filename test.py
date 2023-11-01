@@ -10,7 +10,6 @@ import os
 import random
 
 import aiofiles
-
 from rossum_api import ElisAPIClient, ElisAPIClientSync
 from rossum_api.api_client import APIClient
 

@@ -5,8 +5,8 @@ import pytest
 from mock import patch
 from mock.mock import MagicMock
 
-from rossum_api import ElisAPIClientSync
-from rossum_api.elis_api_client_sync import AsyncRuntimeError
+from rossum_sdk.rossum_api import ElisAPIClientSync
+from rossum_sdk.rossum_api.elis_api_client_sync import AsyncRuntimeError
 
 
 class TestClientSync:

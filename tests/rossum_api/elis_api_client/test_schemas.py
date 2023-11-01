@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from rossum_api.models.schema import Schema
+from rossum_sdk.rossum_api.models.schema import Schema
 
 
 @pytest.fixture

@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 from mock import call
 
-from rossum_api.models.organization import Organization
+from rossum_sdk.rossum_api.models.organization import Organization
 
 
 @pytest.fixture

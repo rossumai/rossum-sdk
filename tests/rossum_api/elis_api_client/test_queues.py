@@ -3,8 +3,8 @@ from __future__ import annotations
 import pytest
 from mock import MagicMock, call, patch
 
-from rossum_api.models.annotation import Annotation
-from rossum_api.models.queue import Queue
+from rossum_sdk.rossum_api.models.annotation import Annotation
+from rossum_sdk.rossum_api.models.queue import Queue
 
 
 @pytest.fixture
@@ -207,7 +207,9 @@ class TestQueues:
 
     async def test_export_annotations_to_file(self, elis_client, mock_file_read):
         client, http_client = elis_client
-        http_client.export.return_value = mock_file_read("tests/data/annotation_export.xml")
+        http_client.export.return_value = mock_file_read(
+            "tests/rossum_api/data/annotation_export.xml"
+        )
 
         qid = 123
         export_format = "xml"
@@ -220,7 +222,7 @@ class TestQueues:
 
         http_client.export.assert_called_with("queues", qid, export_format)
 
-        with open("tests/data/annotation_export.xml", "rb") as fp:
+        with open("tests/rossum_api/data/annotation_export.xml", "rb") as fp:
             for i, line in enumerate(fp.read()):
                 assert result[i] == line
 
@@ -339,7 +341,9 @@ class TestQueuesSync:
 
     def test_export_annotations_to_file(self, elis_client_sync, mock_file_read):
         client, http_client = elis_client_sync
-        http_client.export.return_value = mock_file_read("tests/data/annotation_export.xml")
+        http_client.export.return_value = mock_file_read(
+            "tests/rossum_api/data/annotation_export.xml"
+        )
 
         qid = 123
         export_format = "xml"
@@ -350,6 +354,6 @@ class TestQueuesSync:
 
         http_client.export.assert_called_with("queues", qid, export_format)
 
-        with open("tests/data/annotation_export.xml", "rb") as fp:
+        with open("tests/rossum_api/data/annotation_export.xml", "rb") as fp:
             for i, line in enumerate(fp.read()):
                 assert result[i] == line

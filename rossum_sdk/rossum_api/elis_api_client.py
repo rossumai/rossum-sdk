@@ -7,17 +7,17 @@ from enum import Enum
 import aiofiles
 import dacite
 
-from rossum_api.api_client import APIClient
-from rossum_api.models.annotation import Annotation
-from rossum_api.models.connector import Connector
-from rossum_api.models.hook import Hook
-from rossum_api.models.inbox import Inbox
-from rossum_api.models.organization import Organization
-from rossum_api.models.queue import Queue
-from rossum_api.models.schema import Schema
-from rossum_api.models.user import User
-from rossum_api.models.user_role import UserRole
-from rossum_api.models.workspace import Workspace
+from rossum_sdk.rossum_api.api_client import APIClient
+from rossum_sdk.rossum_api.models.annotation import Annotation
+from rossum_sdk.rossum_api.models.connector import Connector
+from rossum_sdk.rossum_api.models.hook import Hook
+from rossum_sdk.rossum_api.models.inbox import Inbox
+from rossum_sdk.rossum_api.models.organization import Organization
+from rossum_sdk.rossum_api.models.queue import Queue
+from rossum_sdk.rossum_api.models.schema import Schema
+from rossum_sdk.rossum_api.models.user import User
+from rossum_sdk.rossum_api.models.user_role import UserRole
+from rossum_sdk.rossum_api.models.workspace import Workspace
 
 if typing.TYPE_CHECKING:
     import pathlib

@@ -3,7 +3,7 @@ requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "rossum_api"
+name = "rossum_sdk"
 version = "1.0.0"
 license = {text = "MIT"}
 readme = "README.md"
@@ -12,6 +12,9 @@ dependencies = [
     "httpx",
     "dacite",
 ]
+
+[project.entry-points.'rossum_sdk.models']
+default = 'rossum_sdk.rossum_models'
 
 [project.optional-dependencies]
 tests = [

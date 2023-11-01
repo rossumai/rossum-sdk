@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from rossum_api.models.user import User
+from rossum_sdk.rossum_api.models.user import User
 
 
 @pytest.mark.asyncio

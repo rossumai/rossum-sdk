@@ -5,6 +5,7 @@ VENV_PATH = .venv
 help:
 	@echo "Thanks for your interest in the Rossum Python SDK!"
 	@echo
+	@echo "make install: Install all needed dependencies including tests"
 	@echo "make lint: Run linters"
 	@echo "make test: Run basic tests (not testing most integrations)"
 	@echo "make test-all: Run ALL tests (slow, closest to CI)"
@@ -17,13 +18,16 @@ help:
 	virtualenv -ppython3 $(VENV_PATH)
 	$(VENV_PATH)/bin/pip install tox
 
+install:
+	$(VENV_PATH)/bin/pip install -e '.[tests]'
+
 format: .venv
 	$(VENV_PATH)/bin/tox -e linting --notest
 	.tox/linting/bin/black .
 .PHONY: format
 
 test: .venv
-	@$(VENV_PATH)/bin/tox -e py39
+	pytest tests
 .PHONY: test
 
 lint: .venv

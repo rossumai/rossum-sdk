@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 from mock.mock import MagicMock, patch
 
+from rossum_api.api_client import Resource
 from rossum_api.models.annotation import Annotation
 from rossum_api.models.automation_blocker import AutomationBlocker, AutomationBlockerContent
 from rossum_api.models.document import Document
@@ -128,7 +129,7 @@ class TestAnnotations:
         async for a in annotations:
             assert a == Annotation(**dummy_annotation)
 
-        http_client.fetch_all.assert_called_with("annotations", (), (), ())
+        http_client.fetch_all.assert_called_with(Resource.Annotation, (), (), ())
 
     async def test_list_all_annotations_with_sideloads(
         self, elis_client, dummy_annotation_with_sideloads, mock_generator
@@ -158,7 +159,7 @@ class TestAnnotations:
             assert a == annotation
 
         http_client.fetch_all.assert_called_with(
-            "annotations",
+            Resource.Annotation,
             (),
             ["documents", "automation_blockers", "content", "modifiers"],
             ["325164"],
@@ -187,7 +188,7 @@ class TestAnnotations:
         async for a in annotations:
             assert a == Annotation(**dummy_annotation)
 
-        http_client.fetch_all.assert_called_with(
+        http_client.fetch_all_by_url.assert_called_with(
             "annotations/search",
             (),
             (),
@@ -204,7 +205,7 @@ class TestAnnotations:
 
         assert annotation == Annotation(**dummy_annotation)
 
-        http_client.fetch_one.assert_called_with("annotations", aid)
+        http_client.fetch_one.assert_called_with(Resource.Annotation, aid)
 
     async def test_retrieve_annotation_with_sideloads(self, elis_client, dummy_annotation):
         client, http_client = elis_client
@@ -216,7 +217,7 @@ class TestAnnotations:
 
         assert annotation == Annotation(**{**dummy_annotation, "content": []})
 
-        http_client.fetch_one.assert_called_with("annotations", aid)
+        http_client.fetch_one.assert_called_with(Resource.Annotation, aid)
 
     async def test_poll_annotation(self, elis_client, dummy_annotation):
         def is_imported(annotation):
@@ -252,7 +253,7 @@ class TestAnnotations:
 
         assert annotation == Annotation(**dummy_annotation)
 
-        http_client.replace.assert_called_with("annotations", aid, data)
+        http_client.replace.assert_called_with(Resource.Annotation, aid, data)
 
     async def test_update_part_annotation(self, elis_client, dummy_annotation):
         client, http_client = elis_client
@@ -266,7 +267,7 @@ class TestAnnotations:
 
         assert annotation == Annotation(**dummy_annotation)
 
-        http_client.update.assert_called_with("annotations", aid, data)
+        http_client.update.assert_called_with(Resource.Annotation, aid, data)
 
 
 class TestAnnotationsSync:
@@ -279,7 +280,7 @@ class TestAnnotationsSync:
         for a in annotations:
             assert a == Annotation(**dummy_annotation)
 
-        http_client.fetch_all.assert_called_with("annotations", (), (), ())
+        http_client.fetch_all.assert_called_with(Resource.Annotation, (), (), ())
 
     def test_list_all_annotations_with_sideloads(
         self, elis_client_sync, dummy_annotation_with_sideloads, mock_generator
@@ -309,7 +310,7 @@ class TestAnnotationsSync:
             assert a == annotation
 
         http_client.fetch_all.assert_called_with(
-            "annotations",
+            Resource.Annotation,
             (),
             ["documents", "automation_blockers", "content", "modifiers"],
             ["325164"],
@@ -338,7 +339,7 @@ class TestAnnotationsSync:
         for a in annotations:
             assert a == Annotation(**dummy_annotation)
 
-        http_client.fetch_all.assert_called_with(
+        http_client.fetch_all_by_url.assert_called_with(
             "annotations/search",
             (),
             (),
@@ -355,7 +356,7 @@ class TestAnnotationsSync:
 
         assert annotation == Annotation(**dummy_annotation)
 
-        http_client.fetch_one.assert_called_with("annotations", aid)
+        http_client.fetch_one.assert_called_with(Resource.Annotation, aid)
 
     def test_retrieve_annotation_with_sideloads(self, elis_client_sync, dummy_annotation):
         client, http_client = elis_client_sync
@@ -367,7 +368,7 @@ class TestAnnotationsSync:
 
         assert annotation == Annotation(**{**dummy_annotation, "content": []})
 
-        http_client.fetch_one.assert_called_with("annotations", aid)
+        http_client.fetch_one.assert_called_with(Resource.Annotation, aid)
 
     def test_poll_annotation(self, elis_client_sync, dummy_annotation):
         def is_imported(annotation):
@@ -403,7 +404,7 @@ class TestAnnotationsSync:
 
         assert annotation == Annotation(**dummy_annotation)
 
-        http_client.replace.assert_called_with("annotations", aid, data)
+        http_client.replace.assert_called_with(Resource.Annotation, aid, data)
 
     def test_update_part_annotation(self, elis_client_sync, dummy_annotation):
         client, http_client = elis_client_sync
@@ -417,4 +418,4 @@ class TestAnnotationsSync:
 
         assert annotation == Annotation(**dummy_annotation)
 
-        http_client.update.assert_called_with("annotations", aid, data)
+        http_client.update.assert_called_with(Resource.Annotation, aid, data)

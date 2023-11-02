@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 from mock import MagicMock, call, patch
 
+from rossum_api.api_client import Resource
 from rossum_api.models.annotation import Annotation
 from rossum_api.models.queue import Queue
 
@@ -104,7 +105,7 @@ class TestQueues:
         async for q in queues:
             assert q == Queue(**dummy_queue)
 
-        http_client.fetch_all.assert_called_with("queues", ())
+        http_client.fetch_all.assert_called_with(Resource.Queue, ())
 
     async def test_retrieve_queue(self, elis_client, dummy_queue):
         client, http_client = elis_client
@@ -115,7 +116,7 @@ class TestQueues:
 
         assert queue == Queue(**dummy_queue)
 
-        http_client.fetch_one.assert_called_with("queues", qid)
+        http_client.fetch_one.assert_called_with(Resource.Queue, qid)
 
     async def test_create_new_queue(self, elis_client, dummy_queue):
         client, http_client = elis_client
@@ -130,7 +131,7 @@ class TestQueues:
 
         assert queue == Queue(**dummy_queue)
 
-        http_client.create.assert_called_with("queues", data)
+        http_client.create.assert_called_with(Resource.Queue, data)
 
     async def test_delete_queue(self, elis_client, dummy_queue):
         client, http_client = elis_client
@@ -139,7 +140,7 @@ class TestQueues:
         qid = dummy_queue["id"]
         await client.delete_queue(qid)
 
-        http_client.delete.assert_called_with("queues", qid)
+        http_client.delete.assert_called_with(Resource.Queue, qid)
 
     async def test_import_document(self, elis_client):
         client, http_client = elis_client
@@ -188,8 +189,8 @@ class TestQueues:
 
         assert annotation_ids == [111, 222]
         calls = [
-            call("queues", 123, open_mock_first, "document.pdf", {"a": 1}, {"b": 2}),
-            call("queues", 123, open_mock_second, "document 🎁.pdf", {"a": 1}, {"b": 2}),
+            call(Resource.Queue, 123, open_mock_first, "document.pdf", {"a": 1}, {"b": 2}),
+            call(Resource.Queue, 123, open_mock_second, "document 🎁.pdf", {"a": 1}, {"b": 2}),
         ]
         http_client.upload.assert_has_calls(calls, any_order=True)
 
@@ -203,7 +204,7 @@ class TestQueues:
         async for a in client.export_annotations_to_json(queue_id=qid):
             assert a == Annotation(**dummy_annotation)
 
-        http_client.export.assert_called_with("queues", qid, export_format)
+        http_client.export.assert_called_with(Resource.Queue, qid, export_format)
 
     async def test_export_annotations_to_file(self, elis_client, mock_file_read):
         client, http_client = elis_client
@@ -218,7 +219,7 @@ class TestQueues:
         ):
             result += a
 
-        http_client.export.assert_called_with("queues", qid, export_format)
+        http_client.export.assert_called_with(Resource.Queue, qid, export_format)
 
         with open("tests/data/annotation_export.xml", "rb") as fp:
             for i, line in enumerate(fp.read()):
@@ -235,7 +236,7 @@ class TestQueuesSync:
         for q in queues:
             assert q == Queue(**dummy_queue)
 
-        http_client.fetch_all.assert_called_with("queues", ())
+        http_client.fetch_all.assert_called_with(Resource.Queue, ())
 
     def test_retrieve_queue(self, elis_client_sync, dummy_queue):
         client, http_client = elis_client_sync
@@ -246,7 +247,7 @@ class TestQueuesSync:
 
         assert queue == Queue(**dummy_queue)
 
-        http_client.fetch_one.assert_called_with("queues", qid)
+        http_client.fetch_one.assert_called_with(Resource.Queue, qid)
 
     def test_create_new_queue(self, elis_client_sync, dummy_queue):
         client, http_client = elis_client_sync
@@ -261,7 +262,7 @@ class TestQueuesSync:
 
         assert queue == Queue(**dummy_queue)
 
-        http_client.create.assert_called_with("queues", data)
+        http_client.create.assert_called_with(Resource.Queue, data)
 
     def test_import_document(self, elis_client_sync):
         client, http_client = elis_client_sync
@@ -310,8 +311,8 @@ class TestQueuesSync:
 
         assert annotation_ids == [111, 222]
         calls = [
-            call("queues", 123, open_mock_first, "document.pdf", {"a": 1}, {"b": 2}),
-            call("queues", 123, open_mock_second, "document 🎁.pdf", {"a": 1}, {"b": 2}),
+            call(Resource.Queue, 123, open_mock_first, "document.pdf", {"a": 1}, {"b": 2}),
+            call(Resource.Queue, 123, open_mock_second, "document 🎁.pdf", {"a": 1}, {"b": 2}),
         ]
 
         http_client.upload.assert_has_calls(calls, any_order=True)
@@ -323,7 +324,7 @@ class TestQueuesSync:
         qid = dummy_queue["id"]
         client.delete_queue(qid)
 
-        http_client.delete.assert_called_with("queues", qid)
+        http_client.delete.assert_called_with(Resource.Queue, qid)
 
     def test_export_annotations_to_json(self, elis_client_sync, dummy_annotation, mock_generator):
         client, http_client = elis_client_sync
@@ -335,7 +336,7 @@ class TestQueuesSync:
         for a in client.export_annotations_to_json(queue_id=qid):
             assert a == Annotation(**dummy_annotation)
 
-        http_client.export.assert_called_with("queues", qid, export_format)
+        http_client.export.assert_called_with(Resource.Queue, qid, export_format)
 
     def test_export_annotations_to_file(self, elis_client_sync, mock_file_read):
         client, http_client = elis_client_sync
@@ -348,7 +349,7 @@ class TestQueuesSync:
         for a in client.export_annotations_to_file(queue_id=qid, export_format=export_format):
             result += a
 
-        http_client.export.assert_called_with("queues", qid, export_format)
+        http_client.export.assert_called_with(Resource.Queue, qid, export_format)
 
         with open("tests/data/annotation_export.xml", "rb") as fp:
             for i, line in enumerate(fp.read()):

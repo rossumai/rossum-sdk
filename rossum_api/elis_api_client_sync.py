@@ -166,7 +166,7 @@ class ElisAPIClientSync:
         )
 
     def retrieve_own_organization(self) -> Organization:
-        """Retrive organization of currently logged in user."""
+        """Retrieve organization of currently logged in user."""
         return self.event_loop.run_until_complete(self.elis_api_client.retrieve_own_organization())
 
     # ##### SCHEMAS #####
@@ -350,13 +350,11 @@ class ElisAPIClientSync:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles."""
         return self._iter_over_async(self.elis_api_client.list_all_user_roles(ordering, **filters))
 
-    def request_paginated(self, resource: str, *args, **kwargs) -> Iterable[dict]:
+    def request_paginated(self, url: str, *args, **kwargs) -> Iterable[dict]:
         """Use to perform requests to seldomly used or experimental endpoints with paginated response that do not have
         direct support in the client and return iterable.
         """
-        return self._iter_over_async(
-            self.elis_api_client.request_paginated(resource, *args, **kwargs)
-        )
+        return self._iter_over_async(self.elis_api_client.request_paginated(url, *args, **kwargs))
 
     def request_json(self, method: str, *args, **kwargs) -> Dict[str, Any]:
         """Use to perform requests to seldomly used or experimental endpoints that do not have

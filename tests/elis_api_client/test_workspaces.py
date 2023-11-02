@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from rossum_api.api_client import Resource
 from rossum_api.models.workspace import Workspace
 
 
@@ -32,7 +33,7 @@ class TestWorkspaces:
         async for w in workspaces:
             assert w == Workspace(**dummy_workspace)
 
-        http_client.fetch_all.assert_called_with("workspaces", ())
+        http_client.fetch_all.assert_called_with(Resource.Workspace, ())
 
     async def test_retrieve_workspace(self, elis_client, dummy_workspace):
         client, http_client = elis_client
@@ -43,7 +44,7 @@ class TestWorkspaces:
 
         assert workspace == Workspace(**dummy_workspace)
 
-        http_client.fetch_one.assert_called_with("workspaces", oid)
+        http_client.fetch_one.assert_called_with(Resource.Workspace, oid)
 
     async def test_create_new_workspace(self, elis_client, dummy_workspace):
         client, http_client = elis_client
@@ -58,7 +59,7 @@ class TestWorkspaces:
 
         assert workspace == Workspace(**dummy_workspace)
 
-        http_client.create.assert_called_with("workspaces", data)
+        http_client.create.assert_called_with(Resource.Workspace, data)
 
     async def test_delete_workspace(self, elis_client, dummy_workspace):
         client, http_client = elis_client
@@ -67,7 +68,7 @@ class TestWorkspaces:
         oid = dummy_workspace["id"]
         await client.delete_workspace(oid)
 
-        http_client.delete.assert_called_with("workspaces", oid)
+        http_client.delete.assert_called_with(Resource.Workspace, oid)
 
 
 class TestWorkspacesSync:
@@ -80,7 +81,7 @@ class TestWorkspacesSync:
         for w in workspaces:
             assert w == Workspace(**dummy_workspace)
 
-        http_client.fetch_all.assert_called_with("workspaces", ())
+        http_client.fetch_all.assert_called_with(Resource.Workspace, ())
 
     def test_retrieve_workspace(self, elis_client_sync, dummy_workspace):
         client, http_client = elis_client_sync
@@ -91,7 +92,7 @@ class TestWorkspacesSync:
 
         assert workspace == Workspace(**dummy_workspace)
 
-        http_client.fetch_one.assert_called_with("workspaces", oid)
+        http_client.fetch_one.assert_called_with(Resource.Workspace, oid)
 
     def test_create_new_workspace(self, elis_client_sync, dummy_workspace):
         client, http_client = elis_client_sync
@@ -105,7 +106,7 @@ class TestWorkspacesSync:
 
         assert workspace == Workspace(**dummy_workspace)
 
-        http_client.create.assert_called_with("workspaces", data)
+        http_client.create.assert_called_with(Resource.Workspace, data)
 
     def test_delete_workspace(self, elis_client_sync, dummy_workspace):
         client, http_client = elis_client_sync
@@ -114,4 +115,4 @@ class TestWorkspacesSync:
         oid = dummy_workspace["id"]
         client.delete_workspace(oid)
 
-        http_client.delete.assert_called_with("workspaces", oid)
+        http_client.delete.assert_called_with(Resource.Workspace, oid)

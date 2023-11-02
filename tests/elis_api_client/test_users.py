@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from rossum_api.api_client import Resource
 from rossum_api.models.user import User
 
 
@@ -16,7 +17,7 @@ class TestUsers:
         async for u in users:
             assert u == User(**dummy_user)
 
-        http_client.fetch_all.assert_called_with("users", ())
+        http_client.fetch_all.assert_called_with(Resource.User, ())
 
     async def test_retrieve_user(self, elis_client, dummy_user):
         client, http_client = elis_client
@@ -27,7 +28,7 @@ class TestUsers:
 
         assert user == User(**dummy_user)
 
-        http_client.fetch_one.assert_called_with("users", uid)
+        http_client.fetch_one.assert_called_with(Resource.User, uid)
 
     async def test_create_new_user(self, elis_client, dummy_user):
         client, http_client = elis_client
@@ -44,7 +45,7 @@ class TestUsers:
 
         assert user == User(**dummy_user)
 
-        http_client.create.assert_called_with("users", data)
+        http_client.create.assert_called_with(Resource.User, data)
 
 
 class TestUsersSync:
@@ -57,7 +58,7 @@ class TestUsersSync:
         for u in users:
             assert u == User(**dummy_user)
 
-        http_client.fetch_all.assert_called_with("users", ())
+        http_client.fetch_all.assert_called_with(Resource.User, ())
 
     def test_retrieve_user(self, elis_client_sync, dummy_user):
         client, http_client = elis_client_sync
@@ -68,7 +69,7 @@ class TestUsersSync:
 
         assert user == User(**dummy_user)
 
-        http_client.fetch_one.assert_called_with("users", uid)
+        http_client.fetch_one.assert_called_with(Resource.User, uid)
 
     def test_create_new_user(self, elis_client_sync, dummy_user):
         client, http_client = elis_client_sync
@@ -85,4 +86,4 @@ class TestUsersSync:
 
         assert user == User(**dummy_user)
 
-        http_client.create.assert_called_with("users", data)
+        http_client.create.assert_called_with(Resource.User, data)

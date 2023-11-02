@@ -25,6 +25,7 @@ if typing.TYPE_CHECKING:
 
     from rossum_api import ExportFileFormats
     from rossum_api.api_client import APIClient
+    from rossum_api.models import Deserializer
     from rossum_api.models.annotation import Annotation
     from rossum_api.models.connector import Connector
     from rossum_api.models.hook import Hook
@@ -55,8 +56,11 @@ class ElisAPIClientSync:
         token: Optional[str] = None,
         base_url: Optional[str] = None,
         http_client: Optional[APIClient] = None,
+        deserializer: Optional[Deserializer] = None,
     ):
-        self.elis_api_client = ElisAPIClient(username, password, token, base_url, http_client)
+        self.elis_api_client = ElisAPIClient(
+            username, password, token, base_url, http_client, deserializer
+        )
 
         try:
             self.event_loop = asyncio.get_running_loop()

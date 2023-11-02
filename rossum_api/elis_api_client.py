@@ -18,13 +18,13 @@ if typing.TYPE_CHECKING:
     from rossum_api.models import Deserializer
     from rossum_api.models.annotation import Annotation
     from rossum_api.models.connector import Connector
+    from rossum_api.models.group import Group
     from rossum_api.models.hook import Hook
     from rossum_api.models.inbox import Inbox
     from rossum_api.models.organization import Organization
     from rossum_api.models.queue import Queue
     from rossum_api.models.schema import Schema
     from rossum_api.models.user import User
-    from rossum_api.models.user_role import UserRole
     from rossum_api.models.workspace import Workspace
 
 
@@ -396,7 +396,7 @@ class ElisAPIClient:
         self,
         ordering: Sequence[str] = (),
         **filters: Any,
-    ) -> AsyncIterable[UserRole]:
+    ) -> AsyncIterable[Group]:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles."""
         async for g in self._http_client.fetch_all(Resource.Group, ordering, **filters):
             yield self._deserializer(Resource.Group, g)

@@ -28,13 +28,13 @@ if typing.TYPE_CHECKING:
     from rossum_api.models import Deserializer
     from rossum_api.models.annotation import Annotation
     from rossum_api.models.connector import Connector
+    from rossum_api.models.group import Group
     from rossum_api.models.hook import Hook
     from rossum_api.models.inbox import Inbox
     from rossum_api.models.organization import Organization
     from rossum_api.models.queue import Queue
     from rossum_api.models.schema import Schema
     from rossum_api.models.user import User
-    from rossum_api.models.user_role import UserRole
     from rossum_api.models.workspace import Workspace
 
     T = TypeVar("T")
@@ -350,7 +350,7 @@ class ElisAPIClientSync:
         self,
         ordering: Sequence[str] = (),
         **filters: Dict[str, Any],
-    ) -> Iterable[UserRole]:
+    ) -> Iterable[Group]:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles."""
         return self._iter_over_async(self.elis_api_client.list_all_user_roles(ordering, **filters))
 

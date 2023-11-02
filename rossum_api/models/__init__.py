@@ -7,13 +7,13 @@ import dacite
 from rossum_api.api_client import Resource
 from rossum_api.models.annotation import Annotation
 from rossum_api.models.connector import Connector
+from rossum_api.models.group import Group
 from rossum_api.models.hook import Hook
 from rossum_api.models.inbox import Inbox
 from rossum_api.models.organization import Organization
 from rossum_api.models.queue import Queue
 from rossum_api.models.schema import Schema
 from rossum_api.models.user import User
-from rossum_api.models.user_role import UserRole
 from rossum_api.models.workspace import Workspace
 
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 RESOURCE_TO_MODEL = {
     Resource.Annotation: Annotation,
     Resource.Connector: Connector,
-    Resource.Group: UserRole,
+    Resource.Group: Group,
     Resource.Hook: Hook,
     Resource.Inbox: Inbox,
     Resource.Organization: Organization,

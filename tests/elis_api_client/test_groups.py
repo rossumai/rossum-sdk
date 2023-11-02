@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from rossum_api.api_client import Resource
-from rossum_api.models.user_role import UserRole
+from rossum_api.models.group import Group
 
 
 @pytest.fixture
@@ -20,7 +20,7 @@ class TestWorkspaces:
         user_roles = client.list_all_user_roles()
 
         async for u in user_roles:
-            assert u == UserRole(**dummy_user_role)
+            assert u == Group(**dummy_user_role)
 
         http_client.fetch_all.assert_called_with(Resource.Group, ())
 
@@ -33,6 +33,6 @@ class TestWorkspacesAsync:
         user_roles = client.list_all_user_roles()
 
         for u in user_roles:
-            assert u == UserRole(**dummy_user_role)
+            assert u == Group(**dummy_user_role)
 
         http_client.fetch_all.assert_called_with(Resource.Group, ())

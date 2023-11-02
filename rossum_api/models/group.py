@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class UserRole:
+class Group:
     id: int
     name: str
     url: str

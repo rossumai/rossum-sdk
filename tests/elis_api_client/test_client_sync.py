@@ -39,7 +39,7 @@ class TestClientSync:
 
     def test_request_paginated(self, elis_client_sync, mock_generator):
         client, http_client = elis_client_sync
-        http_client.fetch_all.return_value = mock_generator({"some": "json"})
+        http_client.fetch_all_by_url.return_value = mock_generator({"some": "json"})
         kwargs = {"whatever": "kwarg"}
         data = client.request_paginated("hook_templates", **kwargs)
         assert list(data) == [{"some": "json"}]

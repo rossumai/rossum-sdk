@@ -18,7 +18,7 @@ import mock
 import pytest
 import pytest_httpx
 
-from rossum_api.api_client import APIClient, APIClientError
+from rossum_api.api_client import APIClient, APIClientError, Resource
 
 WORKSPACES = [
     {
@@ -181,7 +181,7 @@ async def test_init_token(httpx_mock):
         url="https://elis.rossum.ai/api/v1/users/1",
         json={},
     )
-    await client.fetch_one("users", 1)
+    await client.fetch_one(Resource.User, 1)
     assert len(httpx_mock.get_requests()) == 1
     assert httpx_mock.get_requests()[0].headers["Authorization"] == f"token {FAKE_TOKEN}"
 
@@ -203,7 +203,7 @@ async def test_not_possible_to_reauth(httpx_mock):
         json={"password": ["This field may not be blank."]},
     )
     with pytest.raises(APIClientError) as err:
-        await client.fetch_one("users", 1)
+        await client.fetch_one(Resource.User, 1)
 
     assert err.value.status_code == 400
     assert err.value.error == '{"password": ["This field may not be blank."]}'
@@ -219,7 +219,7 @@ async def test_retry_timeout(client, httpx_mock):
         return httpx.Response(status_code=200, json=WORKSPACES[0])
 
     httpx_mock.add_callback(custom_response)
-    workspace = await client.fetch_one("workspaces", id_=7694)
+    workspace = await client.fetch_one(Resource.Workspace, id_=7694)
     assert workspace == WORKSPACES[0]
 
 
@@ -235,7 +235,7 @@ async def test_retry_n_attempts(client, httpx_mock):
     httpx_mock.add_callback(custom_response)
 
     with pytest.raises(httpx.ReadTimeout):
-        await client.fetch_one("workspaces", id_=7694)
+        await client.fetch_one(Resource.Workspace, id_=7694)
 
 
 @pytest.mark.asyncio
@@ -245,7 +245,7 @@ async def test_fetch_one(client, httpx_mock):
         url="https://elis.rossum.ai/api/v1/workspaces/7694",
         json=WORKSPACES[0],
     )
-    workspace = await client.fetch_one("workspaces", id_=7694)
+    workspace = await client.fetch_one(Resource.Workspace, id_=7694)
     assert workspace == WORKSPACES[0]
 
 
@@ -277,7 +277,7 @@ async def test_fetch_all(client, httpx_mock):
             "results": WORKSPACES[2:],
         },
     )
-    workspaces = [w async for w in client.fetch_all("workspaces")]
+    workspaces = [w async for w in client.fetch_all(Resource.Workspace)]
     assert workspaces == WORKSPACES
 
 
@@ -292,7 +292,7 @@ async def test_fetch_all_with_max_pages_limit(client, httpx_mock):
             "results": WORKSPACES[:1],
         },
     )
-    workspaces = [w async for w in client.fetch_all("workspaces", max_pages=1)]
+    workspaces = [w async for w in client.fetch_all(Resource.Workspace, max_pages=1)]
     assert workspaces == WORKSPACES[:1]
 
 
@@ -306,7 +306,7 @@ async def test_fetch_all_ordering(client, httpx_mock):
             "results": WORKSPACES,
         },
     )
-    workspaces = [w async for w in client.fetch_all("workspaces", ordering=["-id", "name"])]
+    workspaces = [w async for w in client.fetch_all(Resource.Workspace, ordering=["-id", "name"])]
     assert workspaces == WORKSPACES
 
 
@@ -320,7 +320,7 @@ async def test_fetch_all_filters(client, httpx_mock):
             "results": WORKSPACES,
         },
     )
-    workspaces = [w async for w in client.fetch_all("workspaces", name="Test", autopilot=1)]
+    workspaces = [w async for w in client.fetch_all(Resource.Workspace, name="Test", autopilot=1)]
     assert workspaces == WORKSPACES
 
 
@@ -339,7 +339,7 @@ async def test_fetch_all_sideload(client, httpx_mock):
     workspaces = [
         w
         async for w in client.fetch_all(
-            "workspaces",
+            Resource.Workspace,
             sideloads=["content", "automation_blockers"],
             content_schema_ids=["invoice_id", "date_issue"],
         )
@@ -409,13 +409,13 @@ async def test_fetch_all_limit_in_flight_requests(client, httpx_mock):
             yield concurrency
 
     with track_concurrency(client) as concurrency:
-        workspaces = [w async for w in client.fetch_all("workspaces")]
+        workspaces = [w async for w in client.fetch_all(Resource.Workspace)]
         assert workspaces == [WORKSPACES[0]] * (page_count - 1) + WORKSPACES[-1:]
         assert concurrency["max"] == 4, "default max_in_flight_requests is 4"
 
     with track_concurrency(client) as concurrency:
         client.max_in_flight_requests = 3
-        workspaces = [w async for w in client.fetch_all("workspaces")]
+        workspaces = [w async for w in client.fetch_all(Resource.Workspace)]
         assert workspaces == [WORKSPACES[0]] * (page_count - 1) + WORKSPACES[-1:]
         assert concurrency["max"] == 3, "based on overridden max_in_flight_requests to 3"
 
@@ -432,7 +432,7 @@ async def test_create(client, httpx_mock):
         match_content=json.dumps(data).encode("utf-8"),
         json=WORKSPACES[0],
     )
-    workspace = await client.create("workspaces", data=data)
+    workspace = await client.create(Resource.Workspace, data=data)
     assert workspace == WORKSPACES[0]
 
 
@@ -448,7 +448,7 @@ async def test_replace(client, httpx_mock):
         match_content=json.dumps(data).encode("utf-8"),
         json=WORKSPACES[0],
     )
-    workspace = await client.replace("workspaces", id_=123, data=data)
+    workspace = await client.replace(Resource.Workspace, id_=123, data=data)
     assert workspace == WORKSPACES[0]
 
 
@@ -461,7 +461,7 @@ async def test_update(client, httpx_mock):
         match_content=json.dumps(data).encode("utf-8"),
         json=WORKSPACES[0],
     )
-    workspace = await client.update("workspaces", id_=123, data=data)
+    workspace = await client.update(Resource.Workspace, id_=123, data=data)
     assert workspace == WORKSPACES[0]
 
 
@@ -471,7 +471,7 @@ async def test_delete(client, httpx_mock):
         method="DELETE",
         url="https://elis.rossum.ai/api/v1/workspaces/123",
     )
-    result = await client.delete("workspaces", id_=123)
+    result = await client.delete(Resource.Workspace, id_=123)
     assert result is None
 
 
@@ -492,7 +492,7 @@ async def test_upload(client, httpx_mock):
             await fp.flush()
             async with aiofiles.open(fp.name, "rb") as fp:
                 response = await client.upload(
-                    "queues",
+                    Resource.Queue,
                     id_=123,
                     fp=fp,
                     filename="filename.pdf",
@@ -541,7 +541,7 @@ async def test_export_json(client, httpx_mock, filters, expected_method, first_u
     annotations = [
         w
         async for w in client.export(
-            "queues", id_=123, export_format="json", columns=cols, id="456,789", **filters
+            Resource.Queue, id_=123, export_format="json", columns=cols, id="456,789", **filters
         )
     ]
     assert annotations == ANNOTATIONS  # Annotations are yielded in correct order
@@ -573,7 +573,7 @@ async def test_export_csv(client, httpx_mock, filters, expected_method, expected
     export_chunks = [
         w
         async for w in client.export(
-            "queues", id_=123, export_format="csv", columns=cols, id="456,789", **filters
+            Resource.Queue, id_=123, export_format="csv", columns=cols, id="456,789", **filters
         )
     ]
     assert b"".join(export_chunks) == CSV_EXPORT  # Streamed chunks are yielded in correct order
@@ -598,7 +598,7 @@ async def test_authenticate_if_needed_token_expired(client, httpx_mock):
         client.token = "new-token"
 
     with mock.patch.object(client, "_authenticate", side_effect=set_token):
-        workspace = await client.fetch_one("workspaces", id_=7694)
+        workspace = await client.fetch_one(Resource.Workspace, id_=7694)
     assert workspace == WORKSPACES[0]
 
 
@@ -639,7 +639,7 @@ async def test_authenticate_if_needed_no_token(httpx_mock):
         client.token = "new-token"
 
     with mock.patch.object(client, "_authenticate", side_effect=set_token):
-        workspace = await client.fetch_one("workspaces", id_=7694)
+        workspace = await client.fetch_one(Resource.Workspace, id_=7694)
 
     assert workspace == WORKSPACES[0]
 

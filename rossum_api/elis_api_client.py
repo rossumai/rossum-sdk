@@ -7,7 +7,7 @@ from enum import Enum
 import aiofiles
 import dacite
 
-from rossum_api.api_client import APIClient
+from rossum_api.api_client import APIClient, Resource
 from rossum_api.models.annotation import Annotation
 from rossum_api.models.connector import Connector
 from rossum_api.models.hook import Hook
@@ -53,7 +53,7 @@ class ElisAPIClient:
         queue_id: int,
     ) -> Queue:
         """https://elis.rossum.ai/api/docs/#retrieve-a-queue-2."""
-        queue = await self._http_client.fetch_one("queues", queue_id)
+        queue = await self._http_client.fetch_one(Resource.Queue, queue_id)
 
         return dacite.from_dict(Queue, queue)
 
@@ -63,18 +63,18 @@ class ElisAPIClient:
         **filters: Any,
     ) -> AsyncIterable[Queue]:
         """https://elis.rossum.ai/api/docs/#list-all-queues."""
-        async for q in self._http_client.fetch_all("queues", ordering, **filters):
+        async for q in self._http_client.fetch_all(Resource.Queue, ordering, **filters):
             yield dacite.from_dict(Queue, q)
 
     async def create_new_queue(self, data: Dict[str, Any]) -> Queue:
         """https://elis.rossum.ai/api/docs/#create-new-queue."""
-        queue = await self._http_client.create("queues", data)
+        queue = await self._http_client.create(Resource.Queue, data)
 
         return dacite.from_dict(Queue, queue)
 
     async def delete_queue(self, queue_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-queue."""
-        return await self._http_client.delete("queues", queue_id)
+        return await self._http_client.delete(Resource.Queue, queue_id)
 
     async def import_document(
         self,
@@ -109,7 +109,7 @@ class ElisAPIClient:
     async def _upload(self, file, queue_id, filename, values, metadata) -> int:
         async with aiofiles.open(file, "rb") as fp:
             results = await self._http_client.upload(
-                "queues", queue_id, fp, filename, values, metadata
+                Resource.Queue, queue_id, fp, filename, values, metadata
             )
             (result,) = results["results"]  # We're uploading 1 file in 1 request, we can unpack
             return int(result["annotation"].split("/")[-1])
@@ -122,7 +122,7 @@ class ElisAPIClient:
 
         JSON export is paginated and returns the result in a way similar to other list_all methods.
         """
-        async for chunk in self._http_client.export("queues", queue_id, "json"):
+        async for chunk in self._http_client.export(Resource.Queue, queue_id, "json"):
             # JSON export can be translated directly to Annotation object
             yield dacite.from_dict(Annotation, typing.cast(typing.Dict, chunk))
 
@@ -133,7 +133,7 @@ class ElisAPIClient:
 
         XLSX/CSV/XML exports can be huge, therefore byte streaming is used to keep memory consumption low.
         """
-        async for chunk in self._http_client.export("queues", queue_id, str(export_format)):
+        async for chunk in self._http_client.export(Resource.Queue, queue_id, str(export_format)):
             yield typing.cast(bytes, chunk)
 
     # ##### ORGANIZATIONS #####
@@ -143,18 +143,20 @@ class ElisAPIClient:
         **filters: Any,
     ):
         """https://elis.rossum.ai/api/docs/#list-all-organizations."""
-        async for o in self._http_client.fetch_all("organizations", ordering, **filters):
+        async for o in self._http_client.fetch_all(Resource.Organization, ordering, **filters):
             yield dacite.from_dict(Organization, o)
 
     async def retrieve_organization(self, org_id: int) -> Organization:
         """https://elis.rossum.ai/api/docs/#retrieve-an-organization."""
-        organization: Dict[Any, Any] = await self._http_client.fetch_one("organizations", org_id)
+        organization: Dict[Any, Any] = await self._http_client.fetch_one(
+            Resource.Organization, org_id
+        )
 
         return dacite.from_dict(Organization, organization)
 
     async def retrieve_own_organization(self) -> Organization:
-        """Retrive organization of currently logged in user."""
-        user: Dict[Any, Any] = await self._http_client.fetch_one("auth", "user")
+        """Retrieve organization of currently logged in user."""
+        user: Dict[Any, Any] = await self._http_client.fetch_one(Resource.Auth, "user")
         organization_id = user["organization"].split("/")[-1]
         return await self.retrieve_organization(organization_id)
 
@@ -165,24 +167,24 @@ class ElisAPIClient:
         **filters: Any,
     ) -> AsyncIterable[Schema]:
         """https://elis.rossum.ai/api/docs/#list-all-schemas."""
-        async for s in self._http_client.fetch_all("schemas", ordering, **filters):
+        async for s in self._http_client.fetch_all(Resource.Schema, ordering, **filters):
             yield dacite.from_dict(Schema, s)
 
     async def retrieve_schema(self, schema_id: int) -> Schema:
         """https://elis.rossum.ai/api/docs/#retrieve-a-schema."""
-        schema: Dict[Any, Any] = await self._http_client.fetch_one("schemas", schema_id)
+        schema: Dict[Any, Any] = await self._http_client.fetch_one(Resource.Schema, schema_id)
 
         return dacite.from_dict(Schema, schema)
 
     async def create_new_schema(self, data: Dict[str, Any]) -> Schema:
         """https://elis.rossum.ai/api/docs/#create-a-new-schema."""
-        queue = await self._http_client.create("schemas", data)
+        queue = await self._http_client.create(Resource.Schema, data)
 
         return dacite.from_dict(Schema, queue)
 
     async def delete_schema(self, schema_id) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-schema."""
-        return await self._http_client.delete("schemas", schema_id)
+        return await self._http_client.delete(Resource.Schema, schema_id)
 
     # ##### USERS #####
     async def list_all_users(
@@ -191,18 +193,18 @@ class ElisAPIClient:
         **filters: Any,
     ) -> AsyncIterable[User]:
         """https://elis.rossum.ai/api/docs/#list-all-users."""
-        async for u in self._http_client.fetch_all("users", ordering, **filters):
+        async for u in self._http_client.fetch_all(Resource.User, ordering, **filters):
             yield dacite.from_dict(User, u)
 
     async def retrieve_user(self, user_id: int) -> User:
         """https://elis.rossum.ai/api/docs/#retrieve-a-user-2."""
-        user = await self._http_client.fetch_one("users", user_id)
+        user = await self._http_client.fetch_one(Resource.User, user_id)
 
         return dacite.from_dict(User, user)
 
     async def create_new_user(self, data: Dict[str, Any]) -> User:
         """https://elis.rossum.ai/api/docs/#create-new-user."""
-        user = await self._http_client.create("users", data)
+        user = await self._http_client.create(Resource.User, data)
 
         return dacite.from_dict(User, user)
 
@@ -228,7 +230,7 @@ class ElisAPIClient:
                 'When content sideloading is requested, "content_schema_ids" must be provided'
             )
         async for a in self._http_client.fetch_all(
-            "annotations", ordering, sideloads, content_schema_ids, **filters
+            Resource.Annotation, ordering, sideloads, content_schema_ids, **filters
         ):
             yield dacite.from_dict(Annotation, a)
 
@@ -249,8 +251,13 @@ class ElisAPIClient:
         if query_string:
             json_payload["query_string"] = query_string
 
-        async for a in self._http_client.fetch_all(
-            "annotations/search", ordering, sideloads, json=json_payload, method="POST", **kwargs
+        async for a in self._http_client.fetch_all_by_url(
+            f"{Resource.Annotation.value}/search",
+            ordering,
+            sideloads,
+            json=json_payload,
+            method="POST",
+            **kwargs,
         ):
             yield dacite.from_dict(Annotation, a)
 
@@ -258,7 +265,7 @@ class ElisAPIClient:
         self, annotation_id: int, sideloads: Sequence[str] = ()
     ) -> Annotation:
         """https://elis.rossum.ai/api/docs/#retrieve-an-annotation."""
-        annotation_json = await self._http_client.fetch_one("annotations", annotation_id)
+        annotation_json = await self._http_client.fetch_one(Resource.Annotation, annotation_id)
         if sideloads:
             await self._sideload(annotation_json, sideloads)
         return dacite.from_dict(Annotation, annotation_json)
@@ -274,13 +281,13 @@ class ElisAPIClient:
 
         Sideloading is done only once after the predicate becomes true to avoid spaming the server.
         """
-        annotation_json = await self._http_client.fetch_one("annotations", annotation_id)
+        annotation_json = await self._http_client.fetch_one(Resource.Annotation, annotation_id)
         # Parse early, we want predicate to work with Annotation instances for convenience
         annotation = dacite.from_dict(Annotation, annotation_json)
 
         while not predicate(annotation):
             await asyncio.sleep(sleep_s)
-            annotation_json = await self._http_client.fetch_one("annotations", annotation_id)
+            annotation_json = await self._http_client.fetch_one(Resource.Annotation, annotation_id)
             annotation = dacite.from_dict(Annotation, annotation_json)
 
         if sideloads:
@@ -289,13 +296,13 @@ class ElisAPIClient:
 
     async def update_annotation(self, annotation_id: int, data: Dict[str, Any]) -> Annotation:
         """https://elis.rossum.ai/api/docs/#update-an-annotation."""
-        annotation = await self._http_client.replace("annotations", annotation_id, data)
+        annotation = await self._http_client.replace(Resource.Annotation, annotation_id, data)
 
         return dacite.from_dict(Annotation, annotation)
 
     async def update_part_annotation(self, annotation_id: int, data: Dict[str, Any]) -> Annotation:
         """https://elis.rossum.ai/api/docs/#update-part-of-an-annotation."""
-        annotation = await self._http_client.update("annotations", annotation_id, data)
+        annotation = await self._http_client.update(Resource.Annotation, annotation_id, data)
 
         return dacite.from_dict(Annotation, annotation)
 
@@ -306,29 +313,29 @@ class ElisAPIClient:
         **filters: Any,
     ) -> AsyncIterable[Workspace]:
         """https://elis.rossum.ai/api/docs/#list-all-workspaces."""
-        async for w in self._http_client.fetch_all("workspaces", ordering, **filters):
+        async for w in self._http_client.fetch_all(Resource.Workspace, ordering, **filters):
             yield dacite.from_dict(Workspace, w)
 
     async def retrieve_workspace(self, workspace_id) -> Workspace:
         """https://elis.rossum.ai/api/docs/#retrieve-a-workspace."""
-        workspace = await self._http_client.fetch_one("workspaces", workspace_id)
+        workspace = await self._http_client.fetch_one(Resource.Workspace, workspace_id)
 
         return dacite.from_dict(Workspace, workspace)
 
     async def create_new_workspace(self, data: Dict[str, Any]) -> Workspace:
         """https://elis.rossum.ai/api/docs/#create-a-new-workspace."""
-        workspace = await self._http_client.create("workspaces", data)
+        workspace = await self._http_client.create(Resource.Workspace, data)
 
         return dacite.from_dict(Workspace, workspace)
 
     async def delete_workspace(self, workspace_id) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-workspace."""
-        return await self._http_client.delete("workspaces", workspace_id)
+        return await self._http_client.delete(Resource.Workspace, workspace_id)
 
     # ##### INBOX #####
     async def create_new_inbox(self, data: Dict[str, Any]) -> Inbox:
         """https://elis.rossum.ai/api/docs/#create-a-new-inbox."""
-        inbox = await self._http_client.create("inboxes", data)
+        inbox = await self._http_client.create(Resource.Inbox, data)
 
         return dacite.from_dict(Inbox, inbox)
 
@@ -339,18 +346,18 @@ class ElisAPIClient:
         **filters: Any,
     ) -> AsyncIterable[Connector]:
         """https://elis.rossum.ai/api/docs/#list-all-connectors."""
-        async for c in self._http_client.fetch_all("connectors", ordering, **filters):
+        async for c in self._http_client.fetch_all(Resource.Connector, ordering, **filters):
             yield dacite.from_dict(Connector, c)
 
     async def retrieve_connector(self, connector_id) -> Connector:
         """https://elis.rossum.ai/api/docs/#retrieve-a-connector."""
-        connector = await self._http_client.fetch_one("connectors", connector_id)
+        connector = await self._http_client.fetch_one(Resource.Connector, connector_id)
 
         return dacite.from_dict(Connector, connector)
 
     async def create_new_connector(self, data: Dict[str, Any]) -> Connector:
         """https://elis.rossum.ai/api/docs/#create-a-new-connector."""
-        connector = await self._http_client.create("connectors", data)
+        connector = await self._http_client.create(Resource.Connector, data)
 
         return dacite.from_dict(Connector, connector)
 
@@ -361,18 +368,18 @@ class ElisAPIClient:
         **filters: Any,
     ) -> AsyncIterable[Hook]:
         """https://elis.rossum.ai/api/docs/#list-all-hooks."""
-        async for h in self._http_client.fetch_all("hooks", ordering, **filters):
+        async for h in self._http_client.fetch_all(Resource.Hook, ordering, **filters):
             yield dacite.from_dict(Hook, h)
 
     async def retrieve_hook(self, hook_id) -> Hook:
         """https://elis.rossum.ai/api/docs/#retrieve-a-hook."""
-        hook = await self._http_client.fetch_one("hooks", hook_id)
+        hook = await self._http_client.fetch_one(Resource.Hook, hook_id)
 
         return dacite.from_dict(Hook, hook)
 
     async def create_new_hook(self, data: Dict[str, Any]) -> Hook:
         """https://elis.rossum.ai/api/docs/#create-a-new-hook."""
-        hook = await self._http_client.create("hooks", data)
+        hook = await self._http_client.create(Resource.Hook, data)
 
         return dacite.from_dict(Hook, hook)
 
@@ -383,15 +390,15 @@ class ElisAPIClient:
         **filters: Any,
     ) -> AsyncIterable[UserRole]:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles."""
-        async for u in self._http_client.fetch_all("groups", ordering, **filters):
+        async for u in self._http_client.fetch_all(Resource.Group, ordering, **filters):
             yield dacite.from_dict(UserRole, u)
 
     # ##### GENERIC METHODS #####
-    async def request_paginated(self, resource: str, *args, **kwargs) -> AsyncIterable[dict]:
+    async def request_paginated(self, url: str, *args, **kwargs) -> AsyncIterable[dict]:
         """Use to perform requests to seldomly used or experimental endpoints with paginated response that do not have
         direct support in the client and return iterable.
         """
-        async for element in self._http_client.fetch_all(resource, *args, **kwargs):
+        async for element in self._http_client.fetch_all_by_url(url, *args, **kwargs):
             yield element
 
     async def request_json(self, method: str, *args, **kwargs) -> Dict[str, Any]:

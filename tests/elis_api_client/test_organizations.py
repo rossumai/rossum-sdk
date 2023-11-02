@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 from mock import call
 
+from rossum_api.api_client import Resource
 from rossum_api.models.organization import Organization
 
 
@@ -35,7 +36,7 @@ class TestOrganizations:
         async for o in organizations:
             assert o == Organization(**dummy_organization)
 
-        http_client.fetch_all.assert_called_with("organizations", ())
+        http_client.fetch_all.assert_called_with(Resource.Organization, ())
 
     async def test_retrieve_organization(self, elis_client, dummy_organization):
         client, http_client = elis_client
@@ -46,7 +47,7 @@ class TestOrganizations:
 
         assert organization == Organization(**dummy_organization)
 
-        http_client.fetch_one.assert_called_with("organizations", oid)
+        http_client.fetch_one.assert_called_with(Resource.Organization, oid)
 
     async def test_retrieve_own_organization(self, elis_client, dummy_user, dummy_organization):
         client, http_client = elis_client
@@ -57,7 +58,7 @@ class TestOrganizations:
         assert organization == Organization(**dummy_organization)
 
         http_client.fetch_one.assert_has_calls(
-            [call("auth", "user"), call("organizations", "406")]
+            [call(Resource.Auth, "user"), call(Resource.Organization, "406")]
         )
 
 
@@ -71,7 +72,7 @@ class TestOrganizationsSync:
         for o in organizations:
             assert o == Organization(**dummy_organization)
 
-        http_client.fetch_all.assert_called_with("organizations", ())
+        http_client.fetch_all.assert_called_with(Resource.Organization, ())
 
     def test_retrieve_organization(self, elis_client_sync, dummy_organization):
         client, http_client = elis_client_sync
@@ -82,7 +83,7 @@ class TestOrganizationsSync:
 
         assert organization == Organization(**dummy_organization)
 
-        http_client.fetch_one.assert_called_with("organizations", oid)
+        http_client.fetch_one.assert_called_with(Resource.Organization, oid)
 
     def test_retrieve_own_organization(self, elis_client_sync, dummy_user, dummy_organization):
         client, http_client = elis_client_sync
@@ -93,5 +94,5 @@ class TestOrganizationsSync:
         assert organization == Organization(**dummy_organization)
 
         http_client.fetch_one.assert_has_calls(
-            [call("auth", "user"), call("organizations", "406")]
+            [call(Resource.Auth, "user"), call(Resource.Organization, "406")]
         )

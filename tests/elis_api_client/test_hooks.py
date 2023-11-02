@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from rossum_api.api_client import Resource
 from rossum_api.models.hook import Hook
 
 
@@ -49,7 +50,7 @@ class TestHooks:
         async for h in hooks:
             assert h == Hook(**dummy_hook)
 
-        http_client.fetch_all.assert_called_with("hooks", ())
+        http_client.fetch_all.assert_called_with(Resource.Hook, ())
 
     async def test_retrieve_user(self, elis_client, dummy_hook):
         client, http_client = elis_client
@@ -60,7 +61,7 @@ class TestHooks:
 
         assert hook == Hook(**dummy_hook)
 
-        http_client.fetch_one.assert_called_with("hooks", uid)
+        http_client.fetch_one.assert_called_with(Resource.Hook, uid)
 
     async def test_create_new_user(self, elis_client, dummy_hook):
         client, http_client = elis_client
@@ -76,7 +77,7 @@ class TestHooks:
 
         assert hook == Hook(**dummy_hook)
 
-        http_client.create.assert_called_with("hooks", data)
+        http_client.create.assert_called_with(Resource.Hook, data)
 
 
 class TestHooksAsync:
@@ -89,7 +90,7 @@ class TestHooksAsync:
         for h in hooks:
             assert h == Hook(**dummy_hook)
 
-        http_client.fetch_all.assert_called_with("hooks", ())
+        http_client.fetch_all.assert_called_with(Resource.Hook, ())
 
     def test_retrieve_user(self, elis_client_sync, dummy_hook):
         client, http_client = elis_client_sync
@@ -100,7 +101,7 @@ class TestHooksAsync:
 
         assert hook == Hook(**dummy_hook)
 
-        http_client.fetch_one.assert_called_with("hooks", uid)
+        http_client.fetch_one.assert_called_with(Resource.Hook, uid)
 
     def test_create_new_user(self, elis_client_sync, dummy_hook):
         client, http_client = elis_client_sync
@@ -116,4 +117,4 @@ class TestHooksAsync:
 
         assert hook == Hook(**dummy_hook)
 
-        http_client.create.assert_called_with("hooks", data)
+        http_client.create.assert_called_with(Resource.Hook, data)

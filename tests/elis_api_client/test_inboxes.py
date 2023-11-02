@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from rossum_api.api_client import Resource
 from rossum_api.models.inbox import Inbox
 
 
@@ -52,7 +53,7 @@ class TestInboxes:
 
         assert inbox == Inbox(**dummy_inbox)
 
-        http_client.create.assert_called_with("inboxes", data)
+        http_client.create.assert_called_with(Resource.Inbox, data)
 
 
 class TestInboxesSync:
@@ -72,4 +73,4 @@ class TestInboxesSync:
 
         assert inbox == Inbox(**dummy_inbox)
 
-        http_client.create.assert_called_with("inboxes", data)
+        http_client.create.assert_called_with(Resource.Inbox, data)

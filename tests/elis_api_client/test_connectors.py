@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from rossum_api.api_client import Resource
 from rossum_api.models.connector import Connector
 
 
@@ -32,7 +33,7 @@ class TestUsers:
         async for c in connectors:
             assert c == Connector(**dummy_connector)
 
-        http_client.fetch_all.assert_called_with("connectors", ())
+        http_client.fetch_all.assert_called_with(Resource.Connector, ())
 
     @pytest.mark.asyncio
     async def test_retrieve_connector(self, elis_client, dummy_connector):
@@ -44,7 +45,7 @@ class TestUsers:
 
         assert connector == Connector(**dummy_connector)
 
-        http_client.fetch_one.assert_called_with("connectors", cid)
+        http_client.fetch_one.assert_called_with(Resource.Connector, cid)
 
     async def test_create_new_connector(self, elis_client, dummy_connector):
         client, http_client = elis_client
@@ -60,7 +61,7 @@ class TestUsers:
 
         assert connector == Connector(**dummy_connector)
 
-        http_client.create.assert_called_with("connectors", data)
+        http_client.create.assert_called_with(Resource.Connector, data)
 
 
 class TestUsersSync:
@@ -73,7 +74,7 @@ class TestUsersSync:
         for c in connectors:
             assert c == Connector(**dummy_connector)
 
-        http_client.fetch_all.assert_called_with("connectors", ())
+        http_client.fetch_all.assert_called_with(Resource.Connector, ())
 
     def test_retrieve_connector(self, elis_client_sync, dummy_connector):
         client, http_client = elis_client_sync
@@ -84,7 +85,7 @@ class TestUsersSync:
 
         assert connector == Connector(**dummy_connector)
 
-        http_client.fetch_one.assert_called_with("connectors", cid)
+        http_client.fetch_one.assert_called_with(Resource.Connector, cid)
 
     def test_create_new_connector(self, elis_client_sync, dummy_connector):
         client, http_client = elis_client_sync
@@ -100,4 +101,4 @@ class TestUsersSync:
 
         assert connector == Connector(**dummy_connector)
 
-        http_client.create.assert_called_with("connectors", data)
+        http_client.create.assert_called_with(Resource.Connector, data)

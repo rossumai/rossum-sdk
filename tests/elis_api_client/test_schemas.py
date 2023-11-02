@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 
+from rossum_api.api_client import Resource
 from rossum_api.models.schema import Schema
 
 
@@ -45,7 +46,7 @@ class TestSchemas:
         async for s in schemas:
             assert s == Schema(**dummy_schema)
 
-        http_client.fetch_all.assert_called_with("schemas", ())
+        http_client.fetch_all.assert_called_with(Resource.Schema, ())
 
     async def test_retrieve_schema(self, elis_client, dummy_schema):
         client, http_client = elis_client
@@ -56,7 +57,7 @@ class TestSchemas:
 
         assert schema == Schema(**dummy_schema)
 
-        http_client.fetch_one.assert_called_with("schemas", sid)
+        http_client.fetch_one.assert_called_with(Resource.Schema, sid)
 
     async def test_create_new_schema(self, elis_client, dummy_schema):
         client, http_client = elis_client
@@ -67,7 +68,7 @@ class TestSchemas:
 
         assert schema == Schema(**dummy_schema)
 
-        http_client.create.assert_called_with("schemas", data)
+        http_client.create.assert_called_with(Resource.Schema, data)
 
     async def test_delete_schema(self, elis_client, dummy_schema):
         client, http_client = elis_client
@@ -76,7 +77,7 @@ class TestSchemas:
         sid = dummy_schema["id"]
         await client.delete_schema(sid)
 
-        http_client.delete.assert_called_with("schemas", sid)
+        http_client.delete.assert_called_with(Resource.Schema, sid)
 
 
 class TestSchemasSync:
@@ -89,7 +90,7 @@ class TestSchemasSync:
         for s in schemas:
             assert s == Schema(**dummy_schema)
 
-        http_client.fetch_all.assert_called_with("schemas", ())
+        http_client.fetch_all.assert_called_with(Resource.Schema, ())
 
     def test_retrieve_schema(self, elis_client_sync, dummy_schema):
         client, http_client = elis_client_sync
@@ -100,7 +101,7 @@ class TestSchemasSync:
 
         assert schema == Schema(**dummy_schema)
 
-        http_client.fetch_one.assert_called_with("schemas", sid)
+        http_client.fetch_one.assert_called_with(Resource.Schema, sid)
 
     def test_create_new_schema(self, elis_client_sync, dummy_schema):
         client, http_client = elis_client_sync
@@ -111,7 +112,7 @@ class TestSchemasSync:
 
         assert schema == Schema(**dummy_schema)
 
-        http_client.create.assert_called_with("schemas", data)
+        http_client.create.assert_called_with(Resource.Schema, data)
 
     def test_delete_schema(self, elis_client_sync, dummy_schema):
         client, http_client = elis_client_sync
@@ -120,4 +121,4 @@ class TestSchemasSync:
         sid = dummy_schema["id"]
         client.delete_schema(sid)
 
-        http_client.delete.assert_called_with("schemas", sid)
+        http_client.delete.assert_called_with(Resource.Schema, sid)

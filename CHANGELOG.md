@@ -2,6 +2,41 @@
 
 
 
+## v0.10.0 (2023-11-02)
+
+### Chore
+
+* chore: Streamline Makefile and improve README ([`0b1064f`](https://github.com/rossumai/rossum-sdk/commit/0b1064f74fd2a60ce3c5a5fc6cde6194a3413907))
+
+### Feature
+
+* feat: Support deserializing of API payloads to user-defined model classes
+
+Users can provide a custom deserializer that allows customising which
+models should be returned by the client. ([`a1e1385`](https://github.com/rossumai/rossum-sdk/commit/a1e1385649d974637bec33bd920705d0cdb56f2f))
+
+### Refactor
+
+* refactor: Use an enum instead of strings to identify API resources
+
+This is not only cleaner but will be useful when implementing custom
+de-serializers. ([`acbf731`](https://github.com/rossumai/rossum-sdk/commit/acbf731d369b0adfd2da9268008ca458848a20b1))
+
+### Unknown
+
+* Merge pull request #55 from rossumai/oh/user-defined-models
+
+feat: Support deserializing of API payloads to user-defined model classes ([`4d66c46`](https://github.com/rossumai/rossum-sdk/commit/4d66c46ed3a0ba88e68f4887a67147152046839d))
+
+* Merge pull request #54 from rossumai/oh/enums-instead-of-strings
+
+refactor: Use an enum instead of strings to identify API resources ([`2c24376`](https://github.com/rossumai/rossum-sdk/commit/2c24376b620fea9a4aa39c58083738414533460a))
+
+* Merge pull request #52 from rossumai/oh/steamline-makefile
+
+chore: Streamline Makefile and improve README ([`a89e6e6`](https://github.com/rossumai/rossum-sdk/commit/a89e6e6c4d28866f11648a7bdfccb5aa9e1441b4))
+
+
 ## v0.9.1 (2023-10-11)
 
 ### Fix

@@ -302,6 +302,27 @@ class ElisAPIClient:
             await self._sideload(annotation_json, sideloads)
         return self._deserializer(Resource.Annotation, annotation_json)
 
+    async def poll_annotation_until_imported(
+        self, annotation_id: int, **poll_kwargs: Any
+    ) -> Annotation:
+        """A shortcut for waiting until annotation is imported."""
+        return await self.poll_annotation(
+            annotation_id, lambda a: a.status != "importing", **poll_kwargs
+        )
+
+    async def upload_and_wait_until_imported(
+        self, queue_id: int, filepath: Union[str, pathlib.Path], filename: str, **poll_kwargs
+    ) -> Annotation:
+        """A shortcut for uploading a single file and waiting until its annotation is imported."""
+        (annotation_id,) = await self.import_document(queue_id, [(filepath, filename)])
+        return await self.poll_annotation_until_imported(annotation_id, **poll_kwargs)
+
+    async def start_annotation(self, annotation_id: int) -> None:
+        """https://elis.rossum.ai/api/docs/#start-annotation"""
+        await self._http_client.request_json(
+            "POST", f"{Resource.Annotation.value}/{annotation_id}/start"
+        )
+
     async def update_annotation(self, annotation_id: int, data: Dict[str, Any]) -> Annotation:
         """https://elis.rossum.ai/api/docs/#update-an-annotation."""
         annotation = await self._http_client.replace(Resource.Annotation, annotation_id, data)
@@ -313,6 +334,22 @@ class ElisAPIClient:
         annotation = await self._http_client.update(Resource.Annotation, annotation_id, data)
 
         return self._deserializer(Resource.Annotation, annotation)
+
+    async def bulk_update_annotation_data(
+        self, annotation_id: int, operations: List[Dict[str, Any]]
+    ) -> None:
+        """https://elis.rossum.ai/api/docs/#bulk-update-annotation-data"""
+        await self._http_client.request_json(
+            "POST",
+            f"{Resource.Annotation.value}/{annotation_id}/content/operations",
+            json={"operations": operations},
+        )
+
+    async def confirm_annotation(self, annotation_id: int) -> None:
+        """https://elis.rossum.ai/api/docs/#confirm-annotation"""
+        await self._http_client.request_json(
+            "POST", f"{Resource.Annotation.value}/{annotation_id}/confirm"
+        )
 
     # ##### WORKSPACES #####
     async def list_all_workspaces(

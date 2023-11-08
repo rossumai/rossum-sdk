@@ -209,7 +209,8 @@ class TestAnnotations:
 
     async def test_retrieve_annotation_with_sideloads(self, elis_client, dummy_annotation):
         client, http_client = elis_client
-        http_client.fetch_one.return_value = dummy_annotation
+        # Copy the annotation to prevent changing dummy_annotation by side effects
+        http_client.fetch_one.return_value = dummy_annotation.copy()
         http_client.request_json.return_value = {"content": []}
 
         aid = dummy_annotation["id"]
@@ -226,7 +227,8 @@ class TestAnnotations:
         client, http_client = elis_client
         in_progress_annotation = {**dummy_annotation, "status": "importing"}
         # First, return annotation in importing, than to_review state
-        http_client.fetch_one.side_effect = [in_progress_annotation, dummy_annotation]
+        # Copy the annotation to prevent changing dummy_annotation by side effects
+        http_client.fetch_one.side_effect = [in_progress_annotation, dummy_annotation.copy()]
         # Return sideloaded content
         http_client.request_json.return_value = {"content": []}
 
@@ -235,9 +237,61 @@ class TestAnnotations:
                 dummy_annotation["id"], is_imported, sleep_s=2, sideloads=["content"]
             )
 
-        assert annotation == Annotation(**dummy_annotation)
+        assert annotation == Annotation(**{**dummy_annotation, "content": []})
 
         sleep_mock.assert_called_once_with(2)
+
+    async def test_poll_annotation_until_imported(self, elis_client, dummy_annotation):
+        client, http_client = elis_client
+        in_progress_annotation = {**dummy_annotation, "status": "importing"}
+        # First, return annotation in importing, than to_review state
+        # Copy the annotation to prevent changing dummy_annotation by side effects
+        http_client.fetch_one.side_effect = [in_progress_annotation, dummy_annotation.copy()]
+        # Return sideloaded content
+        http_client.request_json.return_value = {"content": []}
+
+        with patch("asyncio.sleep") as sleep_mock:
+            annotation = await client.poll_annotation_until_imported(
+                dummy_annotation["id"], sleep_s=2, sideloads=["content"]
+            )
+
+        assert annotation == Annotation(**{**dummy_annotation, "content": []})
+        sleep_mock.assert_called_once_with(2)
+
+    async def test_upload_and_wait_until_imported(self, elis_client, dummy_annotation):
+        client, http_client = elis_client
+        in_progress_annotation = {**dummy_annotation, "status": "importing"}
+        # Mock uploading a document
+        http_client.upload.side_effect = [
+            {"results": [{"annotation": f"/annotation/{dummy_annotation['id']}"}]}
+        ]
+        # First, return annotation in importing, than to_review state
+        # Copy the annotation to prevent changing dummy_annotation by side effects
+        http_client.fetch_one.side_effect = [in_progress_annotation, dummy_annotation.copy()]
+        # Return sideloaded content
+        http_client.request_json.return_value = {"content": []}
+
+        with patch("asyncio.sleep") as sleep_mock:
+            annotation = await client.upload_and_wait_until_imported(
+                queue_id=8199,
+                filepath="tests/data/sample_invoice.pdf",
+                filename="document.pdf",
+                sleep_s=2,
+                sideloads=["content"],
+            )
+
+        assert annotation == Annotation(**{**dummy_annotation, "content": []})
+
+        sleep_mock.assert_called_once_with(2)
+
+    async def test_start_annotation(self, elis_client, dummy_annotation):
+        client, http_client = elis_client
+        http_client.replace.return_value = dummy_annotation
+
+        aid = dummy_annotation["id"]
+
+        await client.start_annotation(aid)
+        http_client.request_json.assert_called_with("POST", f"annotations/{aid}/start")
 
     async def test_update_annotation(self, elis_client, dummy_annotation):
         client, http_client = elis_client
@@ -268,6 +322,27 @@ class TestAnnotations:
         assert annotation == Annotation(**dummy_annotation)
 
         http_client.update.assert_called_with(Resource.Annotation, aid, data)
+
+    async def test_bulk_update_annotation_data(self, elis_client, dummy_annotation):
+        client, http_client = elis_client
+        http_client.request_json.return_value = dummy_annotation
+
+        aid = dummy_annotation["id"]
+        operations = [{"id": 2510559656, "op": "remove"}, {"id": 2510559657, "op": "remove"}]
+        await client.bulk_update_annotation_data(aid, operations)
+
+        http_client.request_json.assert_called_with(
+            "POST", f"annotations/{aid}/content/operations", json={"operations": operations}
+        )
+
+    async def test_confirm_annotation(self, elis_client, dummy_annotation):
+        client, http_client = elis_client
+        http_client.replace.return_value = dummy_annotation
+
+        aid = dummy_annotation["id"]
+
+        await client.confirm_annotation(aid)
+        http_client.request_json.assert_called_with("POST", f"annotations/{aid}/confirm")
 
 
 class TestAnnotationsSync:
@@ -360,7 +435,9 @@ class TestAnnotationsSync:
 
     def test_retrieve_annotation_with_sideloads(self, elis_client_sync, dummy_annotation):
         client, http_client = elis_client_sync
-        http_client.fetch_one.return_value = dummy_annotation
+
+        # Copy the annotation to prevent changing dummy_annotation by side effects
+        http_client.fetch_one.return_value = dummy_annotation.copy()
         http_client.request_json.return_value = {"content": []}
 
         aid = dummy_annotation["id"]
@@ -377,7 +454,8 @@ class TestAnnotationsSync:
         client, http_client = elis_client_sync
         in_progress_annotation = {**dummy_annotation, "status": "importing"}
         # First, return annotation in importing, than to_review state
-        http_client.fetch_one.side_effect = [in_progress_annotation, dummy_annotation, []]
+        # Copy the annotation to prevent changing dummy_annotation by side effects
+        http_client.fetch_one.side_effect = [in_progress_annotation, dummy_annotation.copy(), []]
         # Return sideloaded content
         http_client.request_json.return_value = {"content": []}
 
@@ -389,6 +467,59 @@ class TestAnnotationsSync:
         assert annotation == Annotation(**{**dummy_annotation, "content": []})
 
         sleep_mock.assert_called_once_with(2)
+
+    def test_poll_annotation_until_imported(self, elis_client_sync, dummy_annotation):
+        client, http_client = elis_client_sync
+        in_progress_annotation = {**dummy_annotation, "status": "importing"}
+        # First, return annotation in importing, than to_review state
+        # Copy the annotation to prevent changing dummy_annotation by side effects
+        http_client.fetch_one.side_effect = [in_progress_annotation, dummy_annotation.copy(), []]
+        # Return sideloaded content
+        http_client.request_json.return_value = {"content": []}
+
+        with patch("asyncio.sleep") as sleep_mock:
+            annotation = client.poll_annotation_until_imported(
+                dummy_annotation["id"], sleep_s=2, sideloads=["content"]
+            )
+
+        assert annotation == Annotation(**{**dummy_annotation, "content": []})
+
+        sleep_mock.assert_called_once_with(2)
+
+    def test_upload_and_wait_until_imported(self, elis_client_sync, dummy_annotation):
+        client, http_client = elis_client_sync
+        in_progress_annotation = {**dummy_annotation, "status": "importing"}
+        # Mock uploading a document
+        http_client.upload.side_effect = [
+            {"results": [{"annotation": f"/annotation/{dummy_annotation['id']}"}]}
+        ]
+        # First, return annotation in importing, than to_review state
+        # Copy the annotation to prevent changing dummy_annotation by side effects
+        http_client.fetch_one.side_effect = [in_progress_annotation, dummy_annotation.copy()]
+        # Return sideloaded content
+        http_client.request_json.return_value = {"content": []}
+
+        with patch("asyncio.sleep") as sleep_mock:
+            annotation = client.upload_and_wait_until_imported(
+                queue_id=8199,
+                filepath="tests/data/sample_invoice.pdf",
+                filename="document.pdf",
+                sleep_s=2,
+                sideloads=["content"],
+            )
+
+        assert annotation == Annotation(**{**dummy_annotation, "content": []})
+
+        sleep_mock.assert_called_once_with(2)
+
+    def test_start_annotation(self, elis_client_sync, dummy_annotation):
+        client, http_client = elis_client_sync
+        http_client.replace.return_value = dummy_annotation
+
+        aid = dummy_annotation["id"]
+
+        client.start_annotation(aid)
+        http_client.request_json.assert_called_with("POST", f"annotations/{aid}/start")
 
     def test_update_annotation(self, elis_client_sync, dummy_annotation):
         client, http_client = elis_client_sync
@@ -419,3 +550,24 @@ class TestAnnotationsSync:
         assert annotation == Annotation(**dummy_annotation)
 
         http_client.update.assert_called_with(Resource.Annotation, aid, data)
+
+    def test_bulk_update_annotation_data(self, elis_client_sync, dummy_annotation):
+        client, http_client = elis_client_sync
+        http_client.request_json.return_value = dummy_annotation
+
+        aid = dummy_annotation["id"]
+        operations = [{"id": 2510559656, "op": "remove"}, {"id": 2510559657, "op": "remove"}]
+        client.bulk_update_annotation_data(aid, operations)
+
+        http_client.request_json.assert_called_with(
+            "POST", f"annotations/{aid}/content/operations", json={"operations": operations}
+        )
+
+    def test_confirm_annotation(self, elis_client_sync, dummy_annotation):
+        client, http_client = elis_client_sync
+        http_client.replace.return_value = dummy_annotation
+
+        aid = dummy_annotation["id"]
+
+        client.confirm_annotation(aid)
+        http_client.request_json.assert_called_with("POST", f"annotations/{aid}/confirm")

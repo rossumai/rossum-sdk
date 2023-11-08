@@ -28,13 +28,13 @@ if typing.TYPE_CHECKING:
     from rossum_api.models import Deserializer
     from rossum_api.models.annotation import Annotation
     from rossum_api.models.connector import Connector
+    from rossum_api.models.group import Group
     from rossum_api.models.hook import Hook
     from rossum_api.models.inbox import Inbox
     from rossum_api.models.organization import Organization
     from rossum_api.models.queue import Queue
     from rossum_api.models.schema import Schema
     from rossum_api.models.user import User
-    from rossum_api.models.user_role import UserRole
     from rossum_api.models.workspace import Workspace
 
     T = TypeVar("T")
@@ -270,6 +270,26 @@ class ElisAPIClientSync:
             self.elis_api_client.poll_annotation(annotation_id, predicate, sleep_s, sideloads)
         )
 
+    def poll_annotation_until_imported(self, annotation_id: int, **poll_kwargs: Any) -> Annotation:
+        """A shortcut for waiting until annotation is imported."""
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.poll_annotation_until_imported(annotation_id, **poll_kwargs)
+        )
+
+    def upload_and_wait_until_imported(
+        self, queue_id: int, filepath: Union[str, pathlib.Path], filename: str, **poll_kwargs
+    ) -> Annotation:
+        """A shortcut for uploading a single file and waiting until its annotation is imported."""
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.upload_and_wait_until_imported(
+                queue_id, filepath, filename, **poll_kwargs
+            )
+        )
+
+    def start_annotation(self, annotation_id: int) -> None:
+        """https://elis.rossum.ai/api/docs/#start-annotation"""
+        self.event_loop.run_until_complete(self.elis_api_client.start_annotation(annotation_id))
+
     def update_annotation(self, annotation_id: int, data: Dict[str, Any]) -> Annotation:
         """https://elis.rossum.ai/api/docs/#update-an-annotation."""
         return self.event_loop.run_until_complete(
@@ -281,6 +301,18 @@ class ElisAPIClientSync:
         return self.event_loop.run_until_complete(
             self.elis_api_client.update_part_annotation(annotation_id, data)
         )
+
+    def bulk_update_annotation_data(
+        self, annotation_id: int, operations: List[Dict[str, Any]]
+    ) -> None:
+        """https://elis.rossum.ai/api/docs/#bulk-update-annotation-data"""
+        self.event_loop.run_until_complete(
+            self.elis_api_client.bulk_update_annotation_data(annotation_id, operations)
+        )
+
+    def confirm_annotation(self, annotation_id: int) -> None:
+        """https://elis.rossum.ai/api/docs/#confirm-annotation"""
+        self.event_loop.run_until_complete(self.elis_api_client.confirm_annotation(annotation_id))
 
     # ##### WORKSPACES #####
     def list_all_workspaces(
@@ -350,7 +382,7 @@ class ElisAPIClientSync:
         self,
         ordering: Sequence[str] = (),
         **filters: Dict[str, Any],
-    ) -> Iterable[UserRole]:
+    ) -> Iterable[Group]:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles."""
         return self._iter_over_async(self.elis_api_client.list_all_user_roles(ordering, **filters))
 

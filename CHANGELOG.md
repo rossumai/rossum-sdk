@@ -2,6 +2,30 @@
 
 
 
+## v0.11.0 (2023-11-08)
+
+### Chore
+
+* chore: Remove side-effects from tests with sideloads
+
+dummy_annotation was modified by a side-effect and the expected values
+didn&#39;t need to add content which was confusing. ([`c3f8130`](https://github.com/rossumai/rossum-sdk/commit/c3f8130561815f1a8f26d7f25a557e77f9e625b3))
+
+### Feature
+
+* feat: Add convenience methods for annotation lifecycle ([`cf56272`](https://github.com/rossumai/rossum-sdk/commit/cf56272354634a5002030c977ac295b72a15a3aa))
+
+### Refactor
+
+* refactor: Rename UserRole to Group for consistency with the API ([`ed8065a`](https://github.com/rossumai/rossum-sdk/commit/ed8065a5abda3a69e3f8347626e63d67ad5f4c5d))
+
+### Unknown
+
+* Merge pull request #56 from rossumai/oh/annotation-convenience-methods
+
+feat: Add convenience methods for annotation lifecycle ([`7e5adbd`](https://github.com/rossumai/rossum-sdk/commit/7e5adbdcbe91ea07de03656264a3af780f2f4d39))
+
+
 ## v0.10.0 (2023-11-02)
 
 ### Chore

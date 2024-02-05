@@ -351,6 +351,14 @@ class ElisAPIClient:
             "POST", f"{Resource.Annotation.value}/{annotation_id}/confirm"
         )
 
+    # ##### DOCUMENTS #####
+    async def retrieve_document_content(self, document_id: int) -> bytes:
+        """https://elis.rossum.ai/api/docs/#document-content"""
+        document_content = await self._http_client.request(
+            "GET", url=f"{Resource.Document.value}/{document_id}/content"
+        )
+        return document_content.content
+
     # ##### WORKSPACES #####
     async def list_all_workspaces(
         self,

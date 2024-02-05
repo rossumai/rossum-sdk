@@ -314,6 +314,13 @@ class ElisAPIClientSync:
         """https://elis.rossum.ai/api/docs/#confirm-annotation"""
         self.event_loop.run_until_complete(self.elis_api_client.confirm_annotation(annotation_id))
 
+    # ##### DOCUMENTS #####
+    def retrieve_document_content(self, document_id: int) -> bytes:
+        """https://elis.rossum.ai/api/docs/#document-content"""
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.retrieve_document_content(document_id)
+        )
+
     # ##### WORKSPACES #####
     def list_all_workspaces(
         self,

@@ -30,6 +30,7 @@ class Resource(Enum):
     Annotation = "annotations"
     Auth = "auth"
     Connector = "connectors"
+    Document = "documents"
     Group = "groups"
     Hook = "hooks"
     Inbox = "inboxes"

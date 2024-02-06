@@ -7,6 +7,7 @@ import dacite
 from rossum_api.api_client import Resource
 from rossum_api.models.annotation import Annotation
 from rossum_api.models.connector import Connector
+from rossum_api.models.document import Document
 from rossum_api.models.group import Group
 from rossum_api.models.hook import Hook
 from rossum_api.models.inbox import Inbox
@@ -26,6 +27,7 @@ if TYPE_CHECKING:
 RESOURCE_TO_MODEL = {
     Resource.Annotation: Annotation,
     Resource.Connector: Connector,
+    Resource.Document: Document,
     Resource.Group: Group,
     Resource.Hook: Hook,
     Resource.Inbox: Inbox,

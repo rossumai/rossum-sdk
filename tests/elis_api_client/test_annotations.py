@@ -344,6 +344,21 @@ class TestAnnotations:
         await client.confirm_annotation(aid)
         http_client.request_json.assert_called_with("POST", f"annotations/{aid}/confirm")
 
+    async def test_create_new_annotation(self, elis_client, dummy_annotation):
+        client, http_client = elis_client
+        http_client.create.return_value = dummy_annotation
+
+        data = {
+            "status": "created",
+            "document": dummy_annotation["document"],
+            "queue": dummy_annotation["queue"],
+        }
+        annotation = await client.create_new_annotation(data)
+
+        assert annotation == Annotation(**dummy_annotation)
+
+        http_client.create.assert_called_with(Resource.Annotation, data)
+
 
 class TestAnnotationsSync:
     def test_list_all_annotations(self, elis_client_sync, dummy_annotation, mock_generator):
@@ -571,3 +586,18 @@ class TestAnnotationsSync:
 
         client.confirm_annotation(aid)
         http_client.request_json.assert_called_with("POST", f"annotations/{aid}/confirm")
+
+    def test_create_new_annotation(self, elis_client_sync, dummy_annotation):
+        client, http_client = elis_client_sync
+        http_client.create.return_value = dummy_annotation
+
+        data = {
+            "status": "created",
+            "document": dummy_annotation["document"],
+            "queue": dummy_annotation["queue"],
+        }
+        annotation = client.create_new_annotation(data)
+
+        assert annotation == Annotation(**dummy_annotation)
+
+        http_client.create.assert_called_with(Resource.Annotation, data)

@@ -52,7 +52,7 @@ class TestHooks:
 
         http_client.fetch_all.assert_called_with(Resource.Hook, ())
 
-    async def test_retrieve_user(self, elis_client, dummy_hook):
+    async def test_retrieve_hook(self, elis_client, dummy_hook):
         client, http_client = elis_client
         http_client.fetch_one.return_value = dummy_hook
 
@@ -63,7 +63,7 @@ class TestHooks:
 
         http_client.fetch_one.assert_called_with(Resource.Hook, uid)
 
-    async def test_create_new_user(self, elis_client, dummy_hook):
+    async def test_create_new_hook(self, elis_client, dummy_hook):
         client, http_client = elis_client
         http_client.create.return_value = dummy_hook
 
@@ -80,7 +80,7 @@ class TestHooks:
         http_client.create.assert_called_with(Resource.Hook, data)
 
 
-class TestHooksAsync:
+class TestHooksSync:
     def test_list_all_hooks(self, elis_client_sync, dummy_hook, mock_generator):
         client, http_client = elis_client_sync
         http_client.fetch_all.return_value = mock_generator(dummy_hook)
@@ -92,7 +92,7 @@ class TestHooksAsync:
 
         http_client.fetch_all.assert_called_with(Resource.Hook, ())
 
-    def test_retrieve_user(self, elis_client_sync, dummy_hook):
+    def test_retrieve_hook(self, elis_client_sync, dummy_hook):
         client, http_client = elis_client_sync
         http_client.fetch_one.return_value = dummy_hook
 
@@ -103,7 +103,7 @@ class TestHooksAsync:
 
         http_client.fetch_one.assert_called_with(Resource.Hook, uid)
 
-    def test_create_new_user(self, elis_client_sync, dummy_hook):
+    def test_create_new_hook(self, elis_client_sync, dummy_hook):
         client, http_client = elis_client_sync
         http_client.create.return_value = dummy_hook
 

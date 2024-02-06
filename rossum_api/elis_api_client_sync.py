@@ -28,6 +28,7 @@ if typing.TYPE_CHECKING:
     from rossum_api.models import Deserializer
     from rossum_api.models.annotation import Annotation
     from rossum_api.models.connector import Connector
+    from rossum_api.models.document import Document
     from rossum_api.models.group import Group
     from rossum_api.models.hook import Hook
     from rossum_api.models.inbox import Inbox
@@ -319,6 +320,18 @@ class ElisAPIClientSync:
         """https://elis.rossum.ai/api/docs/#document-content"""
         return self.event_loop.run_until_complete(
             self.elis_api_client.retrieve_document_content(document_id)
+        )
+
+    def create_new_document(
+        self,
+        file_name: str,
+        file_data: bytes,
+        metadata: Optional[Dict[str, Any]] = None,
+        parent: Optional[str] = None,
+    ) -> Document:
+        """https://elis.rossum.ai/api/docs/#create-document"""
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.create_new_document(file_name, file_data, metadata, parent)
         )
 
     # ##### WORKSPACES #####

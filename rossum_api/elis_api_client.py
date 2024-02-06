@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import typing
 from enum import Enum
 
@@ -18,6 +19,7 @@ if typing.TYPE_CHECKING:
     from rossum_api.models import Deserializer
     from rossum_api.models.annotation import Annotation
     from rossum_api.models.connector import Connector
+    from rossum_api.models.document import Document
     from rossum_api.models.group import Group
     from rossum_api.models.hook import Hook
     from rossum_api.models.inbox import Inbox
@@ -358,6 +360,26 @@ class ElisAPIClient:
             "GET", url=f"{Resource.Document.value}/{document_id}/content"
         )
         return document_content.content
+
+    async def create_new_document(
+        self,
+        file_name: str,
+        file_data: bytes,
+        metadata: Optional[Dict[str, Any]] = None,
+        parent: Optional[str] = None,
+    ) -> Document:
+        """https://elis.rossum.ai/api/docs/#create-document"""
+        metadata = metadata or {}
+        files = {
+            "content": (file_name, file_data),
+            "metadata": ("", json.dumps(metadata).encode("utf-8")),
+            "parent": ("", parent),
+        }
+        document = await self._http_client.request_json(
+            "POST", url=Resource.Document.value, files=files
+        )
+
+        return self._deserializer(Resource.Document, document)
 
     # ##### WORKSPACES #####
     async def list_all_workspaces(

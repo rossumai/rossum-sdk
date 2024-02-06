@@ -192,7 +192,7 @@ class ElisAPIClient:
 
         return self._deserializer(Resource.Schema, schema)
 
-    async def delete_schema(self, schema_id) -> None:
+    async def delete_schema(self, schema_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-schema."""
         return await self._http_client.delete(Resource.Schema, schema_id)
 
@@ -397,7 +397,7 @@ class ElisAPIClient:
         async for w in self._http_client.fetch_all(Resource.Workspace, ordering, **filters):
             yield self._deserializer(Resource.Workspace, w)
 
-    async def retrieve_workspace(self, workspace_id) -> Workspace:
+    async def retrieve_workspace(self, workspace_id: int) -> Workspace:
         """https://elis.rossum.ai/api/docs/#retrieve-a-workspace."""
         workspace = await self._http_client.fetch_one(Resource.Workspace, workspace_id)
 
@@ -409,7 +409,7 @@ class ElisAPIClient:
 
         return self._deserializer(Resource.Workspace, workspace)
 
-    async def delete_workspace(self, workspace_id) -> None:
+    async def delete_workspace(self, workspace_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-workspace."""
         return await self._http_client.delete(Resource.Workspace, workspace_id)
 
@@ -430,7 +430,7 @@ class ElisAPIClient:
         async for c in self._http_client.fetch_all(Resource.Connector, ordering, **filters):
             yield self._deserializer(Resource.Connector, c)
 
-    async def retrieve_connector(self, connector_id) -> Connector:
+    async def retrieve_connector(self, connector_id: int) -> Connector:
         """https://elis.rossum.ai/api/docs/#retrieve-a-connector."""
         connector = await self._http_client.fetch_one(Resource.Connector, connector_id)
 
@@ -452,7 +452,7 @@ class ElisAPIClient:
         async for h in self._http_client.fetch_all(Resource.Hook, ordering, **filters):
             yield self._deserializer(Resource.Hook, h)
 
-    async def retrieve_hook(self, hook_id) -> Hook:
+    async def retrieve_hook(self, hook_id: int) -> Hook:
         """https://elis.rossum.ai/api/docs/#retrieve-a-hook."""
         hook = await self._http_client.fetch_one(Resource.Hook, hook_id)
 

@@ -101,7 +101,7 @@ class ElisAPIClientSync:
         """https://elis.rossum.ai/api/docs/#create-new-queue."""
         return self.event_loop.run_until_complete(self.elis_api_client.create_new_queue(data))
 
-    def delete_queue(self, queue_id) -> None:
+    def delete_queue(self, queue_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-queue."""
         return self.event_loop.run_until_complete(self.elis_api_client.delete_queue(queue_id))
 
@@ -191,9 +191,9 @@ class ElisAPIClientSync:
         """https://elis.rossum.ai/api/docs/#create-a-new-schema."""
         return self.event_loop.run_until_complete(self.elis_api_client.create_new_schema(data))
 
-    def delete_schema(self, id) -> None:
+    def delete_schema(self, schema_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-schema."""
-        return self.event_loop.run_until_complete(self.elis_api_client.delete_schema(id))
+        return self.event_loop.run_until_complete(self.elis_api_client.delete_schema(schema_id))
 
     # ##### USERS #####
     def list_all_users(
@@ -347,17 +347,21 @@ class ElisAPIClientSync:
         """https://elis.rossum.ai/api/docs/#list-all-workspaces."""
         return self._iter_over_async(self.elis_api_client.list_all_workspaces(ordering, **filters))
 
-    def retrieve_workspace(self, id) -> Workspace:
+    def retrieve_workspace(self, workspace_id: int) -> Workspace:
         """https://elis.rossum.ai/api/docs/#retrieve-a-workspace."""
-        return self.event_loop.run_until_complete(self.elis_api_client.retrieve_workspace(id))
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.retrieve_workspace(workspace_id)
+        )
 
     def create_new_workspace(self, data: Dict[str, Any]) -> Workspace:
         """https://elis.rossum.ai/api/docs/#create-a-new-workspace."""
         return self.event_loop.run_until_complete(self.elis_api_client.create_new_workspace(data))
 
-    def delete_workspace(self, id) -> None:
+    def delete_workspace(self, workspace_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#retrieve-a-workspace."""
-        return self.event_loop.run_until_complete(self.elis_api_client.delete_workspace(id))
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.delete_workspace(workspace_id)
+        )
 
     # ##### INBOX #####
     def create_new_inbox(
@@ -376,9 +380,11 @@ class ElisAPIClientSync:
         """https://elis.rossum.ai/api/docs/#list-all-connectors."""
         return self._iter_over_async(self.elis_api_client.list_all_connectors(ordering, **filters))
 
-    def retrieve_connector(self, id) -> Connector:
+    def retrieve_connector(self, connector_id: int) -> Connector:
         """https://elis.rossum.ai/api/docs/#retrieve-a-connector."""
-        return self.event_loop.run_until_complete(self.elis_api_client.retrieve_connector(id))
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.retrieve_connector(connector_id)
+        )
 
     def create_new_connector(self, data: Dict[str, Any]) -> Connector:
         """https://elis.rossum.ai/api/docs/#create-a-new-connector."""
@@ -393,9 +399,9 @@ class ElisAPIClientSync:
         """https://elis.rossum.ai/api/docs/#list-all-hooks."""
         return self._iter_over_async(self.elis_api_client.list_all_hooks(ordering, **filters))
 
-    def retrieve_hook(self, id) -> Hook:
+    def retrieve_hook(self, hook_id: int) -> Hook:
         """https://elis.rossum.ai/api/docs/#retrieve-a-hook."""
-        return self.event_loop.run_until_complete(self.elis_api_client.retrieve_hook(id))
+        return self.event_loop.run_until_complete(self.elis_api_client.retrieve_hook(hook_id))
 
     def create_new_hook(self, data: Dict[str, Any]) -> Hook:
         """https://elis.rossum.ai/api/docs/#create-a-new-hook."""

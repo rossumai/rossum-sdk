@@ -315,6 +315,10 @@ class ElisAPIClientSync:
         """https://elis.rossum.ai/api/docs/#confirm-annotation"""
         self.event_loop.run_until_complete(self.elis_api_client.confirm_annotation(annotation_id))
 
+    def create_new_annotation(self, data: dict[str, Any]) -> Annotation:
+        """https://elis.rossum.ai/api/docs/#create-an-annotation"""
+        return self.event_loop.run_until_complete(self.elis_api_client.create_new_annotation(data))
+
     # ##### DOCUMENTS #####
     def retrieve_document_content(self, document_id: int) -> bytes:
         """https://elis.rossum.ai/api/docs/#document-content"""

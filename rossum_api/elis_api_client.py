@@ -353,6 +353,12 @@ class ElisAPIClient:
             "POST", f"{Resource.Annotation.value}/{annotation_id}/confirm"
         )
 
+    async def create_new_annotation(self, data: dict[str, Any]) -> Annotation:
+        """https://elis.rossum.ai/api/docs/#create-an-annotation"""
+        annotation = await self._http_client.create(Resource.Annotation, data)
+
+        return self._deserializer(Resource.Annotation, annotation)
+
     # ##### DOCUMENTS #####
     async def retrieve_document_content(self, document_id: int) -> bytes:
         """https://elis.rossum.ai/api/docs/#document-content"""

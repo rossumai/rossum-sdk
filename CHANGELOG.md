@@ -2,6 +2,29 @@
 
 
 
+## v0.12.0 (2024-02-06)
+
+### Feature
+
+* feat: add new create_new_annotation method ([`7354ec7`](https://github.com/rossumai/rossum-sdk/commit/7354ec71fd7f821ac92870ada87ce44b935fb2c5))
+
+* feat: add new create_new_document method ([`4affb67`](https://github.com/rossumai/rossum-sdk/commit/4affb6704072305637b5fec403fe3993e0ee1cf3))
+
+* feat: add new retrieve_document_content method ([`4057e9c`](https://github.com/rossumai/rossum-sdk/commit/4057e9c170267302d7b740980a91c7af26e044ef))
+
+### Refactor
+
+* refactor: unify naming of ids and add missing typing ([`86246cd`](https://github.com/rossumai/rossum-sdk/commit/86246cd612336f1d919cb01a06f5ea5b542c20fd))
+
+* refactor(tests): fix typos in tests ([`19711e2`](https://github.com/rossumai/rossum-sdk/commit/19711e233752c0d2102e4ae4633a3ffdff88a05c))
+
+### Unknown
+
+* Merge pull request #59 from bara-m/bara-add-missing-methods
+
+Add new methods for documents and annotations ([`0710177`](https://github.com/rossumai/rossum-sdk/commit/0710177346b8f40dc33f5f7a28269add676ef9f1))
+
+
 ## v0.11.0 (2023-11-08)
 
 ### Chore

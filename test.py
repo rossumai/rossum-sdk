@@ -132,7 +132,9 @@ async def main_with_async_client():
     )
 
     print("Polling until annotation is ready to review...")
-    annotation = await client.poll_annotation(annotation_id, lambda a: a.status != "importing")
+    annotation = await client.poll_annotation(
+        annotation_id, lambda a: a.status not in ("importing", "created")
+    )
     print(f"Annotation ready to review: {annotation}")
 
     # Cleanup

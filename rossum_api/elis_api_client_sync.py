@@ -59,6 +59,15 @@ class ElisAPIClientSync:
         http_client: Optional[APIClient] = None,
         deserializer: Optional[Deserializer] = None,
     ):
+        """
+        Parameters
+        ----------
+        base_url
+            base API URL including the "/api" and version ("/v1") in the url path. For example
+            "https://elis.rossum.ai/api/v1"
+        deserializer
+            pass a custom deserialization callable if different model classes should be returned
+        """
         self.elis_api_client = ElisAPIClient(
             username, password, token, base_url, http_client, deserializer
         )
@@ -114,19 +123,19 @@ class ElisAPIClientSync:
     ) -> List[int]:
         """https://elis.rossum.ai/api/docs/#import-a-document.
 
-        arguments
+        Parameters
         ---------
-            files
-                2-tuple containing current filepath and name to be used by Elis for the uploaded file
-            metadata
-                metadata will be set to newly created annotation object
-            values
-                may be used to initialize datapoint values by setting the value of rir_field_names in the schema
+        files
+            2-tuple containing current filepath and name to be used by Elis for the uploaded file
+        metadata
+            metadata will be set to newly created annotation object
+        values
+            may be used to initialize datapoint values by setting the value of rir_field_names in the schema
 
         Returns
         -------
-            annotation_ids
-                list of IDs of created annotations, respects the order of `files` argument
+        annotation_ids
+            list of IDs of created annotations, respects the order of `files` argument
         """
         return self.event_loop.run_until_complete(
             self.elis_api_client.import_document(queue_id, files, values, metadata)
@@ -441,7 +450,7 @@ class ElisAPIClientSync:
     def get_token(self, refresh: bool = False) -> str:
         """Returns the current token. Authentication is done automatically if needed.
 
-        Arguments:
+        Parameters
         ----------
         refresh
             force refreshing the token

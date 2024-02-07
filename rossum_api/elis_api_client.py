@@ -53,6 +53,9 @@ class ElisAPIClient:
         """
         Parameters
         ----------
+        base_url
+            base API URL including the "/api" and version ("/v1") in the url path. For example
+            "https://elis.rossum.ai/api/v1"
         deserializer
             pass a custom deserialization callable if different model classes should be returned
         """
@@ -97,19 +100,19 @@ class ElisAPIClient:
     ) -> List[int]:
         """https://elis.rossum.ai/api/docs/#import-a-document.
 
-        arguments
+        Parameters
         ---------
-            files
-                2-tuple containing current filepath and name to be used by Elis for the uploaded file
-            metadata
-                metadata will be set to newly created annotation object
-            values
-                may be used to initialize datapoint values by setting the value of rir_field_names in the schema
+        files
+            2-tuple containing current filepath and name to be used by Elis for the uploaded file
+        metadata
+            metadata will be set to newly created annotation object
+        values
+            may be used to initialize datapoint values by setting the value of rir_field_names in the schema
 
         Returns
         -------
-            annotation_ids
-                list of IDs of created annotations, respects the order of `files` argument
+        annotation_ids
+            list of IDs of created annotations, respects the order of `files` argument
         """
         tasks = [
             asyncio.create_task(self._upload(file, queue_id, filename, values, metadata))
@@ -309,7 +312,7 @@ class ElisAPIClient:
     ) -> Annotation:
         """A shortcut for waiting until annotation is imported."""
         return await self.poll_annotation(
-            annotation_id, lambda a: a.status != "importing", **poll_kwargs
+            annotation_id, lambda a: a.status not in ("importing", "created"), **poll_kwargs
         )
 
     async def upload_and_wait_until_imported(
@@ -376,11 +379,13 @@ class ElisAPIClient:
     ) -> Document:
         """https://elis.rossum.ai/api/docs/#create-document"""
         metadata = metadata or {}
-        files = {
+        files: httpx._types.RequestFiles = {
             "content": (file_name, file_data),
             "metadata": ("", json.dumps(metadata).encode("utf-8")),
-            "parent": ("", parent),
         }
+        if parent:
+            files["parent"] = ("", parent)
+
         document = await self._http_client.request_json(
             "POST", url=Resource.Document.value, files=files
         )
@@ -497,7 +502,7 @@ class ElisAPIClient:
     async def get_token(self, refresh: bool = False) -> str:
         """Returns the current token. Authentication is done automatically if needed.
 
-        Arguments:
+        Parameters
         ----------
         refresh
             force refreshing the token

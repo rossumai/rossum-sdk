@@ -2,6 +2,27 @@
 
 
 
+## v0.13.0 (2024-02-07)
+
+### Documentation
+
+* docs: improve client docstrings ([`94e8522`](https://github.com/rossumai/rossum-sdk/commit/94e85229ee3f64bd169ac79c2a8a3a2bf0f03996))
+
+### Feature
+
+* feat: consider new created status when checking if annotation is already imported ([`7c66c63`](https://github.com/rossumai/rossum-sdk/commit/7c66c63585e35cf58272253ba143003c053dccff))
+
+### Fix
+
+* fix: do not send None parent when creating new document ([`95f3fbc`](https://github.com/rossumai/rossum-sdk/commit/95f3fbca22d6ca157567ccf71bd3ff379ab29705))
+
+### Unknown
+
+* Merge pull request #60 from bara-m/bara-make-annotations-method-work-with-new-status
+
+Consider new created status when checking if annotation is already imported ([`c2050cf`](https://github.com/rossumai/rossum-sdk/commit/c2050cfe954cf4d158cd7b7ab3617d65f97ece64))
+
+
 ## v0.12.0 (2024-02-06)
 
 ### Feature

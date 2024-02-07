@@ -309,7 +309,7 @@ class ElisAPIClient:
     ) -> Annotation:
         """A shortcut for waiting until annotation is imported."""
         return await self.poll_annotation(
-            annotation_id, lambda a: a.status != "importing", **poll_kwargs
+            annotation_id, lambda a: a.status not in ("importing", "created"), **poll_kwargs
         )
 
     async def upload_and_wait_until_imported(

@@ -222,7 +222,7 @@ class TestAnnotations:
 
     async def test_poll_annotation(self, elis_client, dummy_annotation):
         def is_imported(annotation):
-            return annotation.status != "importing"
+            return annotation.status not in ("importing", "created")
 
         client, http_client = elis_client
         in_progress_annotation = {**dummy_annotation, "status": "importing"}
@@ -464,7 +464,7 @@ class TestAnnotationsSync:
 
     def test_poll_annotation(self, elis_client_sync, dummy_annotation):
         def is_imported(annotation):
-            return annotation.status != "importing"
+            return annotation.status not in ("importing", "created")
 
         client, http_client = elis_client_sync
         in_progress_annotation = {**dummy_annotation, "status": "importing"}

@@ -379,11 +379,13 @@ class ElisAPIClient:
     ) -> Document:
         """https://elis.rossum.ai/api/docs/#create-document"""
         metadata = metadata or {}
-        files = {
+        files: httpx._types.RequestFiles = {
             "content": (file_name, file_data),
             "metadata": ("", json.dumps(metadata).encode("utf-8")),
-            "parent": ("", parent),
         }
+        if parent:
+            files["parent"] = ("", parent)
+
         document = await self._http_client.request_json(
             "POST", url=Resource.Document.value, files=files
         )

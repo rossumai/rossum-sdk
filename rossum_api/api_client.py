@@ -258,7 +258,7 @@ class APIClient:
         for r in results:
             yield r
         # Await requests one by one to yield results in correct order to ensure the same order of
-        # results next time the same resource is fetched. This slightly descreases throughput.
+        # results next time the same resource is fetched. This slightly decreases throughput.
         for request in page_requests:
             results, _ = await request
             for r in results:

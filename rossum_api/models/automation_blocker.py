@@ -10,7 +10,7 @@ class AutomationBlockerContent:
     type: str
     schema_id: Optional[str] = None
     samples_truncated: Optional[bool] = False
-    samples: Dict[str, Any] = field(default_factory=dict)
+    samples: List[Dict[str, Any]] = field(default_factory=list)
     details: Dict[str, Any] = field(default_factory=dict)
 
 

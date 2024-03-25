@@ -2,6 +2,23 @@
 
 
 
+## v0.13.1 (2024-03-25)
+
+### Ci
+
+* ci(pre-commit): update mypy ([`06d2272`](https://github.com/rossumai/rossum-sdk/commit/06d22725d0a9a33ade3d700779707e7c955268dd))
+
+### Fix
+
+* fix(models:automation_blocker): fix type of `samples` ([`b36d6a8`](https://github.com/rossumai/rossum-sdk/commit/b36d6a8f1b3ae46722bb5dacf0d01fed5d2544b4))
+
+### Unknown
+
+* Merge pull request #62 from rossumai/stepan-s/fix-model-automation-blocker-samples
+
+fix(models:automation_blocker): fix type of `samples` ([`e459253`](https://github.com/rossumai/rossum-sdk/commit/e459253f786d917f25db94c5f4a3197de2a34c15))
+
+
 ## v0.13.0 (2024-02-07)
 
 ### Documentation

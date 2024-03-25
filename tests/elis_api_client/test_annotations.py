@@ -108,7 +108,16 @@ def dummy_annotation_with_sideloads():
         "automation_blocker": {
             "id": 981916,
             "url": "https://elis.develop.r8.lol/api/v1/automation_blockers/981916",
-            "content": [{"type": "automation_disabled", "level": "annotation"}],
+            "content": [
+                {"type": "automation_disabled", "level": "annotation"},
+                {
+                    "level": "datapoint",
+                    "type": "error_message",
+                    "samples": [
+                        {"details": {"message_content": ["Total Amount is most likely not empty"]}}
+                    ],
+                },
+            ],
             "annotation": "https://elis.develop.r8.lol/api/v1/annotations/3232238",
         },
         "email_thread": None,

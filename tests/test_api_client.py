@@ -120,6 +120,14 @@ UPLOAD_RESPONSE = {
         }
     ],
 }
+
+USER = {
+    "id": 1,
+    "url": "https://elis.rossum.ai/api/v1/users/1",
+    "first_name": "John",
+    "last_name": "Doe",
+}
+
 EXPECTED_UPLOAD_CONTENT = b'--313131\r\nContent-Disposition: form-data; name="content"; filename="filename.pdf"\r\nContent-Type: application/octet-stream\r\n\r\nFake PDF.\r\n--313131\r\nContent-Disposition: form-data; name="values"\r\nContent-Type: application/json\r\n\r\n{"upload:organization_unit": "Sales"}\r\n--313131\r\nContent-Disposition: form-data; name="metadata"\r\nContent-Type: application/json\r\n\r\n{"project": "Market ABC"}\r\n--313131--\r\n'
 
 CSV_EXPORT = b"meta_file_name,Invoice number\r\nfilename_1.pdf,11111\r\nfilename_2.pdf,22222"
@@ -187,8 +195,8 @@ async def test_init_token(httpx_mock):
 
 
 @pytest.mark.asyncio
-async def test_not_possible_to_reauth(httpx_mock):
-    """Invalid token used, trying to to re-auth without password, get error. Transparently displays it."""
+async def test_reauth_no_credentials(httpx_mock):
+    """Invalid token used but no credentials available for re-authentication. Raise 401."""
     client = APIClient(token=FAKE_TOKEN)
 
     httpx_mock.add_response(
@@ -197,16 +205,34 @@ async def test_not_possible_to_reauth(httpx_mock):
         status_code=401,
         content=b"unauth!",
     )
-    httpx_mock.add_response(
-        url="https://elis.rossum.ai/api/v1/auth/login",
-        status_code=400,
-        json={"password": ["This field may not be blank."]},
-    )
     with pytest.raises(APIClientError) as err:
         await client.fetch_one(Resource.User, 1)
 
-    assert err.value.status_code == 400
-    assert err.value.error == '{"password": ["This field may not be blank."]}'
+    assert err.value.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_reauth_success(login_mock, httpx_mock):
+    """Invalid token used, credentials available => reauthenticate in the background. Fetch user without raising any errors."""
+    client = APIClient("username", "password", token=FAKE_TOKEN)
+
+    httpx_mock.add_response(
+        method="GET",
+        url="https://elis.rossum.ai/api/v1/users/1",
+        status_code=401,
+        match_headers={"Authorization": f"token {FAKE_TOKEN}"},
+        content=b"unauth!",
+    )
+
+    httpx_mock.add_response(
+        method="GET",
+        url="https://elis.rossum.ai/api/v1/users/1",
+        match_headers={"Authorization": f"token {NEW_TOKEN}"},
+        json=USER,
+    )
+
+    user = await client.fetch_one(Resource.User, 1)
+    assert user == USER
 
 
 @pytest.mark.asyncio

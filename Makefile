@@ -8,7 +8,6 @@ help:
 	@echo "make install: Install all needed dependencies including tests"
 	@echo "make lint: Run linters"
 	@echo "make test: Run basic tests (not testing most integrations)"
-	@echo "make test-all: Run ALL tests (slow, closest to CI)"
 	@echo "make format: Run code formatters (destructive)"
 	@echo
 	@echo "Also make sure to read ./CONTRIBUTING.md"

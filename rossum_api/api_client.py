@@ -67,6 +67,8 @@ def authenticate_if_needed(method):
         except APIClientError as e:
             if e.status_code != 401:
                 raise
+            if not (self.username and self.password):  # no way to refresh token
+                raise
             logger.debug("Token expired, authenticating user %s...", self.username)
             await self._authenticate()
             return await method(self, *args, **kwargs)

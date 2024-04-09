@@ -2,6 +2,27 @@
 
 
 
+## v0.13.2 (2024-04-09)
+
+### Fix
+
+* fix(api-client): do not reauth if no credentials are available ([`9b5f422`](https://github.com/rossumai/rossum-sdk/commit/9b5f4223b3f1ac852315e98956c920cb16aebd21))
+
+### Unknown
+
+* Merge pull request #65 from rossumai/igor/no-reauth-without-credentials
+
+fix(api-client): do not reauth if no credentials are available ([`92697e6`](https://github.com/rossumai/rossum-sdk/commit/92697e602a68259ef3b228659974f39436b96fe7))
+
+* makefile: remove non-existing test-all rule reference ([`033063f`](https://github.com/rossumai/rossum-sdk/commit/033063f35c56885f5f9695eb554ac7f7ec1cf523))
+
+* Merge pull request #61 from michalsrutek/feature/fix-decreases-typo
+
+Fix decreases typo ([`c6db58b`](https://github.com/rossumai/rossum-sdk/commit/c6db58b6d4d01042c20c578f18e35e8dedd72879))
+
+* Merge branch &#39;rossumai:main&#39; into feature/fix-decreases-typo ([`db09423`](https://github.com/rossumai/rossum-sdk/commit/db0942377bd0b16f1ef211323d225a5f223d53ea))
+
+
 ## v0.13.1 (2024-03-25)
 
 ### Ci
@@ -17,6 +38,8 @@
 * Merge pull request #62 from rossumai/stepan-s/fix-model-automation-blocker-samples
 
 fix(models:automation_blocker): fix type of `samples` ([`e459253`](https://github.com/rossumai/rossum-sdk/commit/e459253f786d917f25db94c5f4a3197de2a34c15))
+
+* Fix decreases typo ([`7477335`](https://github.com/rossumai/rossum-sdk/commit/74773351db60927b3128e3c7a9361582b3386ba1))
 
 
 ## v0.13.0 (2024-02-07)

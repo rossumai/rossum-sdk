@@ -2,7 +2,20 @@
 
 
 
+## v0.14.0 (2024-05-22)
+
+### Unknown
+
+* Merge pull request #66 from liborvaneksw/lv/mypy
+
+feat: add py.typed and let the world know we use types ([`334c51e`](https://github.com/rossumai/rossum-sdk/commit/334c51ef71af79444a750c4d18e174fcb7be155b))
+
+
 ## v0.13.3 (2024-05-22)
+
+### Feature
+
+* feat: add py.typed and let the world know we use types ([`9415403`](https://github.com/rossumai/rossum-sdk/commit/941540354521e321c2e40cc12b3b2a6e24a8abce))
 
 ### Fix
 

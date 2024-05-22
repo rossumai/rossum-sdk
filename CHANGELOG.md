@@ -2,6 +2,19 @@
 
 
 
+## v0.13.3 (2024-05-22)
+
+### Fix
+
+* fix: make User.last_login optional ([`406b16b`](https://github.com/rossumai/rossum-sdk/commit/406b16bdf7528073f1e453a7d2ef7cb4777b4191))
+
+### Unknown
+
+* Merge pull request #67 from liborvaneksw/lv/user-model-fix
+
+fix: make User.last_login optional ([`da6419c`](https://github.com/rossumai/rossum-sdk/commit/da6419c3163ba7c83f71faef724360f5e7d9d8b6))
+
+
 ## v0.13.2 (2024-04-09)
 
 ### Fix

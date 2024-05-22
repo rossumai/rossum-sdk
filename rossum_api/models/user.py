@@ -14,7 +14,7 @@ class User:
     date_joined: str
     username: str
     organization: str
-    last_login: str
+    last_login: Optional[str] = None
     is_active: bool = True
     email_verified: Optional[bool] = False
     password: Optional[str] = None

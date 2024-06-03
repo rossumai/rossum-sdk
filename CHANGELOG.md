@@ -2,6 +2,19 @@
 
 
 
+## v0.15.2 (2024-06-03)
+
+### Fix
+
+* fix: Fix package versioning ([`d3b5e88`](https://github.com/rossumai/rossum-sdk/commit/d3b5e889d2b4045c63e16eda961922a734b6db66))
+
+### Unknown
+
+* Merge pull request #72 from stancld/ihe/fix-package-versioniong
+
+fix: Fix package versioning ([`c246579`](https://github.com/rossumai/rossum-sdk/commit/c246579395380b0332574a40288851f68b2e3c80))
+
+
 ## v0.15.1 (2024-06-03)
 
 ### Fix

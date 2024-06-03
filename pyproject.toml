@@ -49,6 +49,5 @@ line_length = 100
 ensure_newline_before_comments = true
 
 [tool.semantic_release]
-version_variable = "setup.py:__version__"
 upload_to_repository = false
 branch = "main"

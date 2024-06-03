@@ -39,6 +39,7 @@ class Resource(Enum):
     Schema = "schemas"
     User = "users"
     Workspace = "workspaces"
+    Engine = "engines"
 
 
 class APIClientError(Exception):

@@ -29,6 +29,7 @@ if typing.TYPE_CHECKING:
     from rossum_api.models.annotation import Annotation
     from rossum_api.models.connector import Connector
     from rossum_api.models.document import Document
+    from rossum_api.models.engine import Engine
     from rossum_api.models.group import Group
     from rossum_api.models.hook import Hook
     from rossum_api.models.inbox import Inbox
@@ -203,6 +204,11 @@ class ElisAPIClientSync:
     def delete_schema(self, schema_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-schema."""
         return self.event_loop.run_until_complete(self.elis_api_client.delete_schema(schema_id))
+
+    # ##### ENGINES #####
+    def retrieve_engine(self, engine_id: int) -> Engine:
+        """https://elis.rossum.ai/api/docs/#retrieve-a-schema."""
+        return self.event_loop.run_until_complete(self.elis_api_client.retrieve_engine(engine_id))
 
     # ##### USERS #####
     def list_all_users(

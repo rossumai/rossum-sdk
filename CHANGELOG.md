@@ -2,6 +2,28 @@
 
 
 
+## v0.15.1 (2024-06-03)
+
+### Fix
+
+* fix: Remove semantic-release version_variable ([`9d5d101`](https://github.com/rossumai/rossum-sdk/commit/9d5d101016f31d54c612be5a79ba93a0eb6a59f2))
+
+### Unknown
+
+* Merge pull request #70 from stancld/ihe/remove-version-variable
+
+fix: Remove semantic-release version_variable ([`740144d`](https://github.com/rossumai/rossum-sdk/commit/740144d00d7f73aa39177e0eea92cdab16f33397))
+
+* Merge pull request #64 from stancld/ds-pyproject
+
+packaging: Use solely pyproject.toml ([`40dbde3`](https://github.com/rossumai/rossum-sdk/commit/40dbde3d519387148ecced292e248225564f200c))
+
+* packaging: Use solely pyproject.toml
+
+Use solely pyproject.toml with a correctly specified package version
+and drop no more needed setup.py. ([`da98b46`](https://github.com/rossumai/rossum-sdk/commit/da98b46e994c9e969bcc23187c511b79da2d4cff))
+
+
 ## v0.15.0 (2024-06-03)
 
 ### Feature

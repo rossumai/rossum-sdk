@@ -20,6 +20,7 @@ if typing.TYPE_CHECKING:
     from rossum_api.models.annotation import Annotation
     from rossum_api.models.connector import Connector
     from rossum_api.models.document import Document
+    from rossum_api.models.engine import Engine
     from rossum_api.models.group import Group
     from rossum_api.models.hook import Hook
     from rossum_api.models.inbox import Inbox
@@ -417,6 +418,13 @@ class ElisAPIClient:
     async def delete_workspace(self, workspace_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-workspace."""
         return await self._http_client.delete(Resource.Workspace, workspace_id)
+
+    # ##### ENGINE #####
+    async def retrieve_engine(self, engine_id: int) -> Engine:
+        """ "https://elis.rossum.ai/api/docs/#retrieve-an-engine."""
+        engine = await self._http_client.fetch_one(Resource.Engine, engine_id)
+
+        return self._deserializer(Resource.Engine, engine)
 
     # ##### INBOX #####
     async def create_new_inbox(self, data: Dict[str, Any]) -> Inbox:

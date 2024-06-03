@@ -32,3 +32,5 @@ class Queue:
     document_lifetime: Optional[str] = None
     delete_after: Optional[str] = None
     status: Optional[str] = None
+    engine: Optional[str] = None
+    training_enabled: bool = True

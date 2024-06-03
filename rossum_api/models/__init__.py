@@ -8,6 +8,7 @@ from rossum_api.api_client import Resource
 from rossum_api.models.annotation import Annotation
 from rossum_api.models.connector import Connector
 from rossum_api.models.document import Document
+from rossum_api.models.engine import Engine
 from rossum_api.models.group import Group
 from rossum_api.models.hook import Hook
 from rossum_api.models.inbox import Inbox
@@ -36,6 +37,7 @@ RESOURCE_TO_MODEL = {
     Resource.Schema: Schema,
     Resource.User: User,
     Resource.Workspace: Workspace,
+    Resource.Engine: Engine,
 }
 
 

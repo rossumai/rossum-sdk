@@ -2,6 +2,19 @@
 
 
 
+## v0.15.0 (2024-06-03)
+
+### Feature
+
+* feat: add support for engine object ([`c6ad1d5`](https://github.com/rossumai/rossum-sdk/commit/c6ad1d5809f08113dff074120fa55e8673218de5))
+
+### Unknown
+
+* Merge pull request #68 from rossumai/ihe/add-engine
+
+Add basic support for Engine object ([`86322b0`](https://github.com/rossumai/rossum-sdk/commit/86322b0e292dd58fac87580390726e1957a74826))
+
+
 ## v0.14.0 (2024-05-22)
 
 ### Unknown

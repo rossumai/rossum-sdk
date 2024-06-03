@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rossum_api"
-version = "0.15.0"
+version = "0.15.1"
 license = {text = "MIT"}
 readme = "README.md"
 dependencies = [
@@ -51,3 +51,5 @@ ensure_newline_before_comments = true
 [tool.semantic_release]
 upload_to_repository = false
 branch = "main"
+version_variables = ["rossum_api/__init__.py:__version__"]
+version_toml = ["pyproject.toml:project.version"]

@@ -2,6 +2,25 @@
 
 
 
+## v0.16.0 (2024-06-04)
+
+### Chore
+
+* chore: Add missing type hint for list_all_organizations ([`86fb228`](https://github.com/rossumai/rossum-sdk/commit/86fb228613aa60a0b48c04a1549252454d15b2c9))
+
+### Feature
+
+* feat: Add delete_annotation method (#75)
+
+* feat: Add delete_annotation method ([`55a3641`](https://github.com/rossumai/rossum-sdk/commit/55a364100e73ec24da009b12819830c7dbd69e5a))
+
+### Unknown
+
+* Merge pull request #73 from uhlikfil/main
+
+chore: Add missing type hint for list_all_organizations ([`6b9bd60`](https://github.com/rossumai/rossum-sdk/commit/6b9bd607abafdcb64f955f76fb045b87b2fe262a))
+
+
 ## v0.15.2 (2024-06-03)
 
 ### Fix

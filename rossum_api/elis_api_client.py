@@ -157,7 +157,7 @@ class ElisAPIClient:
         self,
         ordering: Sequence[str] = (),
         **filters: Any,
-    ):
+    ) -> AsyncIterable[Organization]:
         """https://elis.rossum.ai/api/docs/#list-all-organizations."""
         async for o in self._http_client.fetch_all(Resource.Organization, ordering, **filters):
             yield self._deserializer(Resource.Organization, o)

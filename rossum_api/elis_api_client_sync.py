@@ -334,6 +334,12 @@ class ElisAPIClientSync:
         """https://elis.rossum.ai/api/docs/#create-an-annotation"""
         return self.event_loop.run_until_complete(self.elis_api_client.create_new_annotation(data))
 
+    def delete_annotation(self, annotation_id: int) -> None:
+        """https://elis.rossum.ai/api/docs/#switch-to-deleted"""
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.delete_annotation(annotation_id)
+        )
+
     # ##### DOCUMENTS #####
     def retrieve_document_content(self, document_id: int) -> bytes:
         """https://elis.rossum.ai/api/docs/#document-content"""

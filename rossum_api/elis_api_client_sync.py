@@ -335,7 +335,7 @@ class ElisAPIClientSync:
         return self.event_loop.run_until_complete(self.elis_api_client.create_new_annotation(data))
 
     def delete_annotation(self, annotation_id: int) -> None:
-        """https://elis.rossum.ai/api/docs/#delete-annotation"""
+        """https://elis.rossum.ai/api/docs/#switch-to-deleted"""
         return self.event_loop.run_until_complete(
             self.elis_api_client.delete_annotation(annotation_id)
         )

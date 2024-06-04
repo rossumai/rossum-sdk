@@ -165,7 +165,7 @@ class ElisAPIClientSync:
         self,
         ordering: Sequence[str] = (),
         **filters: Dict[str, Any],
-    ):
+    ) -> Iterable[Organization]:
         """https://elis.rossum.ai/api/docs/#list-all-organizations."""
         return self._iter_over_async(
             self.elis_api_client.list_all_organizations(ordering, **filters)

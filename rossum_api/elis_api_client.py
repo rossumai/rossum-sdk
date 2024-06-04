@@ -363,6 +363,12 @@ class ElisAPIClient:
 
         return self._deserializer(Resource.Annotation, annotation)
 
+    async def delete_annotation(self, annotation_id: int) -> None:
+        """https://elis.rossum.ai/api/docs/#delete-annotation"""
+        await self._http_client.request(
+            "POST", url=f"{Resource.Annotation.value}/{annotation_id}/delete"
+        )
+
     # ##### DOCUMENTS #####
     async def retrieve_document_content(self, document_id: int) -> bytes:
         """https://elis.rossum.ai/api/docs/#document-content"""

@@ -126,6 +126,8 @@ class ElisAPIClientSync:
     ) -> List[int]:
         """https://elis.rossum.ai/api/docs/#import-a-document.
 
+        Deprecated now, consider upload_document.
+
         Parameters
         ---------
         files
@@ -142,6 +144,38 @@ class ElisAPIClientSync:
         """
         return self.event_loop.run_until_complete(
             self.elis_api_client.import_document(queue_id, files, values, metadata)
+        )
+
+    # ##### UPLOAD #####
+    def upload_document(
+        self,
+        queue_id: int,
+        files: Sequence[Tuple[Union[str, pathlib.Path], str]],
+        values: Optional[Dict[str, Any]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> List[Task]:
+        """https://elis.rossum.ai/api/docs/#create-upload.
+
+        Parameters
+        ---------
+        queue_id
+            ID of the queue to upload the files to
+        files
+            2-tuple containing current filepath and name to be used by Elis for the uploaded file
+        metadata
+            metadata will be set to newly created annotation object
+        values
+            may be used to initialize datapoint values by setting the value of rir_field_names in the schema
+
+        Returns
+        -------
+        task_responses
+            list of Task object responses, respects the order of `files` argument
+            Tasks can be polled using poll_task and if succeeded, will contain a
+            link to an Upload object that contains info on uploaded documents/annotations
+        """
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.upload_document(queue_id, files, values, metadata)
         )
 
     def retrieve_upload(

@@ -104,8 +104,12 @@ class ElisAPIClient:
     ) -> List[int]:
         """https://elis.rossum.ai/api/docs/#import-a-document.
 
+        Deprecated now, consider upload_document.
+
         Parameters
         ---------
+        queue_id
+            ID of the queue to upload the files to
         files
             2-tuple containing current filepath and name to be used by Elis for the uploaded file
         metadata
@@ -126,12 +130,76 @@ class ElisAPIClient:
         return await asyncio.gather(*tasks)
 
     async def _upload(self, file, queue_id, filename, values, metadata) -> int:
+        """A helper method used for the import document endpoint.
+
+        This does not create an Upload object."""
         async with aiofiles.open(file, "rb") as fp:
             results = await self._http_client.upload(
                 Resource.Queue, queue_id, fp, filename, values, metadata
             )
             (result,) = results["results"]  # We're uploading 1 file in 1 request, we can unpack
             return int(result["annotation"].split("/")[-1])
+
+    # ##### UPLOAD #####
+    async def upload_document(
+        self,
+        queue_id: int,
+        files: Sequence[Tuple[Union[str, pathlib.Path], str]],
+        values: Optional[Dict[str, Any]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> List[Task]:
+        """https://elis.rossum.ai/api/docs/#create-upload.
+
+        Parameters
+        ---------
+        queue_id
+            ID of the queue to upload the files to
+        files
+            2-tuple containing current filepath and name to be used by Elis for the uploaded file
+        metadata
+            metadata will be set to newly created annotation object
+        values
+            may be used to initialize datapoint values by setting the value of rir_field_names in the schema
+
+        Returns
+        -------
+        task_responses
+            list of Task object responses, respects the order of `files` argument
+            Tasks can be polled using poll_task and if succeeded, will contain a
+            link to an Upload object that contains info on uploaded documents/annotations
+        """
+        tasks: list[typing.Awaitable[Task]] = [
+            asyncio.create_task(self._create_upload(file, queue_id, filename, values, metadata))
+            for file, filename in files
+        ]
+
+        return list(await asyncio.gather(*tasks))
+
+    async def _create_upload(
+        self,
+        file: Union[str, pathlib.Path],
+        queue_id: int,
+        filename: str,
+        values: Optional[Dict[str, Any]] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> Task:
+        """Helper method that uploads the files and gets back Task response for each.
+
+        A successful Task will create an Upload object."""
+
+        async with aiofiles.open(file, "rb") as fp:
+            url = f"uploads?queue={queue_id}"
+            files = {"content": (filename, await fp.read(), "application/octet-stream")}
+
+            if values is not None:
+                files["values"] = ("", json.dumps(values).encode("utf-8"), "application/json")
+            if metadata is not None:
+                files["metadata"] = ("", json.dumps(metadata).encode("utf-8"), "application/json")
+
+            task_url = await self.request_json("POST", url, files=files)
+            task_id = task_url["url"].split("/")[-1]
+
+            return await self.retrieve_task(task_id)
 
     async def retrieve_upload(
         self,

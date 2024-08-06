@@ -9,6 +9,7 @@ import aiofiles
 
 from rossum_api.api_client import APIClient, Resource
 from rossum_api.models import deserialize_default
+from rossum_api.models.task import TaskStatus
 
 if typing.TYPE_CHECKING:
     import pathlib
@@ -27,6 +28,8 @@ if typing.TYPE_CHECKING:
     from rossum_api.models.organization import Organization
     from rossum_api.models.queue import Queue
     from rossum_api.models.schema import Schema
+    from rossum_api.models.task import Task
+    from rossum_api.models.upload import Upload
     from rossum_api.models.user import User
     from rossum_api.models.workspace import Workspace
 
@@ -129,6 +132,14 @@ class ElisAPIClient:
             )
             (result,) = results["results"]  # We're uploading 1 file in 1 request, we can unpack
             return int(result["annotation"].split("/")[-1])
+
+    async def retrieve_upload(
+        self,
+        upload_id: int,
+    ) -> Upload:
+        """Implements https://elis.rossum.ai/api/docs/#retrieve-upload."""
+        upload = await self._http_client.fetch_one(Resource.Upload, upload_id)
+        return self._deserializer(Resource.Upload, upload)
 
     async def export_annotations_to_json(
         self,
@@ -315,6 +326,39 @@ class ElisAPIClient:
         return await self.poll_annotation(
             annotation_id, lambda a: a.status not in ("importing", "created"), **poll_kwargs
         )
+
+    async def poll_task(
+        self,
+        task_id: int,
+        predicate: Callable[[Task], bool],
+        sleep_s: int = 3,
+    ) -> Task:
+        """Poll on Task until predicate is true.
+
+        As with Annotation polling, there is no innate retry limit."""
+        task = await self.retrieve_task(task_id)
+
+        while not predicate(task):
+            await asyncio.sleep(sleep_s)
+            task = await self.retrieve_task(task_id)
+
+        return task
+
+    async def poll_task_until_succeeded(
+        self,
+        task_id: int,
+        sleep_s: int = 3,
+    ) -> Task:
+        """Poll on Task until it is succeeded."""
+        return await self.poll_task(task_id, lambda a: a.status == TaskStatus.SUCCEEDED, sleep_s)
+
+    async def retrieve_task(self, task_id: int) -> Task:
+        """Implements https://elis.rossum.ai/api/docs/#retrieve-task."""
+        task = await self._http_client.fetch_one(
+            Resource.Task, task_id, request_params={"no_redirect": "True"}
+        )
+
+        return self._deserializer(Resource.Task, task)
 
     async def upload_and_wait_until_imported(
         self, queue_id: int, filepath: Union[str, pathlib.Path], filename: str, **poll_kwargs

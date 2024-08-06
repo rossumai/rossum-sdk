@@ -37,6 +37,8 @@ class Resource(Enum):
     Organization = "organizations"
     Queue = "queues"
     Schema = "schemas"
+    Task = "tasks"
+    Upload = "uploads"
     User = "users"
     Workspace = "workspaces"
     Engine = "engines"
@@ -150,9 +152,16 @@ class APIClient:
     def _headers(self):
         return {"Authorization": f"token {self.token}"}
 
-    async def fetch_one(self, resource: Resource, id_: Union[int, str]) -> Dict[str, Any]:
-        """Retrieve a single object in a specific resource."""
-        return await self.request_json("GET", f"{resource.value}/{id_}")
+    async def fetch_one(
+        self, resource: Resource, id_: Union[int, str], request_params: Dict[str, Any] = None
+    ) -> Dict[str, Any]:
+        """Retrieve a single object in a specific resource.
+
+        Allows passing extra params specifically to allow disabling redirects feature of Tasks.
+        See https://elis.rossum.ai/api/docs/#task.
+        If redirects are desired, our raise_for_status wrapper must account for that.
+        """
+        return await self.request_json("GET", f"{resource.value}/{id_}", params=request_params)
 
     async def fetch_all(
         self,

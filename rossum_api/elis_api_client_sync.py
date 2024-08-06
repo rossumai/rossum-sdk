@@ -36,6 +36,8 @@ if typing.TYPE_CHECKING:
     from rossum_api.models.organization import Organization
     from rossum_api.models.queue import Queue
     from rossum_api.models.schema import Schema
+    from rossum_api.models.task import Task
+    from rossum_api.models.upload import Upload
     from rossum_api.models.user import User
     from rossum_api.models.workspace import Workspace
 
@@ -141,6 +143,14 @@ class ElisAPIClientSync:
         return self.event_loop.run_until_complete(
             self.elis_api_client.import_document(queue_id, files, values, metadata)
         )
+
+    def retrieve_upload(
+        self,
+        upload_id: int,
+    ) -> Upload:
+        """Implements https://elis.rossum.ai/api/docs/#retrieve-upload."""
+
+        return self.event_loop.run_until_complete(self.elis_api_client.retrieve_upload(upload_id))
 
     def export_annotations_to_json(self, queue_id: int) -> Iterable[Annotation]:
         """https://elis.rossum.ai/api/docs/#export-annotations.
@@ -278,13 +288,38 @@ class ElisAPIClientSync:
         sleep_s: int = 3,
         sideloads: Sequence[str] = (),
     ) -> Annotation:
-        """Poll on annotation until predicate is true.
+        """Poll on Annotation until predicate is true.
 
-        Sideloading is done only once after the predicate becomes true to avoid spaming the server.
+        Sideloading is done only once after the predicate becomes true to avoid spamming the server.
         """
         return self.event_loop.run_until_complete(
             self.elis_api_client.poll_annotation(annotation_id, predicate, sleep_s, sideloads)
         )
+
+    def poll_task(
+        self,
+        task_id: int,
+        predicate: Callable[[Task], bool],
+        sleep_s: int = 3,
+    ) -> Task:
+        """Poll on Task until predicate is true."""
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.poll_task(task_id, predicate, sleep_s)
+        )
+
+    def poll_task_until_succeeded(
+        self,
+        task_id: int,
+        sleep_s: int = 3,
+    ) -> Task:
+        """Poll on Task until it is succeeded."""
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.poll_task_until_succeeded(task_id, sleep_s)
+        )
+
+    def retrieve_task(self, task_id: int) -> Task:
+        """https://elis.rossum.ai/api/docs/#retrieve-task."""
+        return self.event_loop.run_until_complete(self.elis_api_client.retrieve_task(task_id))
 
     def poll_annotation_until_imported(self, annotation_id: int, **poll_kwargs: Any) -> Annotation:
         """A shortcut for waiting until annotation is imported."""

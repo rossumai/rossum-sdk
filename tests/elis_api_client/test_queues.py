@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
-from mock import MagicMock, call, patch
 
 from rossum_api.api_client import Resource
 from rossum_api.models.annotation import Annotation

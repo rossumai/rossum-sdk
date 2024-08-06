@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from unittest.mock import call
+
 import pytest
-from mock import call
 
 from rossum_api.api_client import Resource
 from rossum_api.models.organization import Organization

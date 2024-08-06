@@ -24,7 +24,7 @@ Thank you for contributing!
 git@github.com:rossumai/rossum-sdk.git
 ```
 
-Make sure that you have Python 3 installed. Version 3.7 or higher is required to run style checkers on pre-commit. On macOS, we recommend using `brew` to install Python.
+Make sure that you have Python 3 installed. Version 3.8 or higher is required to run style checkers on pre-commit. On macOS, we recommend using `brew` to install Python.
 For Windows, we recommend an official python.org release.
 
 ### Create a virtual environment
@@ -70,7 +70,7 @@ make test
 ```
 
 This will use [Tox](https://tox.wiki/en/latest/) to run our whole test suite
-under multiple Python 3.7+ versions.
+under multiple Python 3 versions.
 
 Of course you can always run the underlying commands yourself, which is
 particularly useful when wanting to provide arguments to `pytest` to run

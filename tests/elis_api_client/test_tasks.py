@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from unittest.mock import patch
+
 import pytest
-from mock.mock import patch
 
 from rossum_api.api_client import Resource
 from rossum_api.models.task import Task, TaskStatus

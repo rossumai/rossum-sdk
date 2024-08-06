@@ -370,9 +370,9 @@ class ElisAPIClient:
         sleep_s: int = 3,
         sideloads: Sequence[str] = (),
     ) -> Annotation:
-        """Poll on annotation until predicate is true.
+        """Poll on Annotation until predicate is true.
 
-        Sideloading is done only once after the predicate becomes true to avoid spaming the server.
+        Sideloading is done only once after the predicate becomes true to avoid spamming the server.
         """
         annotation_json = await self._http_client.fetch_one(Resource.Annotation, annotation_id)
         # Parse early, we want predicate to work with Annotation instances for convenience

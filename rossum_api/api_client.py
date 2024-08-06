@@ -442,7 +442,7 @@ class APIClient:
         url
             base URL is prepended with base_url if needed
         """
-        # Do not force the calling site to alway prepend the base URL
+        # Do not force the calling site to always prepend the base URL
         if not url.startswith("https://"):
             url = f"{self.base_url}/{url}"
         headers = kwargs.pop("headers", {})

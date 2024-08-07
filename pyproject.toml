@@ -7,6 +7,7 @@ name = "rossum_api"
 version = "0.16.0"
 license = {text = "MIT"}
 readme = "README.md"
+requires-python = ">= 3.8"
 dependencies = [
     "aiofiles",
     "httpx",
@@ -16,7 +17,6 @@ dependencies = [
 [project.optional-dependencies]
 tests = [
   "codecov",
-  "mock", # Needed for Python 3.7  because unittest.mock there doesn't support AsyncMock,
   "pytest",
   "pytest-asyncio",
   "pytest-httpx",
@@ -37,7 +37,7 @@ pythonpath = [
 
 [tool.black]
 line-length = 99
-target-version = ["py37"]
+target-version = ["py38"]
 include = '\.pyi?$'
 
 [tool.isort]

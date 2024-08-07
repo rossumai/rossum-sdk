@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from unittest.mock import AsyncMock, MagicMock, call, patch
+
 import pytest
-from mock import MagicMock, call, patch
 
 from rossum_api.api_client import Resource
 from rossum_api.models.annotation import Annotation
 from rossum_api.models.queue import Queue
+from rossum_api.models.task import Task, TaskStatus, TaskType
 
 
 @pytest.fixture
@@ -193,6 +195,48 @@ class TestQueues:
             call(Resource.Queue, 123, open_mock_second, "document 🎁.pdf", {"a": 1}, {"b": 2}),
         ]
         http_client.upload.assert_has_calls(calls, any_order=True)
+
+    async def test_create_upload(self, elis_client):
+        client, http_client = elis_client
+
+        dummy_task = Task(
+            id=16508,
+            url="https://api.elis.master.r8.lol/v1/tasks/16508",
+            type=TaskType.UPLOAD_CREATED,
+            status=TaskStatus.RUNNING,
+            detail=None,
+            expires_at="2024-07-31T19:06:47.916608Z",
+            content={"upload": "https://api.elis.master.r8.lol/v1/uploads/37626"},
+            result_url="https://api.elis.master.r8.lol/v1/uploads/37626",
+        )
+
+        dummy_task_two = Task(
+            id=16509,
+            url="https://api.elis.master.r8.lol/v1/tasks/16509",
+            type=TaskType.UPLOAD_CREATED,
+            status=TaskStatus.RUNNING,
+            detail=None,
+            expires_at="2024-07-31T19:06:47.916608Z",
+            content={"upload": "https://api.elis.master.r8.lol/v1/uploads/37626"},
+            result_url="https://api.elis.master.r8.lol/v1/uploads/37626",
+        )
+
+        client._create_upload = AsyncMock(side_effect=[dummy_task, dummy_task_two])
+        files = [
+            ("tests/data/sample_invoice.pdf", "document.pdf"),
+            ("tests/data/sample_invoice.pdf", "document_test.pdf"),
+        ]
+        tasks = await client.upload_document(
+            queue_id=123, files=files, values={"a": 1}, metadata={"b": 2}
+        )
+
+        assert tasks == [dummy_task, dummy_task_two]
+        calls = [
+            call("tests/data/sample_invoice.pdf", 123, "document.pdf", {"a": 1}, {"b": 2}),
+            call("tests/data/sample_invoice.pdf", 123, "document_test.pdf", {"a": 1}, {"b": 2}),
+        ]
+
+        client._create_upload.assert_has_calls(calls, any_order=True)
 
     async def test_export_annotations_to_json(self, elis_client, dummy_annotation, mock_generator):
         client, http_client = elis_client

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+from unittest.mock import MagicMock
+
 import aiofiles
 import pytest
 import pytest_asyncio
-from mock import MagicMock
 
 from rossum_api import ElisAPIClient, ElisAPIClientSync
 from rossum_api.api_client import APIClient

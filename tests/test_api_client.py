@@ -11,10 +11,10 @@ import contextlib
 import copy
 import functools
 import json
+import unittest.mock as mock
 
 import aiofiles
 import httpx
-import mock
 import pytest
 import pytest_httpx
 

@@ -11,7 +11,6 @@ help:
 	@echo "make format: Run code formatters (destructive)"
 	@echo
 	@echo "Also make sure to read ./CONTRIBUTING.md"
-	@false
 
 .venv:
 	virtualenv -ppython3 $(VENV_PATH)

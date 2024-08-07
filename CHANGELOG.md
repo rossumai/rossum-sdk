@@ -1,6 +1,24 @@
 # CHANGELOG
 
+## v0.17.0 (2024-08-07)
 
+### Chore
+
+* chore: Drop support for Python 3.7 ([`3a4e359`](https://github.com/rossumai/rossum-sdk/commit/3a4e359c5e7df7c22ef92a64be3369814c8f4e1d))
+
+* chore: Fix typos and missing docs ([`a499da2`](https://github.com/rossumai/rossum-sdk/commit/a499da214b01cb4fc1b433c7708cd66320a62ae1))
+
+### Feature
+
+* feat: Upload documents using new upload endpoint ([`9ff22d9`](https://github.com/rossumai/rossum-sdk/commit/9ff22d9340210f1d2fde5c0a5b8894f578eaad82))
+
+* feat: Add support for Task and Upload objects ([`6e582a9`](https://github.com/rossumai/rossum-sdk/commit/6e582a9451ffd95950442fd6bda7af8a80df0e39))
+
+### Unknown
+
+* Merge pull request #76 from valtervojta/create_upload_and_friends
+
+Add support for create upload, Upload, Task ([`e6b1a7d`](https://github.com/rossumai/rossum-sdk/commit/e6b1a7d9c11e57e272e794aed032e0b57384e97c))
 
 ## v0.16.0 (2024-06-04)
 
@@ -20,7 +38,6 @@
 
 chore: Add missing type hint for list_all_organizations ([`6b9bd60`](https://github.com/rossumai/rossum-sdk/commit/6b9bd607abafdcb64f955f76fb045b87b2fe262a))
 
-
 ## v0.15.2 (2024-06-03)
 
 ### Fix
@@ -32,7 +49,6 @@ chore: Add missing type hint for list_all_organizations ([`6b9bd60`](https://git
 * Merge pull request #72 from stancld/ihe/fix-package-versioniong
 
 fix: Fix package versioning ([`c246579`](https://github.com/rossumai/rossum-sdk/commit/c246579395380b0332574a40288851f68b2e3c80))
-
 
 ## v0.15.1 (2024-06-03)
 
@@ -55,7 +71,6 @@ packaging: Use solely pyproject.toml ([`40dbde3`](https://github.com/rossumai/ro
 Use solely pyproject.toml with a correctly specified package version
 and drop no more needed setup.py. ([`da98b46`](https://github.com/rossumai/rossum-sdk/commit/da98b46e994c9e969bcc23187c511b79da2d4cff))
 
-
 ## v0.15.0 (2024-06-03)
 
 ### Feature
@@ -68,8 +83,11 @@ and drop no more needed setup.py. ([`da98b46`](https://github.com/rossumai/rossu
 
 Add basic support for Engine object ([`86322b0`](https://github.com/rossumai/rossum-sdk/commit/86322b0e292dd58fac87580390726e1957a74826))
 
-
 ## v0.14.0 (2024-05-22)
+
+### Feature
+
+* feat: add py.typed and let the world know we use types ([`9415403`](https://github.com/rossumai/rossum-sdk/commit/941540354521e321c2e40cc12b3b2a6e24a8abce))
 
 ### Unknown
 
@@ -77,12 +95,7 @@ Add basic support for Engine object ([`86322b0`](https://github.com/rossumai/ros
 
 feat: add py.typed and let the world know we use types ([`334c51e`](https://github.com/rossumai/rossum-sdk/commit/334c51ef71af79444a750c4d18e174fcb7be155b))
 
-
 ## v0.13.3 (2024-05-22)
-
-### Feature
-
-* feat: add py.typed and let the world know we use types ([`9415403`](https://github.com/rossumai/rossum-sdk/commit/941540354521e321c2e40cc12b3b2a6e24a8abce))
 
 ### Fix
 
@@ -93,7 +106,6 @@ feat: add py.typed and let the world know we use types ([`334c51e`](https://gith
 * Merge pull request #67 from liborvaneksw/lv/user-model-fix
 
 fix: make User.last_login optional ([`da6419c`](https://github.com/rossumai/rossum-sdk/commit/da6419c3163ba7c83f71faef724360f5e7d9d8b6))
-
 
 ## v0.13.2 (2024-04-09)
 
@@ -115,7 +127,6 @@ Fix decreases typo ([`c6db58b`](https://github.com/rossumai/rossum-sdk/commit/c6
 
 * Merge branch &#39;rossumai:main&#39; into feature/fix-decreases-typo ([`db09423`](https://github.com/rossumai/rossum-sdk/commit/db0942377bd0b16f1ef211323d225a5f223d53ea))
 
-
 ## v0.13.1 (2024-03-25)
 
 ### Ci
@@ -133,7 +144,6 @@ Fix decreases typo ([`c6db58b`](https://github.com/rossumai/rossum-sdk/commit/c6
 fix(models:automation_blocker): fix type of `samples` ([`e459253`](https://github.com/rossumai/rossum-sdk/commit/e459253f786d917f25db94c5f4a3197de2a34c15))
 
 * Fix decreases typo ([`7477335`](https://github.com/rossumai/rossum-sdk/commit/74773351db60927b3128e3c7a9361582b3386ba1))
-
 
 ## v0.13.0 (2024-02-07)
 
@@ -154,7 +164,6 @@ fix(models:automation_blocker): fix type of `samples` ([`e459253`](https://githu
 * Merge pull request #60 from bara-m/bara-make-annotations-method-work-with-new-status
 
 Consider new created status when checking if annotation is already imported ([`c2050cf`](https://github.com/rossumai/rossum-sdk/commit/c2050cfe954cf4d158cd7b7ab3617d65f97ece64))
-
 
 ## v0.12.0 (2024-02-06)
 
@@ -178,7 +187,6 @@ Consider new created status when checking if annotation is already imported ([`c
 
 Add new methods for documents and annotations ([`0710177`](https://github.com/rossumai/rossum-sdk/commit/0710177346b8f40dc33f5f7a28269add676ef9f1))
 
-
 ## v0.11.0 (2023-11-08)
 
 ### Chore
@@ -201,7 +209,6 @@ didn&#39;t need to add content which was confusing. ([`c3f8130`](https://github.
 * Merge pull request #56 from rossumai/oh/annotation-convenience-methods
 
 feat: Add convenience methods for annotation lifecycle ([`7e5adbd`](https://github.com/rossumai/rossum-sdk/commit/7e5adbdcbe91ea07de03656264a3af780f2f4d39))
-
 
 ## v0.10.0 (2023-11-02)
 
@@ -237,7 +244,6 @@ refactor: Use an enum instead of strings to identify API resources ([`2c24376`](
 
 chore: Streamline Makefile and improve README ([`a89e6e6`](https://github.com/rossumai/rossum-sdk/commit/a89e6e6c4d28866f11648a7bdfccb5aa9e1441b4))
 
-
 ## v0.9.1 (2023-10-11)
 
 ### Fix
@@ -253,7 +259,6 @@ parallel. ([`56244d0`](https://github.com/rossumai/rossum-sdk/commit/56244d07569
 
 fix(api_client): limit in-flight requests ([`3c1a10a`](https://github.com/rossumai/rossum-sdk/commit/3c1a10a5ba3d3787a6bf1796666e458d1f531d62))
 
-
 ## v0.9.0 (2023-10-11)
 
 ### Feature
@@ -265,7 +270,6 @@ fix(api_client): limit in-flight requests ([`3c1a10a`](https://github.com/rossum
 * Merge pull request #51 from uhlikfil/main
 
 feat: export public interface in root package ([`977824f`](https://github.com/rossumai/rossum-sdk/commit/977824f166663f0da2e237ef3276577e01d7b187))
-
 
 ## v0.8.0 (2023-08-25)
 
@@ -281,7 +285,6 @@ feat: export public interface in root package ([`977824f`](https://github.com/ro
 
 Add search_for_annotations method ([`b994053`](https://github.com/rossumai/rossum-sdk/commit/b994053c779af2c8e6a66d94728e7f6658d617ff))
 
-
 ## v0.7.4 (2023-08-11)
 
 ### Feature
@@ -293,7 +296,6 @@ Add search_for_annotations method ([`b994053`](https://github.com/rossumai/rossu
 * Merge pull request #48 from uhlikfil/main
 
 feat(models): add token_lifetime_s attribute to hook model ([`ae35fc4`](https://github.com/rossumai/rossum-sdk/commit/ae35fc4e6ae269389904e0df88df548fab67d9e4))
-
 
 ## v0.7.3 (2023-08-07)
 
@@ -307,7 +309,6 @@ feat(models): add token_lifetime_s attribute to hook model ([`ae35fc4`](https://
 
 fix: Make time_spent in Annotation optional ([`7a26f27`](https://github.com/rossumai/rossum-sdk/commit/7a26f2753514a50313a9f1c038fdbd955689d1fb))
 
-
 ## v0.7.2 (2023-06-02)
 
 ### Fix
@@ -319,7 +320,6 @@ fix: Make time_spent in Annotation optional ([`7a26f27`](https://github.com/ross
 * Merge pull request #46 from uhlikfil/main
 
 await asyncio.sleep ([`3183975`](https://github.com/rossumai/rossum-sdk/commit/318397584681cc74862909ca69dcd9f4b9959832))
-
 
 ## v0.7.1 (2023-05-05)
 
@@ -335,7 +335,6 @@ await asyncio.sleep ([`3183975`](https://github.com/rossumai/rossum-sdk/commit/3
 
 fix(models): make queue model compliant with API docs ([`99e180c`](https://github.com/rossumai/rossum-sdk/commit/99e180c7bd966d4ecae23b6713bfa341cfc9ce47))
 
-
 ## v0.7.0 (2023-05-04)
 
 ### Feature
@@ -347,7 +346,6 @@ fix(models): make queue model compliant with API docs ([`99e180c`](https://githu
 * Merge pull request #44 from OndraSlama/ondra/add-new-method-for-paginated-requests
 
 feat(elis_api_client): add generic method for requests to paginated resources ([`7fc08c1`](https://github.com/rossumai/rossum-sdk/commit/7fc08c1e9251a9a135588003583af3b329f55bfc))
-
 
 ## v0.6.0 (2023-04-28)
 
@@ -369,7 +367,6 @@ feat(api_client): allow to set max pages limit in filters ([`9b47c1d`](https://g
 
 chore: run test workflow also on pull requests ([`2f9efc3`](https://github.com/rossumai/rossum-sdk/commit/2f9efc3ac48107a4950555fd695e345722b723a7))
 
-
 ## v0.5.1 (2023-03-31)
 
 ### Chore
@@ -386,7 +383,6 @@ chore: run test workflow also on pull requests ([`2f9efc3`](https://github.com/r
 
 * Create lint-and-test.yml ([`1492b4b`](https://github.com/rossumai/rossum-sdk/commit/1492b4ba4dd791f0c8aa477e2cbb59877d05e734))
 
-
 ## v0.5.0 (2023-03-06)
 
 ### Feature
@@ -398,7 +394,6 @@ chore: run test workflow also on pull requests ([`2f9efc3`](https://github.com/r
 * Merge pull request #38 from OndraSlama/ondra/add-request-method-to-ElisApiClient
 
 feat(rossum_sdk/api_client): add `request` method to ElisApiClient ([`b7ccf1e`](https://github.com/rossumai/rossum-sdk/commit/b7ccf1e8448eb29e3d03d2d3e8a38c22ade33464))
-
 
 ## v0.4.0 (2023-03-02)
 
@@ -454,7 +449,6 @@ chore: do not run commitizen when there is no commit ([`a98cd5a`](https://github
 
 chore: add pre-commit hook for commit messages ([`6bb40da`](https://github.com/rossumai/rossum-sdk/commit/6bb40da3af7c3b2508e7ef295bdb7af257f162c6))
 
-
 ## v0.3.0 (2022-10-17)
 
 ### Feature
@@ -466,7 +460,6 @@ chore: add pre-commit hook for commit messages ([`6bb40da`](https://github.com/r
 * Merge pull request #26 from rossumai/oh/add-request-json-to-elis-api-client
 
 Add request_json method to ElisAPIClient ([`d59eecd`](https://github.com/rossumai/rossum-sdk/commit/d59eecd80bb447b9c4a6f8198a6845483fd211f5))
-
 
 ## v0.2.0 (2022-10-13)
 
@@ -483,7 +476,6 @@ and backoff can be configured. ([`09ab473`](https://github.com/rossumai/rossum-s
 
 feat: Implement retrying of failed requests ([`b21e0fb`](https://github.com/rossumai/rossum-sdk/commit/b21e0fbf6edf1e8df4f10ea811d344ab529c1602))
 
-
 ## v0.1.3 (2022-10-12)
 
 ### Fix
@@ -495,7 +487,6 @@ feat: Implement retrying of failed requests ([`b21e0fb`](https://github.com/ross
 * Merge pull request #24 from OndraSlama/ondra-annotation-model-fix
 
 fix: change Annotation.confirmed_at type to str instead of datetime ([`b383edf`](https://github.com/rossumai/rossum-sdk/commit/b383edffe96028c56cb55153e192674f21fe0268))
-
 
 ## v0.1.2 (2022-10-11)
 
@@ -509,7 +500,6 @@ fix: change Annotation.confirmed_at type to str instead of datetime ([`b383edf`]
 
 fix: Allow null Organization.trial_expires_at in the model ([`b764a55`](https://github.com/rossumai/rossum-sdk/commit/b764a5522c42596aa7e0b535d8a99df16794fed1))
 
-
 ## v0.1.1 (2022-10-11)
 
 ### Fix
@@ -521,7 +511,6 @@ fix: Allow null Organization.trial_expires_at in the model ([`b764a55`](https://
 * Merge pull request #22 from rossumai/miiila/more-relaxed-deps
 
 fix: making dependency requirements more relaxed ([`bfbf70b`](https://github.com/rossumai/rossum-sdk/commit/bfbf70b9ddc9c058363a7b09f09599e4eaf4a5d7))
-
 
 ## v0.1.0 (2022-10-06)
 
@@ -597,25 +586,25 @@ is common enough to add it to this general purpose client. ([`1bebcbe`](https://
 
 Re-introduce coverage badge ([`a717028`](https://github.com/rossumai/rossum-sdk/commit/a717028baed4ad6f49a00c6e5e423b3e25e4508f))
 
+* Re-introduce coverage badge ([`406116a`](https://github.com/rossumai/rossum-sdk/commit/406116a21977c11ea6ce0bcf6d9443c47bbe7cfe))
+
 * Merge pull request #16 from rossumai/ihe/fix-timeout
 
 Turn off timeout by default ([`9760664`](https://github.com/rossumai/rossum-sdk/commit/976066448d3e472001236b6446404a93755eb1c2))
-
-* Re-introduce coverage badge ([`406116a`](https://github.com/rossumai/rossum-sdk/commit/406116a21977c11ea6ce0bcf6d9443c47bbe7cfe))
-
-* Merge pull request #15 from rossumai/oh/badges
-
-Update badges in README, run codecov after tests ([`4472cdb`](https://github.com/rossumai/rossum-sdk/commit/4472cdb374bb62f37e0ff780c34859911884dfb3))
 
 * Add missing fields to Queue and Annotation ([`2b97d44`](https://github.com/rossumai/rossum-sdk/commit/2b97d448850a0c32b3f705461747d41c33f5bbc6))
 
 * Turn off timeout by default ([`bfa7427`](https://github.com/rossumai/rossum-sdk/commit/bfa7427ffd34921f236d9e54c2cd781eebd4f143))
 
+* Merge pull request #15 from rossumai/oh/badges
+
+Update badges in README, run codecov after tests ([`4472cdb`](https://github.com/rossumai/rossum-sdk/commit/4472cdb374bb62f37e0ff780c34859911884dfb3))
+
+* Update badges in README, run codecov after tests ([`65d41ef`](https://github.com/rossumai/rossum-sdk/commit/65d41efcb33a817a72283063fd2c5d3ebe5b9c09))
+
 * Merge pull request #14 from rossumai/add-license
 
 Add LICENCE ([`77b4ccb`](https://github.com/rossumai/rossum-sdk/commit/77b4ccb2742a81633cfcf43b52bc964d1b722c65))
-
-* Update badges in README, run codecov after tests ([`65d41ef`](https://github.com/rossumai/rossum-sdk/commit/65d41efcb33a817a72283063fd2c5d3ebe5b9c09))
 
 * Add LICENCE ([`9b3132d`](https://github.com/rossumai/rossum-sdk/commit/9b3132dffdac6480fa86272ac72851a352f1a75f))
 
@@ -652,6 +641,8 @@ Implement sideloading ([`8cc68ab`](https://github.com/rossumai/rossum-sdk/commit
 
 Add annotation export ([`c60f701`](https://github.com/rossumai/rossum-sdk/commit/c60f70199fa1b4313fcda2a6e3926cd2ddd830a2))
 
+* add annotation export ([`d7d800b`](https://github.com/rossumai/rossum-sdk/commit/d7d800b570b2c57546b098bee9576a796e91295e))
+
 * Merge pull request #9 from rossumai/lbenka-simple-readme
 
 update readme ([`7663223`](https://github.com/rossumai/rossum-sdk/commit/7663223c00b9c2c73a87f283e8bcaa99be2f08d1))
@@ -667,8 +658,6 @@ use existing even_loop if exists ([`7978b53`](https://github.com/rossumai/rossum
 * use existing event_loop if exists ([`dccfd3e`](https://github.com/rossumai/rossum-sdk/commit/dccfd3e53614a5eb90a8a3e145a2bfb4d2426371))
 
 * enable e2e test through cron ([`90f3f2b`](https://github.com/rossumai/rossum-sdk/commit/90f3f2be1d9204e2978df6dea3c937d2d9a56cde))
-
-* add annotation export ([`d7d800b`](https://github.com/rossumai/rossum-sdk/commit/d7d800b570b2c57546b098bee9576a796e91295e))
 
 * Merge pull request #5 from rossumai/oh/sideloading
 
@@ -709,6 +698,10 @@ IDEs will stop complaining about overriding the built-in id() function. ([`a04ca
 
 * Refactor APIClient to reduce boilerplate ([`ccc4b0d`](https://github.com/rossumai/rossum-sdk/commit/ccc4b0d6f5b0a360189a78efc671b121189e5f40))
 
+* Correctly type fp argument of APIClient.upload method
+
+...using a type stub from typeshed package. ([`090d93a`](https://github.com/rossumai/rossum-sdk/commit/090d93a611586d3afc6593531c34ff383b3168b8))
+
 * Merge pull request #1 from rossumai/mv/implement-document-import
 
 Mv/implement document import ([`2beeb55`](https://github.com/rossumai/rossum-sdk/commit/2beeb55a296b6d7327e3cdb639487fe9a9fe856a))
@@ -716,10 +709,6 @@ Mv/implement document import ([`2beeb55`](https://github.com/rossumai/rossum-sdk
 * fix async context manager for aiofiles + e2e tests ([`845080a`](https://github.com/rossumai/rossum-sdk/commit/845080a939b6c28d8e29c986d40e5367d011d016))
 
 * implement import document in both Elis Clients ([`b9d88f8`](https://github.com/rossumai/rossum-sdk/commit/b9d88f8c29892c1fec87f5d05fe86648d2c10a45))
-
-* Correctly type fp argument of APIClient.upload method
-
-...using a type stub from typeshed package. ([`090d93a`](https://github.com/rossumai/rossum-sdk/commit/090d93a611586d3afc6593531c34ff383b3168b8))
 
 * Merge pull request #2 from rossumai/oh/metadata-and-values-in-upload
 

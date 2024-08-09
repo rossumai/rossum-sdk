@@ -9,10 +9,10 @@ if typing.TYPE_CHECKING:
     import pathlib
     from typing import (
         Any,
-        AsyncIterable,
+        AsyncIterator,
         Callable,
         Dict,
-        Iterable,
+        Iterator,
         List,
         Optional,
         Sequence,
@@ -84,7 +84,7 @@ class ElisAPIClientSync:
         except RuntimeError:
             self.event_loop = asyncio.new_event_loop()
 
-    def _iter_over_async(self, ait: AsyncIterable[T]) -> Iterable[T]:
+    def _iter_over_async(self, ait: AsyncIterator[T]) -> Iterator[T]:
         ait = ait.__aiter__()
         while True:
             try:
@@ -102,7 +102,7 @@ class ElisAPIClientSync:
         self,
         ordering: Sequence[str] = (),
         **filters: Dict[str, Any],
-    ) -> Iterable[Queue]:
+    ) -> Iterator[Queue]:
         """https://elis.rossum.ai/api/docs/#list-all-queues."""
         return self._iter_over_async(self.elis_api_client.list_all_queues(ordering, **filters))
 
@@ -186,7 +186,7 @@ class ElisAPIClientSync:
 
         return self.event_loop.run_until_complete(self.elis_api_client.retrieve_upload(upload_id))
 
-    def export_annotations_to_json(self, queue_id: int) -> Iterable[Annotation]:
+    def export_annotations_to_json(self, queue_id: int) -> Iterator[Annotation]:
         """https://elis.rossum.ai/api/docs/#export-annotations.
 
         JSON export is paginated and returns the result in a way similar to other list_all methods.
@@ -195,7 +195,7 @@ class ElisAPIClientSync:
 
     def export_annotations_to_file(
         self, queue_id: int, export_format: ExportFileFormats
-    ) -> Iterable[bytes]:
+    ) -> Iterator[bytes]:
         """https://elis.rossum.ai/api/docs/#export-annotations.
 
         XLSX/CSV/XML exports can be huge, therefore byte streaming is used to keep memory consumption low.
@@ -209,7 +209,7 @@ class ElisAPIClientSync:
         self,
         ordering: Sequence[str] = (),
         **filters: Dict[str, Any],
-    ) -> Iterable[Organization]:
+    ) -> Iterator[Organization]:
         """https://elis.rossum.ai/api/docs/#list-all-organizations."""
         return self._iter_over_async(
             self.elis_api_client.list_all_organizations(ordering, **filters)
@@ -233,7 +233,7 @@ class ElisAPIClientSync:
         self,
         ordering: Sequence[str] = (),
         **filters: Dict[str, Any],
-    ) -> Iterable[Schema]:
+    ) -> Iterator[Schema]:
         """https://elis.rossum.ai/api/docs/#list-all-schemas."""
         return self._iter_over_async(self.elis_api_client.list_all_schemas(ordering, **filters))
 
@@ -259,7 +259,7 @@ class ElisAPIClientSync:
         self,
         ordering: Sequence[str] = (),
         **filters: Dict[str, Any],
-    ) -> Iterable[User]:
+    ) -> Iterator[User]:
         """https://elis.rossum.ai/api/docs/#list-all-users."""
         return self._iter_over_async(self.elis_api_client.list_all_users(ordering, **filters))
 
@@ -286,7 +286,7 @@ class ElisAPIClientSync:
         sideloads: Sequence[str] = (),
         content_schema_ids: Sequence[str] = (),
         **filters: Dict[str, Any],
-    ) -> Iterable[Annotation]:
+    ) -> Iterator[Annotation]:
         """https://elis.rossum.ai/api/docs/#list-all-annotations."""
         return self._iter_over_async(
             self.elis_api_client.list_all_annotations(
@@ -301,7 +301,7 @@ class ElisAPIClientSync:
         ordering: Sequence[str] = (),
         sideloads: Sequence[str] = (),
         **kwargs: Any,
-    ) -> Iterable[Annotation]:
+    ) -> Iterator[Annotation]:
         """https://elis.rossum.ai/api/docs/internal/#search-for-annotations."""
         return self._iter_over_async(
             self.elis_api_client.search_for_annotations(
@@ -433,7 +433,7 @@ class ElisAPIClientSync:
         self,
         ordering: Sequence[str] = (),
         **filters: Dict[str, Any],
-    ) -> Iterable[Workspace]:
+    ) -> Iterator[Workspace]:
         """https://elis.rossum.ai/api/docs/#list-all-workspaces."""
         return self._iter_over_async(self.elis_api_client.list_all_workspaces(ordering, **filters))
 
@@ -466,7 +466,7 @@ class ElisAPIClientSync:
         self,
         ordering: Sequence[str] = (),
         **filters: Dict[str, Any],
-    ) -> Iterable[Connector]:
+    ) -> Iterator[Connector]:
         """https://elis.rossum.ai/api/docs/#list-all-connectors."""
         return self._iter_over_async(self.elis_api_client.list_all_connectors(ordering, **filters))
 
@@ -485,7 +485,7 @@ class ElisAPIClientSync:
         self,
         ordering: Sequence[str] = (),
         **filters: Dict[str, Any],
-    ) -> Iterable[Hook]:
+    ) -> Iterator[Hook]:
         """https://elis.rossum.ai/api/docs/#list-all-hooks."""
         return self._iter_over_async(self.elis_api_client.list_all_hooks(ordering, **filters))
 
@@ -502,13 +502,13 @@ class ElisAPIClientSync:
         self,
         ordering: Sequence[str] = (),
         **filters: Dict[str, Any],
-    ) -> Iterable[Group]:
+    ) -> Iterator[Group]:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles."""
         return self._iter_over_async(self.elis_api_client.list_all_user_roles(ordering, **filters))
 
-    def request_paginated(self, url: str, *args, **kwargs) -> Iterable[dict]:
+    def request_paginated(self, url: str, *args, **kwargs) -> Iterator[dict]:
         """Use to perform requests to seldomly used or experimental endpoints with paginated response that do not have
-        direct support in the client and return iterable.
+        direct support in the client and return Iterator.
         """
         return self._iter_over_async(self.elis_api_client.request_paginated(url, *args, **kwargs))
 

@@ -13,7 +13,7 @@ from rossum_api.models.task import TaskStatus
 
 if typing.TYPE_CHECKING:
     import pathlib
-    from typing import Any, AsyncIterable, Callable, Dict, List, Optional, Sequence, Tuple, Union
+    from typing import Any, AsyncIterator, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
     import httpx
 
@@ -80,7 +80,7 @@ class ElisAPIClient:
         self,
         ordering: Sequence[str] = (),
         **filters: Any,
-    ) -> AsyncIterable[Queue]:
+    ) -> AsyncIterator[Queue]:
         """https://elis.rossum.ai/api/docs/#list-all-queues."""
         async for q in self._http_client.fetch_all(Resource.Queue, ordering, **filters):
             yield self._deserializer(Resource.Queue, q)
@@ -212,7 +212,7 @@ class ElisAPIClient:
     async def export_annotations_to_json(
         self,
         queue_id: int,
-    ) -> AsyncIterable[Annotation]:
+    ) -> AsyncIterator[Annotation]:
         """https://elis.rossum.ai/api/docs/#export-annotations.
 
         JSON export is paginated and returns the result in a way similar to other list_all methods.
@@ -223,7 +223,7 @@ class ElisAPIClient:
 
     async def export_annotations_to_file(
         self, queue_id: int, export_format: ExportFileFormats
-    ) -> AsyncIterable[bytes]:
+    ) -> AsyncIterator[bytes]:
         """https://elis.rossum.ai/api/docs/#export-annotations.
 
         XLSX/CSV/XML exports can be huge, therefore byte streaming is used to keep memory consumption low.
@@ -236,7 +236,7 @@ class ElisAPIClient:
         self,
         ordering: Sequence[str] = (),
         **filters: Any,
-    ) -> AsyncIterable[Organization]:
+    ) -> AsyncIterator[Organization]:
         """https://elis.rossum.ai/api/docs/#list-all-organizations."""
         async for o in self._http_client.fetch_all(Resource.Organization, ordering, **filters):
             yield self._deserializer(Resource.Organization, o)
@@ -258,7 +258,7 @@ class ElisAPIClient:
         self,
         ordering: Sequence[str] = (),
         **filters: Any,
-    ) -> AsyncIterable[Schema]:
+    ) -> AsyncIterator[Schema]:
         """https://elis.rossum.ai/api/docs/#list-all-schemas."""
         async for s in self._http_client.fetch_all(Resource.Schema, ordering, **filters):
             yield self._deserializer(Resource.Schema, s)
@@ -284,7 +284,7 @@ class ElisAPIClient:
         self,
         ordering: Sequence[str] = (),
         **filters: Any,
-    ) -> AsyncIterable[User]:
+    ) -> AsyncIterator[User]:
         """https://elis.rossum.ai/api/docs/#list-all-users."""
         async for u in self._http_client.fetch_all(Resource.User, ordering, **filters):
             yield self._deserializer(Resource.User, u)
@@ -316,7 +316,7 @@ class ElisAPIClient:
         sideloads: Sequence[str] = (),
         content_schema_ids: Sequence[str] = (),
         **filters: Any,
-    ) -> AsyncIterable[Annotation]:
+    ) -> AsyncIterator[Annotation]:
         """https://elis.rossum.ai/api/docs/#list-all-annotations."""
         if sideloads and "content" in sideloads and not content_schema_ids:
             raise ValueError(
@@ -334,7 +334,7 @@ class ElisAPIClient:
         ordering: Sequence[str] = (),
         sideloads: Sequence[str] = (),
         **kwargs: Any,
-    ) -> AsyncIterable[Annotation]:
+    ) -> AsyncIterator[Annotation]:
         """https://elis.rossum.ai/api/docs/#search-for-annotations."""
         if not query and not query_string:
             raise ValueError("Either query or query_string must be provided")
@@ -516,7 +516,7 @@ class ElisAPIClient:
         self,
         ordering: Sequence[str] = (),
         **filters: Any,
-    ) -> AsyncIterable[Workspace]:
+    ) -> AsyncIterator[Workspace]:
         """https://elis.rossum.ai/api/docs/#list-all-workspaces."""
         async for w in self._http_client.fetch_all(Resource.Workspace, ordering, **filters):
             yield self._deserializer(Resource.Workspace, w)
@@ -556,7 +556,7 @@ class ElisAPIClient:
         self,
         ordering: Sequence[str] = (),
         **filters: Any,
-    ) -> AsyncIterable[Connector]:
+    ) -> AsyncIterator[Connector]:
         """https://elis.rossum.ai/api/docs/#list-all-connectors."""
         async for c in self._http_client.fetch_all(Resource.Connector, ordering, **filters):
             yield self._deserializer(Resource.Connector, c)
@@ -578,7 +578,7 @@ class ElisAPIClient:
         self,
         ordering: Sequence[str] = (),
         **filters: Any,
-    ) -> AsyncIterable[Hook]:
+    ) -> AsyncIterator[Hook]:
         """https://elis.rossum.ai/api/docs/#list-all-hooks."""
         async for h in self._http_client.fetch_all(Resource.Hook, ordering, **filters):
             yield self._deserializer(Resource.Hook, h)
@@ -600,13 +600,13 @@ class ElisAPIClient:
         self,
         ordering: Sequence[str] = (),
         **filters: Any,
-    ) -> AsyncIterable[Group]:
+    ) -> AsyncIterator[Group]:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles."""
         async for g in self._http_client.fetch_all(Resource.Group, ordering, **filters):
             yield self._deserializer(Resource.Group, g)
 
     # ##### GENERIC METHODS #####
-    async def request_paginated(self, url: str, *args, **kwargs) -> AsyncIterable[dict]:
+    async def request_paginated(self, url: str, *args, **kwargs) -> AsyncIterator[dict]:
         """Use to perform requests to seldomly used or experimental endpoints with paginated response that do not have
         direct support in the client and return iterable.
         """

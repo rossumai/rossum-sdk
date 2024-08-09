@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## v0.17.1 (2024-08-09)
+
+### Fix
+
+* fix: use Iterator instead of Iterable types
+
+Iterator is a better type for the method return value,
+since it correctly type checks the use of `next()`.
+Iterable interface doesn&#39;t. ([`77edb52`](https://github.com/rossumai/rossum-sdk/commit/77edb529e4b69c74695bc16516cfe27ba9094c01))
+
+### Unknown
+
+* Merge pull request #77 from uhlikfil/main
+
+fix: use Iterator instead of Iterable types ([`ef1b4e2`](https://github.com/rossumai/rossum-sdk/commit/ef1b4e2109a115d3234752d63a9dd9f2089a2b5c))
+
 ## v0.17.0 (2024-08-07)
 
 ### Chore

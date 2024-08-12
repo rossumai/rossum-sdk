@@ -101,7 +101,7 @@ class ElisAPIClientSync:
     def list_all_queues(
         self,
         ordering: Sequence[str] = (),
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> Iterator[Queue]:
         """https://elis.rossum.ai/api/docs/#list-all-queues."""
         return self._iter_over_async(self.elis_api_client.list_all_queues(ordering, **filters))
@@ -208,7 +208,7 @@ class ElisAPIClientSync:
     def list_all_organizations(
         self,
         ordering: Sequence[str] = (),
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> Iterator[Organization]:
         """https://elis.rossum.ai/api/docs/#list-all-organizations."""
         return self._iter_over_async(
@@ -232,7 +232,7 @@ class ElisAPIClientSync:
     def list_all_schemas(
         self,
         ordering: Sequence[str] = (),
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> Iterator[Schema]:
         """https://elis.rossum.ai/api/docs/#list-all-schemas."""
         return self._iter_over_async(self.elis_api_client.list_all_schemas(ordering, **filters))
@@ -258,7 +258,7 @@ class ElisAPIClientSync:
     def list_all_users(
         self,
         ordering: Sequence[str] = (),
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> Iterator[User]:
         """https://elis.rossum.ai/api/docs/#list-all-users."""
         return self._iter_over_async(self.elis_api_client.list_all_users(ordering, **filters))
@@ -285,7 +285,7 @@ class ElisAPIClientSync:
         ordering: Sequence[str] = (),
         sideloads: Sequence[str] = (),
         content_schema_ids: Sequence[str] = (),
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> Iterator[Annotation]:
         """https://elis.rossum.ai/api/docs/#list-all-annotations."""
         return self._iter_over_async(
@@ -432,7 +432,7 @@ class ElisAPIClientSync:
     def list_all_workspaces(
         self,
         ordering: Sequence[str] = (),
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> Iterator[Workspace]:
         """https://elis.rossum.ai/api/docs/#list-all-workspaces."""
         return self._iter_over_async(self.elis_api_client.list_all_workspaces(ordering, **filters))
@@ -465,7 +465,7 @@ class ElisAPIClientSync:
     def list_all_connectors(
         self,
         ordering: Sequence[str] = (),
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> Iterator[Connector]:
         """https://elis.rossum.ai/api/docs/#list-all-connectors."""
         return self._iter_over_async(self.elis_api_client.list_all_connectors(ordering, **filters))
@@ -484,7 +484,7 @@ class ElisAPIClientSync:
     def list_all_hooks(
         self,
         ordering: Sequence[str] = (),
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> Iterator[Hook]:
         """https://elis.rossum.ai/api/docs/#list-all-hooks."""
         return self._iter_over_async(self.elis_api_client.list_all_hooks(ordering, **filters))
@@ -501,7 +501,7 @@ class ElisAPIClientSync:
     def list_all_user_roles(
         self,
         ordering: Sequence[str] = (),
-        **filters: Dict[str, Any],
+        **filters: Any,
     ) -> Iterator[Group]:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles."""
         return self._iter_over_async(self.elis_api_client.list_all_user_roles(ordering, **filters))

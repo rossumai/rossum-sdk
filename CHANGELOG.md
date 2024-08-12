@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v0.17.2 (2024-08-12)
+
+### Fix
+
+* fix: fix typing of filters kwargs in sync client ([`7ae75e1`](https://github.com/rossumai/rossum-sdk/commit/7ae75e1bb335f0c52656982315eb4d39f5b84a62))
+
+### Unknown
+
+* Merge pull request #78 from uhlikfil/main
+
+fix: fix typing of filters kwargs in sync client ([`999c39e`](https://github.com/rossumai/rossum-sdk/commit/999c39e3aa6855f3b1ec65a800936151a4d5f15b))
+
 ## v0.17.1 (2024-08-09)
 
 ### Fix

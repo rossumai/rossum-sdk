@@ -29,6 +29,7 @@ if typing.TYPE_CHECKING:
     from rossum_api.models.annotation import Annotation
     from rossum_api.models.connector import Connector
     from rossum_api.models.document import Document
+    from rossum_api.models.email_template import EmailTemplate
     from rossum_api.models.engine import Engine
     from rossum_api.models.group import Group
     from rossum_api.models.hook import Hook
@@ -460,6 +461,29 @@ class ElisAPIClientSync:
     ) -> Inbox:
         """https://elis.rossum.ai/api/docs/#create-a-new-inbox."""
         return self.event_loop.run_until_complete(self.elis_api_client.create_new_inbox(data))
+
+    # ##### EMAIL TEMPLATES #####
+    def list_all_email_templates(
+        self,
+        ordering: Sequence[str] = (),
+        **filters: Any,
+    ) -> Iterator[Connector]:
+        """https://elis.rossum.ai/api/docs/#list-all-email-templates."""
+        return self._iter_over_async(
+            self.elis_api_client.list_all_email_templates(ordering, **filters)
+        )
+
+    def retrieve_email_template(self, email_template_id: int) -> EmailTemplate:
+        """https://elis.rossum.ai/api/docs/#retrieve-an-email-template-object."""
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.retrieve_email_template(email_template_id)
+        )
+
+    def create_new_email_template(self, data: Dict[str, Any]) -> EmailTemplate:
+        """https://elis.rossum.ai/api/docs/#create-new-email-template-object."""
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.create_new_email_template(data)
+        )
 
     # ##### CONNECTORS #####
     def list_all_connectors(

@@ -10,7 +10,7 @@ from rossum_api.models.email_template import EmailTemplate
 def dummy_email_template():
     return {
         "id": 1500,
-        "name": "MyQ email_template",
+        "name": "My email_template",
         "queue": "https://elis.rossum.ai/api/v1/queues/8199",
         "url": "https://elis.rossum.ai/api/v1/email_templates/1500",
         "organization": "https://elis.rossum.ai/api/v1/organizations/1500",

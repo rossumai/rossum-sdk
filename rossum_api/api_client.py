@@ -31,6 +31,7 @@ class Resource(Enum):
     Auth = "auth"
     Connector = "connectors"
     Document = "documents"
+    EmailTemplate = "email_templates"
     Group = "groups"
     Hook = "hooks"
     Inbox = "inboxes"

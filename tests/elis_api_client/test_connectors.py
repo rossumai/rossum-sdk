@@ -23,7 +23,7 @@ def dummy_connector():
 
 
 @pytest.mark.asyncio
-class TestUsers:
+class TestConnectors:
     async def test_list_all_connectors(self, elis_client, dummy_connector, mock_generator):
         client, http_client = elis_client
         http_client.fetch_all.return_value = mock_generator(dummy_connector)
@@ -64,7 +64,7 @@ class TestUsers:
         http_client.create.assert_called_with(Resource.Connector, data)
 
 
-class TestUsersSync:
+class TestConnectorsSync:
     def test_list_all_connectors(self, elis_client_sync, dummy_connector, mock_generator):
         client, http_client = elis_client_sync
         http_client.fetch_all.return_value = mock_generator(dummy_connector)

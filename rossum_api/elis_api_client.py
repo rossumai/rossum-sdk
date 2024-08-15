@@ -21,6 +21,7 @@ if typing.TYPE_CHECKING:
     from rossum_api.models.annotation import Annotation
     from rossum_api.models.connector import Connector
     from rossum_api.models.document import Document
+    from rossum_api.models.email_template import EmailTemplate
     from rossum_api.models.engine import Engine
     from rossum_api.models.group import Group
     from rossum_api.models.hook import Hook
@@ -550,6 +551,30 @@ class ElisAPIClient:
         inbox = await self._http_client.create(Resource.Inbox, data)
 
         return self._deserializer(Resource.Inbox, inbox)
+
+    # ##### EMAIL TEMPLATES #####
+    async def list_all_email_templates(
+        self,
+        ordering: Sequence[str] = (),
+        **filters: Any,
+    ) -> AsyncIterator[Connector]:
+        """https://elis.rossum.ai/api/docs/#list-all-email-templates."""
+        async for c in self._http_client.fetch_all(Resource.EmailTemplate, ordering, **filters):
+            yield self._deserializer(Resource.EmailTemplate, c)
+
+    async def retrieve_email_template(self, email_template_id: int) -> EmailTemplate:
+        """https://elis.rossum.ai/api/docs/#retrieve-an-email-template-object."""
+        email_template = await self._http_client.fetch_one(
+            Resource.EmailTemplate, email_template_id
+        )
+
+        return self._deserializer(Resource.EmailTemplate, email_template)
+
+    async def create_new_email_template(self, data: Dict[str, Any]) -> EmailTemplate:
+        """https://elis.rossum.ai/api/docs/#create-new-email-template-object."""
+        email_template = await self._http_client.create(Resource.EmailTemplate, data)
+
+        return self._deserializer(Resource.EmailTemplate, email_template)
 
     # ##### CONNECTORS #####
     async def list_all_connectors(

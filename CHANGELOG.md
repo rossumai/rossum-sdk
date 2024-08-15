@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## v0.18.0 (2024-08-15)
+
+### Feature
+
+* feat: Add basic support for EmailTemplate object ([`0dc2882`](https://github.com/rossumai/rossum-sdk/commit/0dc28825f9f76e4f8bd6f10742f23ebf10633025))
+
+### Unknown
+
+* Merge pull request #81 from rossumai/rehoumir-patch-2
+
+feat: Add basic support for EmailTemplate object ([`5c8c921`](https://github.com/rossumai/rossum-sdk/commit/5c8c9213eaebd3f9658719819c5d7274a11540f9))
+
+* Merge pull request #80 from rehoumir/mirek-r/add-email-templates
+
+Add basic support for EmailTemplate object ([`3d68242`](https://github.com/rossumai/rossum-sdk/commit/3d68242593afed166ffab0fd9619bace68c50034))
+
+* Add basic support for EmailTemplate object ([`73a7289`](https://github.com/rossumai/rossum-sdk/commit/73a7289d3dde5a62ba48e0dee8c796c6fefa84a0))
+
 ## v0.17.2 (2024-08-12)
 
 ### Fix

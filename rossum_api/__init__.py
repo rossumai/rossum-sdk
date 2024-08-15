@@ -4,7 +4,7 @@ from rossum_api.api_client import APIClientError
 from rossum_api.elis_api_client import ElisAPIClient, ExportFileFormats
 from rossum_api.elis_api_client_sync import ElisAPIClientSync
 
-__version__ = "0.17.2"
+__version__ = "0.18.0"
 
 __all__ = (
     "APIClientError",

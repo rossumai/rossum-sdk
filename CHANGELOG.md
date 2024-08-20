@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v0.18.1 (2024-08-20)
+
+### Fix
+
+* fix: handle http:// urls for local development ([`715513d`](https://github.com/rossumai/rossum-sdk/commit/715513d8144c8ede02d7288788fd73ca5722a2e3))
+
+### Unknown
+
+* Merge pull request #83 from opichals/opichals-allow-using-http-protocol
+
+fix: handle http:// urls for local development ([`1b09f4b`](https://github.com/rossumai/rossum-sdk/commit/1b09f4be431d7d36ff457eb84812066b54ad4041))
+
 ## v0.18.0 (2024-08-15)
 
 ### Feature

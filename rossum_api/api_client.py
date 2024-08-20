@@ -444,7 +444,7 @@ class APIClient:
             base URL is prepended with base_url if needed
         """
         # Do not force the calling site to always prepend the base URL
-        if not url.startswith("https://"):
+        if not url.startswith("https://") and not url.startswith("http://"):
             url = f"{self.base_url}/{url}"
         headers = kwargs.pop("headers", {})
         headers["Authorization"] = f"token {self.token}"
@@ -471,7 +471,7 @@ class APIClient:
     async def _stream(self, method: str, url: str, *args, **kwargs) -> AsyncIterator[bytes]:
         """Performs a streaming HTTP call."""
         # Do not force the calling site to alway prepend the base URL
-        if not url.startswith("https://"):
+        if not url.startswith("https://") and not url.startswith("http://"):
             url = f"{self.base_url}/{url}"
         headers = kwargs.pop("headers", {})
         headers["Authorization"] = f"token {self.token}"

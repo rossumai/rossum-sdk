@@ -698,6 +698,15 @@ async def test_request_json_full_url(client, httpx_mock):
 
 
 @pytest.mark.asyncio
+async def test_request_json_full_url_http(client, httpx_mock):
+    httpx_mock.add_response(
+        method="GET", url="http://localhost:8000/api/v1/workspaces/123", json=WORKSPACES[0]
+    )
+    data = await client.request_json("GET", "http://localhost:8000/api/v1/workspaces/123")
+    assert data == WORKSPACES[0]
+
+
+@pytest.mark.asyncio
 async def test_request_json_204(client, httpx_mock):
     httpx_mock.add_response(
         method="DELETE", url="https://elis.rossum.ai/api/v1/workspaces/123", status_code=204

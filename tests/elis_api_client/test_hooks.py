@@ -79,6 +79,29 @@ class TestHooks:
 
         http_client.create.assert_called_with(Resource.Hook, data)
 
+    async def test_update_part_hook(self, elis_client, dummy_hook):
+        client, http_client = elis_client
+        http_client.update.return_value = dummy_hook
+
+        hid = dummy_hook["id"]
+        data = {
+            "name": "New Hook Name",
+        }
+        hook = await client.update_part_hook(hid, data)
+
+        assert hook == Hook(**dummy_hook)
+
+        http_client.update.assert_called_with(Resource.Hook, hid, data)
+
+    async def test_delete_hook(self, elis_client, dummy_hook):
+        client, http_client = elis_client
+        http_client.delete.return_value = None
+
+        hid = dummy_hook["id"]
+        await client.delete_hook(hid)
+
+        http_client.delete.assert_called_with(Resource.Hook, hid)
+
 
 class TestHooksSync:
     def test_list_all_hooks(self, elis_client_sync, dummy_hook, mock_generator):
@@ -118,3 +141,26 @@ class TestHooksSync:
         assert hook == Hook(**dummy_hook)
 
         http_client.create.assert_called_with(Resource.Hook, data)
+
+    def test_update_part_hook(self, elis_client_sync, dummy_hook):
+        client, http_client = elis_client_sync
+        http_client.update.return_value = dummy_hook
+
+        hid = dummy_hook["id"]
+        data = {
+            "name": "New Hook Name",
+        }
+        hook = client.update_part_hook(hid, data)
+
+        assert hook == Hook(**dummy_hook)
+
+        http_client.update.assert_called_with(Resource.Hook, hid, data)
+
+    def test_delete_hook(self, elis_client_sync, dummy_hook):
+        client, http_client = elis_client_sync
+        http_client.delete.return_value = None
+
+        hid = dummy_hook["id"]
+        client.delete_hook(hid)
+
+        http_client.delete.assert_called_with(Resource.Hook, hid)

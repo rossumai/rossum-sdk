@@ -533,6 +533,16 @@ class ElisAPIClientSync:
         """https://elis.rossum.ai/api/docs/#create-a-new-hook."""
         return self.event_loop.run_until_complete(self.elis_api_client.create_new_hook(data))
 
+    def update_part_hook(self, hook_id: int, data: Dict[str, Any]) -> Hook:
+        """https://elis.rossum.ai/api/docs/#update-part-of-a-hook"""
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.update_part_hook(hook_id, data)
+        )
+
+    def delete_hook(self, hook_id: int) -> None:
+        """https://elis.rossum.ai/api/docs/#delete-a-hook"""
+        return self.event_loop.run_until_complete(self.elis_api_client.delete_hook(hook_id))
+
     # ##### USER ROLES #####
     def list_all_user_roles(
         self,

@@ -634,6 +634,16 @@ class ElisAPIClient:
 
         return self._deserializer(Resource.Hook, hook)
 
+    async def update_part_hook(self, hook_id: int, data: Dict[str, Any]) -> Hook:
+        """https://elis.rossum.ai/api/docs/#update-part-of-a-hook"""
+        hook = await self._http_client.update(Resource.Hook, hook_id, data)
+
+        return self._deserializer(Resource.Hook, hook)
+
+    async def delete_hook(self, hook_id: int) -> None:
+        """https://elis.rossum.ai/api/docs/#delete-a-hook"""
+        return await self._http_client.delete(Resource.Hook, hook_id)
+
     # ##### USER ROLES #####
     async def list_all_user_roles(
         self,

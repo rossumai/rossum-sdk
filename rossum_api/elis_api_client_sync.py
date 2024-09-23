@@ -417,6 +417,12 @@ class ElisAPIClientSync:
         )
 
     # ##### DOCUMENTS #####
+    def retrieve_document(self, document_id: int) -> Document:
+        """https://elis.rossum.ai/api/docs/#retrieve-a-document"""
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.retrieve_document(document_id)
+        )
+
     def retrieve_document_content(self, document_id: int) -> bytes:
         """https://elis.rossum.ai/api/docs/#document-content"""
         return self.event_loop.run_until_complete(

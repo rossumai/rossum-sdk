@@ -489,6 +489,14 @@ class ElisAPIClient:
         )
 
     # ##### DOCUMENTS #####
+    async def retrieve_document(self, document_id: int) -> Document:
+        """https://elis.rossum.ai/api/docs/#retrieve-a-document"""
+        document: Dict[Any, Any] = await self._http_client.fetch_one(
+            Resource.Document, document_id
+        )
+
+        return self._deserializer(Resource.Document, document)
+
     async def retrieve_document_content(self, document_id: int) -> bytes:
         """https://elis.rossum.ai/api/docs/#document-content"""
         document_content = await self._http_client.request(

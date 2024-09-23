@@ -410,6 +410,12 @@ class ElisAPIClientSync:
             self.elis_api_client.delete_annotation(annotation_id)
         )
 
+    def cancel_annotation(self, annotation_id: int) -> None:
+        """https://elis.rossum.ai/api/docs/#cancel-annotation"""
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.cancel_annotation(annotation_id)
+        )
+
     # ##### DOCUMENTS #####
     def retrieve_document_content(self, document_id: int) -> bytes:
         """https://elis.rossum.ai/api/docs/#document-content"""

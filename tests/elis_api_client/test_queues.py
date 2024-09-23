@@ -361,7 +361,7 @@ class TestQueuesSync:
 
         http_client.upload.assert_has_calls(calls, any_order=True)
 
-    def test_delete_schema(self, elis_client_sync, dummy_queue):
+    def test_delete_queue(self, elis_client_sync, dummy_queue):
         client, http_client = elis_client_sync
         http_client.delete.return_value = None
 

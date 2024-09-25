@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## v0.19.0 (2024-09-25)
+
+### Chore
+
+* chore: fix naming in queues tests ([`2c51b64`](https://github.com/rossumai/rossum-sdk/commit/2c51b640124394cb86c85e23546d0dd591ecfdf9))
+
+### Feature
+
+* feat: Add new methods for hook object ([`232269f`](https://github.com/rossumai/rossum-sdk/commit/232269fe8582c4d553172f510265a0b8cbccfaff))
+
+* feat: Add retrieve document method ([`4edac76`](https://github.com/rossumai/rossum-sdk/commit/4edac76684b0ac9cb8146dafaa1f92214bfe02e1))
+
+* feat: Add cancel annotation method ([`a217b64`](https://github.com/rossumai/rossum-sdk/commit/a217b64dc4609bca144322a5fe93dff26b0ff752))
+
+### Unknown
+
+* Merge pull request #84 from rossumai/bara-add-missing-methods
+
+Add some missing methods ([`13411a6`](https://github.com/rossumai/rossum-sdk/commit/13411a67a5cea5fdef2bdc41959b4c7ea02dc0cb))
+
 ## v0.18.1 (2024-08-20)
 
 ### Fix

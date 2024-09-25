@@ -37,6 +37,17 @@ def dummy_document() -> dict:
 
 @pytest.mark.asyncio
 class TestDocuments:
+    async def test_retrieve_document(self, elis_client, dummy_document):
+        client, http_client = elis_client
+        http_client.fetch_one.return_value = dummy_document
+
+        did = dummy_document["id"]
+        document = await client.retrieve_document(did)
+
+        assert document == Document(**dummy_document)
+
+        http_client.fetch_one.assert_called_with(Resource.Document, did)
+
     async def test_retrieve_document_content(self, elis_client, file_data):
         client, http_client = elis_client
         http_client.request.return_value = httpx.Response(status_code=200, content=file_data)
@@ -71,6 +82,17 @@ class TestDocuments:
 
 
 class TestDocumentsSync:
+    def test_retrieve_document(self, elis_client_sync, dummy_document):
+        client, http_client = elis_client_sync
+        http_client.fetch_one.return_value = dummy_document
+
+        did = dummy_document["id"]
+        document = client.retrieve_document(did)
+
+        assert document == Document(**dummy_document)
+
+        http_client.fetch_one.assert_called_with(Resource.Document, did)
+
     def test_retrieve_document_content(self, elis_client_sync, file_data):
         client, http_client = elis_client_sync
         http_client.request.return_value = httpx.Response(status_code=200, content=file_data)

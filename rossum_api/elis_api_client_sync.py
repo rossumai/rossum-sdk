@@ -410,7 +410,19 @@ class ElisAPIClientSync:
             self.elis_api_client.delete_annotation(annotation_id)
         )
 
+    def cancel_annotation(self, annotation_id: int) -> None:
+        """https://elis.rossum.ai/api/docs/#cancel-annotation"""
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.cancel_annotation(annotation_id)
+        )
+
     # ##### DOCUMENTS #####
+    def retrieve_document(self, document_id: int) -> Document:
+        """https://elis.rossum.ai/api/docs/#retrieve-a-document"""
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.retrieve_document(document_id)
+        )
+
     def retrieve_document_content(self, document_id: int) -> bytes:
         """https://elis.rossum.ai/api/docs/#document-content"""
         return self.event_loop.run_until_complete(
@@ -520,6 +532,16 @@ class ElisAPIClientSync:
     def create_new_hook(self, data: Dict[str, Any]) -> Hook:
         """https://elis.rossum.ai/api/docs/#create-a-new-hook."""
         return self.event_loop.run_until_complete(self.elis_api_client.create_new_hook(data))
+
+    def update_part_hook(self, hook_id: int, data: Dict[str, Any]) -> Hook:
+        """https://elis.rossum.ai/api/docs/#update-part-of-a-hook"""
+        return self.event_loop.run_until_complete(
+            self.elis_api_client.update_part_hook(hook_id, data)
+        )
+
+    def delete_hook(self, hook_id: int) -> None:
+        """https://elis.rossum.ai/api/docs/#delete-a-hook"""
+        return self.event_loop.run_until_complete(self.elis_api_client.delete_hook(hook_id))
 
     # ##### USER ROLES #####
     def list_all_user_roles(

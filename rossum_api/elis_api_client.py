@@ -482,7 +482,21 @@ class ElisAPIClient:
             "POST", url=f"{Resource.Annotation.value}/{annotation_id}/delete"
         )
 
+    async def cancel_annotation(self, annotation_id: int) -> None:
+        """https://elis.rossum.ai/api/docs/#cancel-annotation"""
+        await self._http_client.request(
+            "POST", url=f"{Resource.Annotation.value}/{annotation_id}/cancel"
+        )
+
     # ##### DOCUMENTS #####
+    async def retrieve_document(self, document_id: int) -> Document:
+        """https://elis.rossum.ai/api/docs/#retrieve-a-document"""
+        document: Dict[Any, Any] = await self._http_client.fetch_one(
+            Resource.Document, document_id
+        )
+
+        return self._deserializer(Resource.Document, document)
+
     async def retrieve_document_content(self, document_id: int) -> bytes:
         """https://elis.rossum.ai/api/docs/#document-content"""
         document_content = await self._http_client.request(
@@ -619,6 +633,16 @@ class ElisAPIClient:
         hook = await self._http_client.create(Resource.Hook, data)
 
         return self._deserializer(Resource.Hook, hook)
+
+    async def update_part_hook(self, hook_id: int, data: Dict[str, Any]) -> Hook:
+        """https://elis.rossum.ai/api/docs/#update-part-of-a-hook"""
+        hook = await self._http_client.update(Resource.Hook, hook_id, data)
+
+        return self._deserializer(Resource.Hook, hook)
+
+    async def delete_hook(self, hook_id: int) -> None:
+        """https://elis.rossum.ai/api/docs/#delete-a-hook"""
+        return await self._http_client.delete(Resource.Hook, hook_id)
 
     # ##### USER ROLES #####
     async def list_all_user_roles(

@@ -369,6 +369,26 @@ class TestAnnotations:
 
         http_client.create.assert_called_with(Resource.Annotation, data)
 
+    async def test_delete_annotation(self, elis_client, dummy_annotation):
+        client, http_client = elis_client
+
+        aid = dummy_annotation["id"]
+        await client.delete_annotation(aid)
+
+        http_client.request.assert_called_with(
+            "POST", url=f"{Resource.Annotation.value}/{aid}/delete"
+        )
+
+    async def test_cancel_annotation(self, elis_client, dummy_annotation):
+        client, http_client = elis_client
+
+        aid = dummy_annotation["id"]
+        await client.cancel_annotation(aid)
+
+        http_client.request.assert_called_with(
+            "POST", url=f"{Resource.Annotation.value}/{aid}/cancel"
+        )
+
 
 class TestAnnotationsSync:
     def test_list_all_annotations(self, elis_client_sync, dummy_annotation, mock_generator):
@@ -611,3 +631,23 @@ class TestAnnotationsSync:
         assert annotation == Annotation(**dummy_annotation)
 
         http_client.create.assert_called_with(Resource.Annotation, data)
+
+    def test_delete_annotation(self, elis_client_sync, dummy_annotation):
+        client, http_client = elis_client_sync
+
+        aid = dummy_annotation["id"]
+        client.delete_annotation(aid)
+
+        http_client.request.assert_called_with(
+            "POST", url=f"{Resource.Annotation.value}/{aid}/delete"
+        )
+
+    def test_cancel_annotation(self, elis_client_sync, dummy_annotation):
+        client, http_client = elis_client_sync
+
+        aid = dummy_annotation["id"]
+        client.cancel_annotation(aid)
+
+        http_client.request.assert_called_with(
+            "POST", url=f"{Resource.Annotation.value}/{aid}/cancel"
+        )

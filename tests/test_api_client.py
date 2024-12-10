@@ -4,6 +4,7 @@
 * `workspace` is used as resource in most tests to make the examples representative.
 * all CRUD methods are tested for both a happy path and an error (400 or 404)
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -147,7 +148,8 @@ def count_calls(func):
 
 @pytest.fixture
 def client():
-    client = APIClient("username", "password", retry_backoff_factor=0)
+    # Set retrying parameters to zero to keep tests fast
+    client = APIClient("username", "password", retry_backoff_factor=0, retry_max_jitter=0)
     client.token = FAKE_TOKEN
     return client
 
@@ -177,6 +179,28 @@ async def test_authenticate(client, login_mock):
     )
     with pytest.raises(APIClientError, match="401"):
         await client._authenticate()
+
+
+@pytest.mark.asyncio
+async def test_authenticate_is_retried(client, httpx_mock):
+    @count_calls
+    def custom_response(request: httpx.Request, n_calls: int):
+        if n_calls == 1:
+            raise httpx.ReadTimeout("Unable to read within timeout")
+
+        return httpx.Response(
+            status_code=200,
+            json={
+                "key": NEW_TOKEN,
+                "domain": "custom-domain.app.rossum.ai",
+            },
+        )
+
+    httpx_mock.add_callback(custom_response)
+
+    assert client.token != "our-token"
+    await client._authenticate()
+    assert client.token == "our-token"
 
 
 @pytest.mark.asyncio

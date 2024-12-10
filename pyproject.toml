@@ -19,7 +19,7 @@ tests = [
   "codecov",
   "pytest",
   "pytest-asyncio",
-  "pytest-httpx",
+  "pytest-httpx<=0.22.0",  # 0.22 is the last release working with Python 3.8
   "pytest-cov",
   "ruff",
   "types-aiofiles",

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import asyncio
 import typing
+from concurrent.futures import ThreadPoolExecutor
+from queue import Queue as ThreadSafeQueue
 
 from rossum_api import ElisAPIClient
 
@@ -75,29 +77,41 @@ class ElisAPIClientSync:
         self.elis_api_client = ElisAPIClient(
             username, password, token, base_url, http_client, deserializer
         )
-
-        try:
-            self.event_loop = asyncio.get_running_loop()
-            if self.event_loop.is_running():
-                raise AsyncRuntimeError(
-                    "Event loop is present and already running, please use async version of the client"
-                )
-        except RuntimeError:
-            self.event_loop = asyncio.new_event_loop()
+        # The executor is never terminated. We would either need to turn the client into a context manager which is inconvenient for users or terminate it after each request which is wasteful. Keeping one thread around seems like the lesser evil.
+        self.executor = ThreadPoolExecutor(max_workers=1)
 
     def _iter_over_async(self, ait: AsyncIterator[T]) -> Iterator[T]:
-        ait = ait.__aiter__()
-        while True:
+        """Iterate over an async generator from sync code without materializing all items into memory."""
+        queue: ThreadSafeQueue = (
+            ThreadSafeQueue()
+        )  # To communicate with the thread executing the async generator
+
+        async def async_iter_to_list(ait: AsyncIterator[T], queue: ThreadSafeQueue):
             try:
-                obj = self.event_loop.run_until_complete(ait.__anext__())
-                yield obj
-            except StopAsyncIteration:
+                async for obj in ait:
+                    queue.put(obj)
+            finally:
+                queue.put(None)  # Signal iterator was consumed
+
+        future = self.executor.submit(asyncio.run, async_iter_to_list(ait, queue))  # type: ignore
+
+        # Consume the queue until completion to retain the iterator nature even in sync context
+        while True:
+            item = queue.get()
+            if item is None:  # None is used to signal completion
                 break
+            yield item
+
+        future.result()
+
+    def _run_coroutine(self, coroutine):
+        future = self.executor.submit(asyncio.run, coroutine)
+        return future.result()  # Wait for the coroutine to complete
 
     # ##### QUEUE #####
     def retrieve_queue(self, queue_id: int) -> Queue:
         """https://elis.rossum.ai/api/docs/#retrieve-a-queue-2."""
-        return self.event_loop.run_until_complete(self.elis_api_client.retrieve_queue(queue_id))
+        return self._run_coroutine(self.elis_api_client.retrieve_queue(queue_id))
 
     def list_all_queues(
         self,
@@ -112,11 +126,11 @@ class ElisAPIClientSync:
         data: Dict[str, Any],
     ) -> Queue:
         """https://elis.rossum.ai/api/docs/#create-new-queue."""
-        return self.event_loop.run_until_complete(self.elis_api_client.create_new_queue(data))
+        return self._run_coroutine(self.elis_api_client.create_new_queue(data))
 
     def delete_queue(self, queue_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-queue."""
-        return self.event_loop.run_until_complete(self.elis_api_client.delete_queue(queue_id))
+        return self._run_coroutine(self.elis_api_client.delete_queue(queue_id))
 
     def import_document(
         self,
@@ -143,7 +157,7 @@ class ElisAPIClientSync:
         annotation_ids
             list of IDs of created annotations, respects the order of `files` argument
         """
-        return self.event_loop.run_until_complete(
+        return self._run_coroutine(
             self.elis_api_client.import_document(queue_id, files, values, metadata)
         )
 
@@ -175,7 +189,7 @@ class ElisAPIClientSync:
             Tasks can be polled using poll_task and if succeeded, will contain a
             link to an Upload object that contains info on uploaded documents/annotations
         """
-        return self.event_loop.run_until_complete(
+        return self._run_coroutine(
             self.elis_api_client.upload_document(queue_id, files, values, metadata)
         )
 
@@ -185,7 +199,7 @@ class ElisAPIClientSync:
     ) -> Upload:
         """Implements https://elis.rossum.ai/api/docs/#retrieve-upload."""
 
-        return self.event_loop.run_until_complete(self.elis_api_client.retrieve_upload(upload_id))
+        return self._run_coroutine(self.elis_api_client.retrieve_upload(upload_id))
 
     def export_annotations_to_json(self, queue_id: int) -> Iterator[Annotation]:
         """https://elis.rossum.ai/api/docs/#export-annotations.
@@ -221,13 +235,11 @@ class ElisAPIClientSync:
         org_id: int,
     ) -> Organization:
         """https://elis.rossum.ai/api/docs/#retrieve-an-organization."""
-        return self.event_loop.run_until_complete(
-            self.elis_api_client.retrieve_organization(org_id)
-        )
+        return self._run_coroutine(self.elis_api_client.retrieve_organization(org_id))
 
     def retrieve_own_organization(self) -> Organization:
         """Retrieve organization of currently logged in user."""
-        return self.event_loop.run_until_complete(self.elis_api_client.retrieve_own_organization())
+        return self._run_coroutine(self.elis_api_client.retrieve_own_organization())
 
     # ##### SCHEMAS #####
     def list_all_schemas(
@@ -240,20 +252,20 @@ class ElisAPIClientSync:
 
     def retrieve_schema(self, schema_id: int) -> Schema:
         """https://elis.rossum.ai/api/docs/#retrieve-a-schema."""
-        return self.event_loop.run_until_complete(self.elis_api_client.retrieve_schema(schema_id))
+        return self._run_coroutine(self.elis_api_client.retrieve_schema(schema_id))
 
     def create_new_schema(self, data: Dict[str, Any]) -> Schema:
         """https://elis.rossum.ai/api/docs/#create-a-new-schema."""
-        return self.event_loop.run_until_complete(self.elis_api_client.create_new_schema(data))
+        return self._run_coroutine(self.elis_api_client.create_new_schema(data))
 
     def delete_schema(self, schema_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-schema."""
-        return self.event_loop.run_until_complete(self.elis_api_client.delete_schema(schema_id))
+        return self._run_coroutine(self.elis_api_client.delete_schema(schema_id))
 
     # ##### ENGINES #####
     def retrieve_engine(self, engine_id: int) -> Engine:
         """https://elis.rossum.ai/api/docs/#retrieve-a-schema."""
-        return self.event_loop.run_until_complete(self.elis_api_client.retrieve_engine(engine_id))
+        return self._run_coroutine(self.elis_api_client.retrieve_engine(engine_id))
 
     # ##### USERS #####
     def list_all_users(
@@ -266,11 +278,11 @@ class ElisAPIClientSync:
 
     def retrieve_user(self, user_id: int) -> User:
         """https://elis.rossum.ai/api/docs/#retrieve-a-user-2."""
-        return self.event_loop.run_until_complete(self.elis_api_client.retrieve_user(user_id))
+        return self._run_coroutine(self.elis_api_client.retrieve_user(user_id))
 
     def create_new_user(self, data: Dict[str, Any]) -> User:
         """https://elis.rossum.ai/api/docs/#create-new-user."""
-        return self.event_loop.run_until_complete(self.elis_api_client.create_new_user(data))
+        return self._run_coroutine(self.elis_api_client.create_new_user(data))
 
     # TODO: specific method in APICLient
     def change_user_password(self, new_password: str) -> dict:
@@ -312,7 +324,7 @@ class ElisAPIClientSync:
 
     def retrieve_annotation(self, annotation_id: int, sideloads: Sequence[str] = ()) -> Annotation:
         """https://elis.rossum.ai/api/docs/#retrieve-an-annotation."""
-        return self.event_loop.run_until_complete(
+        return self._run_coroutine(
             self.elis_api_client.retrieve_annotation(annotation_id, sideloads)
         )
 
@@ -327,7 +339,7 @@ class ElisAPIClientSync:
 
         Sideloading is done only once after the predicate becomes true to avoid spamming the server.
         """
-        return self.event_loop.run_until_complete(
+        return self._run_coroutine(
             self.elis_api_client.poll_annotation(annotation_id, predicate, sleep_s, sideloads)
         )
 
@@ -338,9 +350,7 @@ class ElisAPIClientSync:
         sleep_s: int = 3,
     ) -> Task:
         """Poll on Task until predicate is true."""
-        return self.event_loop.run_until_complete(
-            self.elis_api_client.poll_task(task_id, predicate, sleep_s)
-        )
+        return self._run_coroutine(self.elis_api_client.poll_task(task_id, predicate, sleep_s))
 
     def poll_task_until_succeeded(
         self,
@@ -348,17 +358,17 @@ class ElisAPIClientSync:
         sleep_s: int = 3,
     ) -> Task:
         """Poll on Task until it is succeeded."""
-        return self.event_loop.run_until_complete(
+        return self._run_coroutine(
             self.elis_api_client.poll_task_until_succeeded(task_id, sleep_s)
         )
 
     def retrieve_task(self, task_id: int) -> Task:
         """https://elis.rossum.ai/api/docs/#retrieve-task."""
-        return self.event_loop.run_until_complete(self.elis_api_client.retrieve_task(task_id))
+        return self._run_coroutine(self.elis_api_client.retrieve_task(task_id))
 
     def poll_annotation_until_imported(self, annotation_id: int, **poll_kwargs: Any) -> Annotation:
         """A shortcut for waiting until annotation is imported."""
-        return self.event_loop.run_until_complete(
+        return self._run_coroutine(
             self.elis_api_client.poll_annotation_until_imported(annotation_id, **poll_kwargs)
         )
 
@@ -366,7 +376,7 @@ class ElisAPIClientSync:
         self, queue_id: int, filepath: Union[str, pathlib.Path], filename: str, **poll_kwargs
     ) -> Annotation:
         """A shortcut for uploading a single file and waiting until its annotation is imported."""
-        return self.event_loop.run_until_complete(
+        return self._run_coroutine(
             self.elis_api_client.upload_and_wait_until_imported(
                 queue_id, filepath, filename, **poll_kwargs
             )
@@ -374,17 +384,15 @@ class ElisAPIClientSync:
 
     def start_annotation(self, annotation_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#start-annotation"""
-        self.event_loop.run_until_complete(self.elis_api_client.start_annotation(annotation_id))
+        self._run_coroutine(self.elis_api_client.start_annotation(annotation_id))
 
     def update_annotation(self, annotation_id: int, data: Dict[str, Any]) -> Annotation:
         """https://elis.rossum.ai/api/docs/#update-an-annotation."""
-        return self.event_loop.run_until_complete(
-            self.elis_api_client.update_annotation(annotation_id, data)
-        )
+        return self._run_coroutine(self.elis_api_client.update_annotation(annotation_id, data))
 
     def update_part_annotation(self, annotation_id: int, data: Dict[str, Any]) -> Annotation:
         """https://elis.rossum.ai/api/docs/#update-part-of-an-annotation."""
-        return self.event_loop.run_until_complete(
+        return self._run_coroutine(
             self.elis_api_client.update_part_annotation(annotation_id, data)
         )
 
@@ -392,42 +400,34 @@ class ElisAPIClientSync:
         self, annotation_id: int, operations: List[Dict[str, Any]]
     ) -> None:
         """https://elis.rossum.ai/api/docs/#bulk-update-annotation-data"""
-        self.event_loop.run_until_complete(
+        self._run_coroutine(
             self.elis_api_client.bulk_update_annotation_data(annotation_id, operations)
         )
 
     def confirm_annotation(self, annotation_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#confirm-annotation"""
-        self.event_loop.run_until_complete(self.elis_api_client.confirm_annotation(annotation_id))
+        self._run_coroutine(self.elis_api_client.confirm_annotation(annotation_id))
 
     def create_new_annotation(self, data: dict[str, Any]) -> Annotation:
         """https://elis.rossum.ai/api/docs/#create-an-annotation"""
-        return self.event_loop.run_until_complete(self.elis_api_client.create_new_annotation(data))
+        return self._run_coroutine(self.elis_api_client.create_new_annotation(data))
 
     def delete_annotation(self, annotation_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#switch-to-deleted"""
-        return self.event_loop.run_until_complete(
-            self.elis_api_client.delete_annotation(annotation_id)
-        )
+        return self._run_coroutine(self.elis_api_client.delete_annotation(annotation_id))
 
     def cancel_annotation(self, annotation_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#cancel-annotation"""
-        return self.event_loop.run_until_complete(
-            self.elis_api_client.cancel_annotation(annotation_id)
-        )
+        return self._run_coroutine(self.elis_api_client.cancel_annotation(annotation_id))
 
     # ##### DOCUMENTS #####
     def retrieve_document(self, document_id: int) -> Document:
         """https://elis.rossum.ai/api/docs/#retrieve-a-document"""
-        return self.event_loop.run_until_complete(
-            self.elis_api_client.retrieve_document(document_id)
-        )
+        return self._run_coroutine(self.elis_api_client.retrieve_document(document_id))
 
     def retrieve_document_content(self, document_id: int) -> bytes:
         """https://elis.rossum.ai/api/docs/#document-content"""
-        return self.event_loop.run_until_complete(
-            self.elis_api_client.retrieve_document_content(document_id)
-        )
+        return self._run_coroutine(self.elis_api_client.retrieve_document_content(document_id))
 
     def create_new_document(
         self,
@@ -437,7 +437,7 @@ class ElisAPIClientSync:
         parent: Optional[str] = None,
     ) -> Document:
         """https://elis.rossum.ai/api/docs/#create-document"""
-        return self.event_loop.run_until_complete(
+        return self._run_coroutine(
             self.elis_api_client.create_new_document(file_name, file_data, metadata, parent)
         )
 
@@ -452,19 +452,15 @@ class ElisAPIClientSync:
 
     def retrieve_workspace(self, workspace_id: int) -> Workspace:
         """https://elis.rossum.ai/api/docs/#retrieve-a-workspace."""
-        return self.event_loop.run_until_complete(
-            self.elis_api_client.retrieve_workspace(workspace_id)
-        )
+        return self._run_coroutine(self.elis_api_client.retrieve_workspace(workspace_id))
 
     def create_new_workspace(self, data: Dict[str, Any]) -> Workspace:
         """https://elis.rossum.ai/api/docs/#create-a-new-workspace."""
-        return self.event_loop.run_until_complete(self.elis_api_client.create_new_workspace(data))
+        return self._run_coroutine(self.elis_api_client.create_new_workspace(data))
 
     def delete_workspace(self, workspace_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#retrieve-a-workspace."""
-        return self.event_loop.run_until_complete(
-            self.elis_api_client.delete_workspace(workspace_id)
-        )
+        return self._run_coroutine(self.elis_api_client.delete_workspace(workspace_id))
 
     # ##### INBOX #####
     def create_new_inbox(
@@ -472,7 +468,7 @@ class ElisAPIClientSync:
         data: Dict[str, Any],
     ) -> Inbox:
         """https://elis.rossum.ai/api/docs/#create-a-new-inbox."""
-        return self.event_loop.run_until_complete(self.elis_api_client.create_new_inbox(data))
+        return self._run_coroutine(self.elis_api_client.create_new_inbox(data))
 
     # ##### EMAIL TEMPLATES #####
     def list_all_email_templates(
@@ -487,15 +483,11 @@ class ElisAPIClientSync:
 
     def retrieve_email_template(self, email_template_id: int) -> EmailTemplate:
         """https://elis.rossum.ai/api/docs/#retrieve-an-email-template-object."""
-        return self.event_loop.run_until_complete(
-            self.elis_api_client.retrieve_email_template(email_template_id)
-        )
+        return self._run_coroutine(self.elis_api_client.retrieve_email_template(email_template_id))
 
     def create_new_email_template(self, data: Dict[str, Any]) -> EmailTemplate:
         """https://elis.rossum.ai/api/docs/#create-new-email-template-object."""
-        return self.event_loop.run_until_complete(
-            self.elis_api_client.create_new_email_template(data)
-        )
+        return self._run_coroutine(self.elis_api_client.create_new_email_template(data))
 
     # ##### CONNECTORS #####
     def list_all_connectors(
@@ -508,13 +500,11 @@ class ElisAPIClientSync:
 
     def retrieve_connector(self, connector_id: int) -> Connector:
         """https://elis.rossum.ai/api/docs/#retrieve-a-connector."""
-        return self.event_loop.run_until_complete(
-            self.elis_api_client.retrieve_connector(connector_id)
-        )
+        return self._run_coroutine(self.elis_api_client.retrieve_connector(connector_id))
 
     def create_new_connector(self, data: Dict[str, Any]) -> Connector:
         """https://elis.rossum.ai/api/docs/#create-a-new-connector."""
-        return self.event_loop.run_until_complete(self.elis_api_client.create_new_connector(data))
+        return self._run_coroutine(self.elis_api_client.create_new_connector(data))
 
     # ##### HOOKS #####
     def list_all_hooks(
@@ -527,21 +517,19 @@ class ElisAPIClientSync:
 
     def retrieve_hook(self, hook_id: int) -> Hook:
         """https://elis.rossum.ai/api/docs/#retrieve-a-hook."""
-        return self.event_loop.run_until_complete(self.elis_api_client.retrieve_hook(hook_id))
+        return self._run_coroutine(self.elis_api_client.retrieve_hook(hook_id))
 
     def create_new_hook(self, data: Dict[str, Any]) -> Hook:
         """https://elis.rossum.ai/api/docs/#create-a-new-hook."""
-        return self.event_loop.run_until_complete(self.elis_api_client.create_new_hook(data))
+        return self._run_coroutine(self.elis_api_client.create_new_hook(data))
 
     def update_part_hook(self, hook_id: int, data: Dict[str, Any]) -> Hook:
         """https://elis.rossum.ai/api/docs/#update-part-of-a-hook"""
-        return self.event_loop.run_until_complete(
-            self.elis_api_client.update_part_hook(hook_id, data)
-        )
+        return self._run_coroutine(self.elis_api_client.update_part_hook(hook_id, data))
 
     def delete_hook(self, hook_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#delete-a-hook"""
-        return self.event_loop.run_until_complete(self.elis_api_client.delete_hook(hook_id))
+        return self._run_coroutine(self.elis_api_client.delete_hook(hook_id))
 
     # ##### USER ROLES #####
     def list_all_user_roles(
@@ -562,17 +550,13 @@ class ElisAPIClientSync:
         """Use to perform requests to seldomly used or experimental endpoints that do not have
         direct support in the client and return JSON.
         """
-        return self.event_loop.run_until_complete(
-            self.elis_api_client.request_json(method, *args, **kwargs)
-        )
+        return self._run_coroutine(self.elis_api_client.request_json(method, *args, **kwargs))
 
     def request(self, method: str, *args, **kwargs) -> httpx.Response:
         """Use to perform requests to seldomly used or experimental endpoints that do not have
         direct support in the client and return the raw response.
         """
-        return self.event_loop.run_until_complete(
-            self.elis_api_client.request(method, *args, **kwargs)
-        )
+        return self._run_coroutine(self.elis_api_client.request(method, *args, **kwargs))
 
     def get_token(self, refresh: bool = False) -> str:
         """Returns the current token. Authentication is done automatically if needed.
@@ -582,4 +566,4 @@ class ElisAPIClientSync:
         refresh
             force refreshing the token
         """
-        return self.event_loop.run_until_complete(self.elis_api_client.get_token(refresh))
+        return self._run_coroutine(self.elis_api_client.get_token(refresh))

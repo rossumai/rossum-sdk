@@ -257,7 +257,7 @@ class TestQueues:
         qid = 123
         export_format = "xml"
 
-        result = []
+        result = b""
         async for a in client.export_annotations_to_file(
             queue_id=qid, export_format=export_format
         ):
@@ -266,8 +266,7 @@ class TestQueues:
         http_client.export.assert_called_with(Resource.Queue, qid, export_format)
 
         with open("tests/data/annotation_export.xml", "rb") as fp:
-            for i, line in enumerate(fp.read()):
-                assert result[i] == line
+            assert result == fp.read()
 
 
 class TestQueuesSync:
@@ -389,12 +388,11 @@ class TestQueuesSync:
         qid = 123
         export_format = "xml"
 
-        result = []
+        result = b""
         for a in client.export_annotations_to_file(queue_id=qid, export_format=export_format):
             result += a
 
         http_client.export.assert_called_with(Resource.Queue, qid, export_format)
 
         with open("tests/data/annotation_export.xml", "rb") as fp:
-            for i, line in enumerate(fp.read()):
-                assert result[i] == line
+            assert result == fp.read()

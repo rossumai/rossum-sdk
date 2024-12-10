@@ -5,14 +5,14 @@ import functools
 import itertools
 import json
 import logging
-import random
 import typing
 from enum import Enum
 
 import httpx
+import tenacity
 
 if typing.TYPE_CHECKING:
-    from typing import Any, AsyncIterator, Dict, Iterator, List, Optional, Sequence, Tuple, Union
+    from typing import Any, AsyncIterator, Dict, List, Optional, Sequence, Tuple, Union
 
     from aiofiles.threadpool.binary import AsyncBufferedReader
 
@@ -110,12 +110,6 @@ def authenticate_generator_if_needed(method):
     return authenticate_if_needed
 
 
-def exponential_backoff(factor: float) -> Iterator[float]:
-    yield 0
-    for n in itertools.count(2):
-        yield (factor * (2 ** (n - 2))) + (factor * random.random())
-
-
 class APIClient:
     """Perform CRUD operations over resources provided by Elis API.
 
@@ -133,6 +127,7 @@ class APIClient:
         timeout: Optional[float] = None,
         n_retries: int = 3,
         retry_backoff_factor: float = 1.0,
+        retry_max_jitter: float = 1.0,
         max_in_flight_requests: int = 4,
     ):
         if token is None and (username is None and password is None):
@@ -147,6 +142,7 @@ class APIClient:
         self.client = httpx.AsyncClient(timeout=timeout)
         self.n_retries = n_retries
         self.retry_backoff_factor = retry_backoff_factor
+        self.retry_max_jitter = retry_max_jitter
         self.max_in_flight_requests = max_in_flight_requests
 
     @property
@@ -427,12 +423,33 @@ class APIClient:
         return self.token  # type: ignore[return-value] # self.token is set in _authenticate method
 
     async def _authenticate(self) -> None:
-        response = await self.client.post(
-            f"{self.base_url}/auth/login",
-            data={"username": self.username, "password": self.password},
-        )
-        await self._raise_for_status(response)
+        async for attempt in self._retrying():
+            with attempt:
+                response = await self.client.post(
+                    f"{self.base_url}/auth/login",
+                    data={"username": self.username, "password": self.password},
+                )
+                await self._raise_for_status(response)
         self.token = response.json()["key"]
+
+    def _retrying(self):
+        """Build Tenacity retrying according to desired settings."""
+
+        def should_retry_request(exc: BaseException) -> bool:
+            if isinstance(exc, httpx.RequestError):
+                return True
+            if isinstance(exc, httpx.HTTPStatusError):
+                return exc.response.status_code in RETRIED_HTTP_CODES
+            return False
+
+        return tenacity.AsyncRetrying(
+            wait=tenacity.wait_exponential_jitter(
+                initial=self.retry_backoff_factor, jitter=self.retry_max_jitter
+            ),
+            retry=tenacity.retry_if_exception(should_retry_request),
+            stop=tenacity.stop_after_attempt(self.n_retries),
+            reraise=True,
+        )
 
     @authenticate_if_needed
     async def _request(self, method: str, url: str, *args, **kwargs) -> httpx.Response:
@@ -449,22 +466,10 @@ class APIClient:
         headers = kwargs.pop("headers", {})
         headers["Authorization"] = f"token {self.token}"
 
-        for attempt, backoff in zip(
-            range(1, self.n_retries + 1), exponential_backoff(self.retry_backoff_factor)
-        ):
-            remaining_attempts = self.n_retries - attempt
-
-            try:
+        async for attempt in self._retrying():
+            with attempt:
                 response = await self.client.request(method, url, headers=headers, *args, **kwargs)
-                if response.status_code in RETRIED_HTTP_CODES:
-                    continue
-                break
-            except httpx.RequestError:
-                if not remaining_attempts:
-                    raise
-            await asyncio.sleep(backoff)
-
-        await self._raise_for_status(response)
+                await self._raise_for_status(response)
         return response
 
     @authenticate_generator_if_needed

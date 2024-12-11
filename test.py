@@ -12,8 +12,8 @@ import random
 
 import aiofiles
 
-from rossum_api import ElisAPIClient, ElisAPIClientSync
-from rossum_api.api_client import APIClient
+from rossum_api import AsyncRossumAPIClient, SyncRossumAPIClient
+from rossum_api.clients.internal_async_client import InternalAsyncClient
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
@@ -51,7 +51,7 @@ SCHEMA = {
 
 
 async def main():
-    client = APIClient(
+    client = InternalAsyncClient(
         os.environ["ELIS_USERNAME"],
         os.environ["ELIS_PASSWORD"],
         base_url="https://elis.develop.r8.lol/api/v1",
@@ -112,7 +112,7 @@ async def main():
 
 
 async def main_with_async_client():
-    client = ElisAPIClient(
+    client = AsyncRossumAPIClient(
         os.environ["ELIS_USERNAME"],
         os.environ["ELIS_PASSWORD"],
         base_url="https://elis.develop.r8.lol/api/v1",
@@ -146,7 +146,7 @@ async def main_with_async_client():
 
 
 def main_with_sync_client():
-    client = ElisAPIClientSync(
+    client = SyncRossumAPIClient(
         os.environ["ELIS_USERNAME"],
         os.environ["ELIS_PASSWORD"],
         base_url="https://elis.develop.r8.lol/api/v1",

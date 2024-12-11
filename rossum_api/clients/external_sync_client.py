@@ -6,7 +6,8 @@ from pathlib import Path
 from typing import Any, Callable, Iterator, Optional, Sequence, Tuple, Union, cast
 
 from rossum_api import ExportFileFormats
-from rossum_api.api_client import Resource
+from rossum_api.clients.internal_async_client import Resource
+from rossum_api.clients.internal_sync_client import InternalSyncClient
 from rossum_api.domain_logic.annotations import (
     get_http_method_for_annotation_export,
     is_annotation_imported,
@@ -17,7 +18,6 @@ from rossum_api.domain_logic.search import build_search_params, validate_search_
 from rossum_api.domain_logic.upload import build_upload_files
 from rossum_api.domain_logic.urls import build_upload_url, parse_resource_id_from_url
 from rossum_api.dtos import Token, UserCredentials
-from rossum_api.internal_sync_client import InternalSyncRossumAPIClient
 from rossum_api.models import (
     Annotation,
     Connector,
@@ -40,7 +40,7 @@ from rossum_api.models import (
 from rossum_api.models.task import TaskStatus
 
 
-class ElisAPIClientSync:
+class SyncRossumAPIClient:
     def __init__(
         self,
         base_url: str,
@@ -48,7 +48,7 @@ class ElisAPIClientSync:
         deserializer: Optional[Deserializer] = None,
     ):
         self._deserializer = deserializer or deserialize_default
-        self.internal_client = InternalSyncRossumAPIClient(base_url, credentials)
+        self.internal_client = InternalSyncClient(base_url, credentials)
 
     # ##### QUEUES #####
 

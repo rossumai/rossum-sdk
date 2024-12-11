@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING
 
-from rossum_api.api_client import Resource
+from rossum_api.clients.internal_async_client import Resource
 
 if TYPE_CHECKING:
     from rossum_api.models import Resource

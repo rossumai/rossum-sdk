@@ -7,7 +7,7 @@ from enum import Enum
 
 import aiofiles
 
-from rossum_api.api_client import APIClient
+from rossum_api.clients.internal_async_client import InternalAsyncClient
 from rossum_api.domain_logic.annotations import (
     is_annotation_imported,
     validate_list_annotations_params,
@@ -53,14 +53,14 @@ class Sideload:
     pass
 
 
-class ElisAPIClient:
+class AsyncRossumAPIClient:
     def __init__(
         self,
         username: Optional[str] = None,
         password: Optional[str] = None,
         token: Optional[str] = None,
         base_url: str = DEFAULT_BASE_URL,
-        http_client: Optional[APIClient] = None,
+        http_client: Optional[InternalAsyncClient] = None,
         deserializer: Optional[Deserializer] = None,
     ):
         """
@@ -72,7 +72,7 @@ class ElisAPIClient:
         deserializer
             pass a custom deserialization callable if different model classes should be returned
         """
-        self._http_client = http_client or APIClient(base_url, username, password, token)
+        self._http_client = http_client or InternalAsyncClient(base_url, username, password, token)
         self._deserializer = deserializer or deserialize_default
 
     # ##### QUEUE #####

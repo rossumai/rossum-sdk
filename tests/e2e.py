@@ -18,7 +18,7 @@ import aiofiles
 import pytest
 from aiofiles import os as aios
 
-from rossum_api import ElisAPIClient
+from rossum_api import AsyncRossumAPIClient
 from rossum_api.domain_logic.resources import Resource
 
 if TYPE_CHECKING:
@@ -44,7 +44,7 @@ class TestE2E:
         queue: Optional[Queue] = None
         schema: Optional[Schema] = None
 
-        client = ElisAPIClient(
+        client = AsyncRossumAPIClient(
             token=os.environ["ROSSUM_TOKEN"],
             base_url=os.environ["ROSSUM_BASE_URL"],
         )
@@ -89,7 +89,7 @@ class TestE2E:
         queue: Optional[Queue] = None
         schema: Optional[Schema] = None
 
-        client = ElisAPIClient(
+        client = AsyncRossumAPIClient(
             token=os.environ["ROSSUM_TOKEN"],
             base_url=os.environ["ROSSUM_BASE_URL"],
         )

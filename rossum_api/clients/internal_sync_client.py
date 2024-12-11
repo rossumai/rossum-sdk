@@ -6,7 +6,7 @@ import httpx
 import tenacity
 
 from rossum_api import APIClientError
-from rossum_api.api_client import Resource
+from rossum_api.clients.internal_async_client import Resource
 from rossum_api.domain_logic.pagination import build_pagination_params
 from rossum_api.domain_logic.retry import AlwaysRetry, should_retry
 from rossum_api.domain_logic.sideloads import build_sideload_params, embed_sideloads
@@ -16,7 +16,7 @@ from rossum_api.models import Deserializer, deserialize_default
 from rossum_api.utils import enforce_domain
 
 
-class InternalSyncRossumAPIClient:
+class InternalSyncClient:
     def __init__(
         self,
         base_url: str,

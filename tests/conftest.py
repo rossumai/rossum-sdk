@@ -6,24 +6,24 @@ import aiofiles
 import pytest
 import pytest_asyncio
 
-from rossum_api import ElisAPIClient, ElisAPIClientSync
-from rossum_api.api_client import APIClient
+from rossum_api import AsyncRossumAPIClient, SyncRossumAPIClient
+from rossum_api.clients.internal_async_client import InternalAsyncClient
 
 
 @pytest.fixture
 def http_client():
-    return MagicMock(APIClient)
+    return MagicMock(InternalAsyncClient)
 
 
 @pytest_asyncio.fixture
 def elis_client(http_client):
-    client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
+    client = AsyncRossumAPIClient(username="", password="", base_url=None, http_client=http_client)
     return (client, http_client)
 
 
 @pytest.fixture
 def elis_client_sync(http_client):
-    client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
+    client = SyncRossumAPIClient(username="", password="", base_url=None, http_client=http_client)
     return (client, http_client)
 
 

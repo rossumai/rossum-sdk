@@ -51,7 +51,7 @@ def authenticate_if_needed(method):
     """
 
     @functools.wraps(method)
-    async def authenticate_if_needed(self: APIClient, *args, **kwargs):
+    async def authenticate_if_needed(self: InternalAsyncClient, *args, **kwargs):
         # Authenticate if there is no token, no need to fire the request only to get 401 and retry
         if self.token is None:
             await self._authenticate()
@@ -81,7 +81,7 @@ def authenticate_generator_if_needed(method):
     """
 
     @functools.wraps(method)
-    async def authenticate_if_needed(self: APIClient, *args, **kwargs):
+    async def authenticate_if_needed(self: InternalAsyncClient, *args, **kwargs):
         # Authenticate if there is no token, no need to fire the request only to get 401 and retry
         if self.token is None:
             await self._authenticate()
@@ -99,7 +99,7 @@ def authenticate_generator_if_needed(method):
     return authenticate_if_needed
 
 
-class APIClient:
+class InternalAsyncClient:
     """Perform CRUD operations over resources provided by Elis API.
 
     Requests will be retried up to `n_retries` times with exponential backoff.

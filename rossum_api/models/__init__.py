@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import dacite
 
-from rossum_api.api_client import Resource
+from rossum_api.domain_logic.resources import Resource
 from rossum_api.models.annotation import Annotation
 from rossum_api.models.connector import Connector
 from rossum_api.models.document import Document

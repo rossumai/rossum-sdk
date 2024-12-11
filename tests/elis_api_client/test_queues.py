@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
 
-from rossum_api.api_client import Resource
+from rossum_api.domain_logic.resources import Resource
 from rossum_api.models.annotation import Annotation
 from rossum_api.models.queue import Queue
 from rossum_api.models.task import Task, TaskStatus, TaskType

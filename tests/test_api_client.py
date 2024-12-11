@@ -19,7 +19,8 @@ import httpx
 import pytest
 import pytest_httpx
 
-from rossum_api.api_client import APIClient, APIClientError, Resource
+from rossum_api.api_client import APIClient, APIClientError
+from rossum_api.domain_logic.resources import Resource
 
 WORKSPACES = [
     {

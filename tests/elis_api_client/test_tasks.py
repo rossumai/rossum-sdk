@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from rossum_api.api_client import Resource
+from rossum_api.domain_logic.resources import Resource
 from rossum_api.models.task import Task, TaskStatus
 
 

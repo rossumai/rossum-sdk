@@ -19,7 +19,7 @@ import pytest
 from aiofiles import os as aios
 
 from rossum_api import ElisAPIClient
-from rossum_api.api_client import Resource
+from rossum_api.domain_logic.resources import Resource
 
 if TYPE_CHECKING:
     from typing import Optional

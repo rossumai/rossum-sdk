@@ -7,7 +7,9 @@ from enum import Enum
 
 import aiofiles
 
-from rossum_api.api_client import APIClient, Resource
+from rossum_api.api_client import APIClient
+from rossum_api.domain_logic.resources import Resource
+from rossum_api.domain_logic.urls import DEFAULT_BASE_URL
 from rossum_api.models import deserialize_default
 from rossum_api.models.task import TaskStatus
 
@@ -51,7 +53,7 @@ class ElisAPIClient:
         username: Optional[str] = None,
         password: Optional[str] = None,
         token: Optional[str] = None,
-        base_url: Optional[str] = None,
+        base_url: str = DEFAULT_BASE_URL,
         http_client: Optional[APIClient] = None,
         deserializer: Optional[Deserializer] = None,
     ):

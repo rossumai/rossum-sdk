@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from rossum_api.api_client import Resource
+from rossum_api.domain_logic.resources import Resource
 from rossum_api.models.user import User
 
 

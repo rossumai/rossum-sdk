@@ -238,6 +238,7 @@ class InternalSyncRossumAPIClient:
         """
         if not self.token:
             self._authenticate()
+        url = enforce_domain(url, self.base_url)
 
         for attempt in tenacity.Retrying(
             wait=tenacity.wait_exponential_jitter(),
@@ -245,7 +246,6 @@ class InternalSyncRossumAPIClient:
             stop=tenacity.stop_after_attempt(self.n_retries),
         ):
             with attempt:
-                url = enforce_domain(url, self.base_url)
                 response = self.client.request(method, url, headers=self._headers, *args, **kwargs)
                 if response.status_code == 401:
                     self._authenticate()

@@ -8,8 +8,14 @@ from enum import Enum
 import aiofiles
 
 from rossum_api.api_client import APIClient
+from rossum_api.domain_logic.annotations import (
+    is_annotation_imported,
+    validate_list_annotations_params,
+)
+from rossum_api.domain_logic.documents import build_create_document_params
 from rossum_api.domain_logic.resources import Resource
-from rossum_api.domain_logic.urls import DEFAULT_BASE_URL
+from rossum_api.domain_logic.search import build_search_params, validate_search_params
+from rossum_api.domain_logic.urls import DEFAULT_BASE_URL, parse_resource_id_from_url
 from rossum_api.models import deserialize_default
 from rossum_api.models.task import TaskStatus
 
@@ -66,7 +72,7 @@ class ElisAPIClient:
         deserializer
             pass a custom deserialization callable if different model classes should be returned
         """
-        self._http_client = http_client or APIClient(username, password, token, base_url)
+        self._http_client = http_client or APIClient(base_url, username, password, token)
         self._deserializer = deserializer or deserialize_default
 
     # ##### QUEUE #####
@@ -141,7 +147,7 @@ class ElisAPIClient:
                 Resource.Queue, queue_id, fp, filename, values, metadata
             )
             (result,) = results["results"]  # We're uploading 1 file in 1 request, we can unpack
-            return int(result["annotation"].split("/")[-1])
+            return parse_resource_id_from_url(result["annotation"])
 
     # ##### UPLOAD #####
     async def upload_document(
@@ -200,7 +206,7 @@ class ElisAPIClient:
                 files["metadata"] = ("", json.dumps(metadata).encode("utf-8"), "application/json")
 
             task_url = await self.request_json("POST", url, files=files)
-            task_id = task_url["url"].split("/")[-1]
+            task_id = parse_resource_id_from_url(task_url["url"])
 
             return await self.retrieve_task(task_id)
 
@@ -253,7 +259,7 @@ class ElisAPIClient:
     async def retrieve_own_organization(self) -> Organization:
         """Retrieve organization of currently logged in user."""
         user: Dict[Any, Any] = await self._http_client.fetch_one(Resource.Auth, "user")
-        organization_id = user["organization"].split("/")[-1]
+        organization_id = parse_resource_id_from_url(user["organization"])
         return await self.retrieve_organization(organization_id)
 
     # ##### SCHEMAS #####
@@ -321,10 +327,7 @@ class ElisAPIClient:
         **filters: Any,
     ) -> AsyncIterator[Annotation]:
         """https://elis.rossum.ai/api/docs/#list-all-annotations."""
-        if sideloads and "content" in sideloads and not content_schema_ids:
-            raise ValueError(
-                'When content sideloading is requested, "content_schema_ids" must be provided'
-            )
+        validate_list_annotations_params(sideloads, content_schema_ids)
         async for a in self._http_client.fetch_all(
             Resource.Annotation, ordering, sideloads, content_schema_ids, **filters
         ):
@@ -339,13 +342,8 @@ class ElisAPIClient:
         **kwargs: Any,
     ) -> AsyncIterator[Annotation]:
         """https://elis.rossum.ai/api/docs/#search-for-annotations."""
-        if not query and not query_string:
-            raise ValueError("Either query or query_string must be provided")
-        json_payload = {}
-        if query:
-            json_payload["query"] = query
-        if query_string:
-            json_payload["query_string"] = query_string
+        validate_search_params(query, query_string)
+        json_payload = build_search_params(query, query_string)
 
         async for a in self._http_client.fetch_all_by_url(
             f"{Resource.Annotation.value}/search",
@@ -394,9 +392,7 @@ class ElisAPIClient:
         self, annotation_id: int, **poll_kwargs: Any
     ) -> Annotation:
         """A shortcut for waiting until annotation is imported."""
-        return await self.poll_annotation(
-            annotation_id, lambda a: a.status not in ("importing", "created"), **poll_kwargs
-        )
+        return await self.poll_annotation(annotation_id, is_annotation_imported, **poll_kwargs)
 
     async def poll_task(
         self,
@@ -514,13 +510,7 @@ class ElisAPIClient:
         parent: Optional[str] = None,
     ) -> Document:
         """https://elis.rossum.ai/api/docs/#create-document"""
-        metadata = metadata or {}
-        files: httpx._types.RequestFiles = {
-            "content": (file_name, file_data),
-            "metadata": ("", json.dumps(metadata).encode("utf-8")),
-        }
-        if parent:
-            files["parent"] = ("", parent)
+        files = build_create_document_params(file_name, file_data, metadata, parent)
 
         document = await self._http_client.request_json(
             "POST", url=Resource.Document.value, files=files

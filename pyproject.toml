@@ -11,9 +11,9 @@ requires-python = ">= 3.8"
 dependencies = [
     "aiofiles",
     "dacite",
+    "inflect",
     "httpx",
     "tenacity",
-    "inflect",
 ]
 
 [project.optional-dependencies]

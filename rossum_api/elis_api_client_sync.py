@@ -15,7 +15,7 @@ from rossum_api.domain_logic.annotations import (
 from rossum_api.domain_logic.documents import build_create_document_params
 from rossum_api.domain_logic.search import build_search_params, validate_search_params
 from rossum_api.domain_logic.upload import build_upload_files
-from rossum_api.domain_logic.urls import get_upload_url, parse_resource_id_from_url
+from rossum_api.domain_logic.urls import build_upload_url, parse_resource_id_from_url
 from rossum_api.dtos import Token, UserCredentials
 from rossum_api.internal_sync_client import InternalSyncRossumAPIClient
 from rossum_api.models import (
@@ -89,7 +89,7 @@ class ElisAPIClientSync:
         results = []
         for file_path, filename in files:
             with open(file_path, "rb") as fp:
-                request_files = build_upload_files(fp, filename, values, metadata)
+                request_files = build_upload_files(fp.read(), filename, values, metadata)
                 response_data = self.internal_client.upload(url, request_files)
                 (result,) = response_data[
                     "results"
@@ -124,7 +124,7 @@ class ElisAPIClientSync:
         annotation_ids
             list of IDs of created annotations, respects the order of `files` argument
         """
-        url = get_upload_url(Resource.Queue, queue_id)
+        url = build_upload_url(Resource.Queue, queue_id)
         return self._import_document(url, files, values, metadata)
 
     # ##### UPLOAD #####
@@ -401,12 +401,10 @@ class ElisAPIClientSync:
         annotation = self.internal_client.replace(Resource.Annotation, annotation_id, data)
         return self._deserializer(Resource.Annotation, annotation)
 
-
     def update_part_annotation(self, annotation_id: int, data: dict[str, Any]) -> Annotation:
         """https://elis.rossum.ai/api/docs/#update-part-of-an-annotation."""
         annotation = self.internal_client.update(Resource.Annotation, annotation_id, data)
         return self._deserializer(Resource.Annotation, annotation)
-
 
     def bulk_update_annotation_data(
         self, annotation_id: int, operations: list[dict[str, Any]]
@@ -458,7 +456,6 @@ class ElisAPIClientSync:
         )
         return document_content.content
 
-
     def create_new_document(
         self,
         file_name: str,
@@ -470,7 +467,6 @@ class ElisAPIClientSync:
         files = build_create_document_params(file_name, file_data, metadata, parent)
         document = self.internal_client.request_json(
             "POST", url=Resource.Document.value, files=files
-
         )
         return self._deserializer(Resource.Document, document)
 

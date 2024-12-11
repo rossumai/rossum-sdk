@@ -3,21 +3,24 @@ from __future__ import annotations
 import asyncio
 import functools
 import itertools
-import json
 import logging
 import typing
 
 import httpx
 import tenacity
 
+from rossum_api.domain_logic.annotations import get_http_method_for_annotation_export
+from rossum_api.domain_logic.pagination import build_pagination_params
+from rossum_api.domain_logic.retry import AlwaysRetry, should_retry
+from rossum_api.domain_logic.upload import build_upload_files
 from rossum_api.domain_logic.urls import (
-    DEFAULT_BASE_URL,
     build_export_url,
     build_full_login_url,
     build_upload_url,
     parse_annotation_id_from_datapoint_url,
     parse_resource_id_from_url,
 )
+from rossum_api.utils import enforce_domain
 
 if typing.TYPE_CHECKING:
     from typing import Any, AsyncIterator, Dict, List, Optional, Sequence, Tuple, Union
@@ -106,10 +109,10 @@ class APIClient:
 
     def __init__(
         self,
+        base_url: str,
         username: Optional[str] = None,
         password: Optional[str] = None,
         token: Optional[str] = None,
-        base_url: str = DEFAULT_BASE_URL,
         timeout: Optional[float] = None,
         n_retries: int = 3,
         retry_backoff_factor: float = 1.0,
@@ -228,9 +231,8 @@ class APIClient:
         filters
             mapping from resource field to value used to filter records
         """
-        query_params = {
-            "page_size": 100,
-            "ordering": ",".join(ordering),
+        pagination_params = build_pagination_params(ordering)
+        query_params = pagination_params | {
             "sideload": ",".join(sideloads),
             "content.schema_id": ",".join(content_schema_ids),
             **filters,
@@ -300,7 +302,6 @@ class APIClient:
             if url is None:
                 continue
             sideload_id = parse_resource_id_from_url(url)
-
             result[sideload_name] = sideloads_by_id[sideload_group].get(
                 sideload_id, []
             )  # `content` can have 0 datapoints, use [] default value in this case
@@ -345,15 +346,9 @@ class APIClient:
                 may be used to initialize values of the object created from the uploaded file,
                 semantics is different for each resource
         """
-        files = {"content": (filename, await fp.read(), "application/octet-stream")}
-
-        # Filename of values and metadata must be "", otherwise Elis API returns HTTP 400 with body
-        # "Value must be valid JSON."
-        if values is not None:
-            files["values"] = ("", json.dumps(values).encode("utf-8"), "application/json")
-        if metadata is not None:
-            files["metadata"] = ("", json.dumps(metadata).encode("utf-8"), "application/json")
-        return await self.request_json("POST", build_upload_url(resource, id_), files=files)
+        url = build_upload_url(resource, id_)
+        files = build_upload_files(await fp.read(), filename, values, metadata)
+        return await self.request_json("POST", url, files=files)
 
     async def export(
         self,
@@ -371,7 +366,7 @@ class APIClient:
             query_params["columns"] = ",".join(columns)
         url = build_export_url(resource, id_)
         # to_status parameter is valid only in POST requests, we can use GET in all other cases
-        method = "POST" if "to_status" in filters else "GET"
+        method = get_http_method_for_annotation_export(**filters)
         if export_format == "json":
             # JSON export is paginated just like a regular fetch_all, it abuses **filters kwargs of
             # fetch_all_by_url to pass export-specific query params
@@ -434,7 +429,6 @@ class APIClient:
             reraise=True,
         )
 
-    @authenticate_if_needed
     async def _request(self, method: str, url: str, *args, **kwargs) -> httpx.Response:
         """Performs the actual HTTP call and does error handling.
 
@@ -444,29 +438,47 @@ class APIClient:
             base URL is prepended with base_url if needed
         """
         # Do not force the calling site to always prepend the base URL
-        if not url.startswith("https://") and not url.startswith("http://"):
-            url = f"{self.base_url}/{url}"
-        headers = kwargs.pop("headers", {})
-        headers["Authorization"] = f"token {self.token}"
+        if not self.token:
+            await self._authenticate()
+        url = enforce_domain(url, self.base_url)
 
-        async for attempt in self._retrying():
+        for attempt in tenacity.Retrying(
+            wait=tenacity.wait_exponential_jitter(),
+            retry=tenacity.retry_if_exception(should_retry),
+            stop=tenacity.stop_after_attempt(self.n_retries),
+        ):
             with attempt:
-                response = await self.client.request(method, url, headers=headers, *args, **kwargs)
+                response = await self.client.request(
+                    method, url, headers=self._headers, *args, **kwargs
+                )
+                if response.status_code == 401:
+                    await self._authenticate()
+                    if attempt.retry_state.attempt_number == 1:
+                        raise AlwaysRetry()
                 await self._raise_for_status(response)
-        return response
+                return response
 
-    @authenticate_generator_if_needed
     async def _stream(self, method: str, url: str, *args, **kwargs) -> AsyncIterator[bytes]:
         """Performs a streaming HTTP call."""
         # Do not force the calling site to alway prepend the base URL
-        if not url.startswith("https://") and not url.startswith("http://"):
-            url = f"{self.base_url}/{url}"
-        headers = kwargs.pop("headers", {})
-        headers["Authorization"] = f"token {self.token}"
-        async with self.client.stream(method, url, headers=headers, *args, **kwargs) as response:
-            await self._raise_for_status(response)
-            async for chunk in response.aiter_bytes():
-                yield chunk
+        url = enforce_domain(url, self.base_url)
+
+        for attempt in tenacity.Retrying(
+            wait=tenacity.wait_exponential_jitter(),
+            retry=tenacity.retry_if_exception(should_retry),
+            stop=tenacity.stop_after_attempt(self.n_retries),
+        ):
+            with attempt:
+                async with self.client.stream(
+                    method, url, headers=self._headers, *args, **kwargs
+                ) as response:
+                    if response.status_code == 401:
+                        await self._authenticate()
+                        if attempt.retry_state.attempt_number == 1:
+                            raise AlwaysRetry()
+                    await self._raise_for_status(response)
+                    async for chunk in response.aiter_bytes():
+                        yield chunk
 
     async def _raise_for_status(self, response: httpx.Response):
         """Raise an exception in case of HTTP error.

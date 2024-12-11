@@ -4,17 +4,17 @@ import json
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, BinaryIO, Optional
+    from typing import Any, Optional
 
 
 def build_upload_files(
-    fp: BinaryIO,
+    file_content: bytes,
     filename: str,
     values: Optional[dict[str, Any]] = None,
     metadata: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     """Build request files for the upload endpoint."""
-    files = {"content": (filename, fp.read(), "application/octet-stream")}
+    files = {"content": (filename, file_content, "application/octet-stream")}
 
     # Filename of values and metadata must be "", otherwise Elis API returns HTTP 400 with body
     # "Value must be valid JSON."

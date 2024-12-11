@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from queue import Queue as ThreadSafeQueue
 
 from rossum_api import ElisAPIClient
+from rossum_api.domain_logic.urls import DEFAULT_BASE_URL
 
 if typing.TYPE_CHECKING:
     import pathlib
@@ -61,7 +62,7 @@ class ElisAPIClientSync:
         username: Optional[str] = None,
         password: Optional[str] = None,
         token: Optional[str] = None,
-        base_url: Optional[str] = None,
+        base_url: str = DEFAULT_BASE_URL,
         http_client: Optional[APIClient] = None,
         deserializer: Optional[Deserializer] = None,
     ):

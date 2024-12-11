@@ -10,6 +10,15 @@ import typing
 import httpx
 import tenacity
 
+from rossum_api.domain_logic.urls import (
+    DEFAULT_BASE_URL,
+    build_export_url,
+    build_full_login_url,
+    build_upload_url,
+    parse_annotation_id_from_datapoint_url,
+    parse_resource_id_from_url,
+)
+
 if typing.TYPE_CHECKING:
     from typing import Any, AsyncIterator, Dict, List, Optional, Sequence, Tuple, Union
 
@@ -100,7 +109,7 @@ class APIClient:
         username: Optional[str] = None,
         password: Optional[str] = None,
         token: Optional[str] = None,
-        base_url: Optional[str] = "https://elis.rossum.ai/api/v1",
+        base_url: str = DEFAULT_BASE_URL,
         timeout: Optional[float] = None,
         n_retries: int = 3,
         retry_backoff_factor: float = 1.0,
@@ -272,9 +281,7 @@ class APIClient:
                 # Datapoints from all annotations are present in content, we have to construct
                 # content (list of datapoints) for each annotation
                 def annotation_id(datapoint):
-                    return int(
-                        datapoint["url"].replace(f"/content/{datapoint['id']}", "").split("/")[-1]
-                    )
+                    return parse_annotation_id_from_datapoint_url(datapoint["url"])
 
                 sideloads_by_id[sideload_group] = {
                     k: list(v)
@@ -292,7 +299,7 @@ class APIClient:
             url = result[sideload_name]
             if url is None:
                 continue
-            sideload_id = int(url.replace("/content", "").split("/")[-1])
+            sideload_id = parse_resource_id_from_url(url)
 
             result[sideload_name] = sideloads_by_id[sideload_group].get(
                 sideload_id, []
@@ -338,7 +345,6 @@ class APIClient:
                 may be used to initialize values of the object created from the uploaded file,
                 semantics is different for each resource
         """
-        url = f"{resource.value}/{id_}/upload"
         files = {"content": (filename, await fp.read(), "application/octet-stream")}
 
         # Filename of values and metadata must be "", otherwise Elis API returns HTTP 400 with body
@@ -347,7 +353,7 @@ class APIClient:
             files["values"] = ("", json.dumps(values).encode("utf-8"), "application/json")
         if metadata is not None:
             files["metadata"] = ("", json.dumps(metadata).encode("utf-8"), "application/json")
-        return await self.request_json("POST", url, files=files)
+        return await self.request_json("POST", build_upload_url(resource, id_), files=files)
 
     async def export(
         self,
@@ -363,7 +369,7 @@ class APIClient:
             query_params = {**query_params, **filters}
         if columns:
             query_params["columns"] = ",".join(columns)
-        url = f"{resource.value}/{id_}/export"
+        url = build_export_url(resource, id_)
         # to_status parameter is valid only in POST requests, we can use GET in all other cases
         method = "POST" if "to_status" in filters else "GET"
         if export_format == "json":
@@ -403,7 +409,7 @@ class APIClient:
         async for attempt in self._retrying():
             with attempt:
                 response = await self.client.post(
-                    f"{self.base_url}/auth/login",
+                    build_full_login_url(self.base_url),
                     data={"username": self.username, "password": self.password},
                 )
                 await self._raise_for_status(response)

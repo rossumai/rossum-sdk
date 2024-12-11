@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import threading
 import typing
 from concurrent.futures import ThreadPoolExecutor
 from queue import Queue as ThreadSafeQueue
@@ -45,6 +46,20 @@ if typing.TYPE_CHECKING:
     from rossum_api.models.workspace import Workspace
 
     T = TypeVar("T")
+
+thread_local = threading.local()
+
+
+def get_or_create_event_loop():
+    if not hasattr(thread_local, "loop"):
+        thread_local.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(thread_local.loop)
+    return thread_local.loop
+
+
+def run_coroutine_in_thread(coroutine):
+    loop = get_or_create_event_loop()
+    return loop.run_until_complete(coroutine)
 
 
 class Sideload:
@@ -93,7 +108,7 @@ class ElisAPIClientSync:
             finally:
                 queue.put(None)  # Signal iterator was consumed
 
-        future = self.executor.submit(asyncio.run, async_iter_to_list(ait, queue))  # type: ignore
+        future = self.executor.submit(run_coroutine_in_thread, async_iter_to_list(ait, queue))  # type: ignore
 
         # Consume the queue until completion to retain the iterator nature even in sync context
         while True:
@@ -105,8 +120,8 @@ class ElisAPIClientSync:
         future.result()
 
     def _run_coroutine(self, coroutine):
-        future = self.executor.submit(asyncio.run, coroutine)
-        return future.result()  # Wait for the coroutine to complete
+        future = self.executor.submit(run_coroutine_in_thread, coroutine)
+        return future.result()
 
     # ##### QUEUE #####
     def retrieve_queue(self, queue_id: int) -> Queue:

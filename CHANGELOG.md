@@ -1,6 +1,22 @@
 # CHANGELOG
 
 
+## v0.20.1 (2024-12-11)
+
+### Bug Fixes
+
+- Prevent race condition over the asyncio event loop in ThreadPoolExecutor
+  ([`6a4d922`](https://github.com/rossumai/rossum-sdk/commit/6a4d922f9ebe98aa82ab2395f4b62c749eb89c10))
+
+### Chores
+
+- Extract Resource into domain logic
+  ([`99ec60c`](https://github.com/rossumai/rossum-sdk/commit/99ec60c1fa51dccc684b600b976608807b681e5b))
+
+- Extract URL domain logic into a reusable module
+  ([`826fcd5`](https://github.com/rossumai/rossum-sdk/commit/826fcd5e766bde55f6f4bfc991a22ce422cac7dd))
+
+
 ## v0.20.0 (2024-12-10)
 
 ### Bug Fixes

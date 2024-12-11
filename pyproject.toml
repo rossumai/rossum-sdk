@@ -11,6 +11,7 @@ requires-python = ">= 3.8"
 dependencies = [
     "aiofiles",
     "dacite",
+    "inflect",
     "httpx",
     "tenacity",
 ]
@@ -24,6 +25,7 @@ tests = [
   "pytest-cov",
   "ruff",
   "types-aiofiles",
+  "pre-commit",
 ]
 
 [tools.setuptools]

@@ -25,8 +25,8 @@ from rossum_api.models.workspace import Workspace
 if TYPE_CHECKING:
     from typing import Any, Callable, Dict
 
-    JsonDict = Dict[str, Any]
-    Deserializer = Callable[[Resource, JsonDict], Any]
+JsonDict = Dict[str, Any]
+Deserializer = Callable[[Resource, JsonDict], Any]
 
 
 RESOURCE_TO_MODEL = {

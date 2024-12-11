@@ -1,11 +1,11 @@
 """Integration tests.
 
- These test do not run with the rest of the tests (and did not run in previous versions)
- because of the filename. To manually run them, you need to:
- - set envars ROSSUM_TOKEN, ROSSUM_BASE_URL and ROSSUM_ORGANIZATION_URL
- - pytest tests/e2e.py
+These test do not run with the rest of the tests (and did not run in previous versions)
+because of the filename. To manually run them, you need to:
+- set envars ROSSUM_TOKEN, ROSSUM_BASE_URL and ROSSUM_ORGANIZATION_URL
+- pytest tests/e2e.py
 
- In case of permission issues these tests will fail during cleanup.
+In case of permission issues these tests will fail during cleanup.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ import aiofiles
 import pytest
 from aiofiles import os as aios
 
-from rossum_api import ElisAPIClient
+from rossum_api import AsyncRossumAPIClient
 from rossum_api.domain_logic.resources import Resource
 
 if TYPE_CHECKING:
@@ -44,7 +44,7 @@ class TestE2E:
         queue: Optional[Queue] = None
         schema: Optional[Schema] = None
 
-        client = ElisAPIClient(
+        client = AsyncRossumAPIClient(
             token=os.environ["ROSSUM_TOKEN"],
             base_url=os.environ["ROSSUM_BASE_URL"],
         )
@@ -89,7 +89,7 @@ class TestE2E:
         queue: Optional[Queue] = None
         schema: Optional[Schema] = None
 
-        client = ElisAPIClient(
+        client = AsyncRossumAPIClient(
             token=os.environ["ROSSUM_TOKEN"],
             base_url=os.environ["ROSSUM_BASE_URL"],
         )

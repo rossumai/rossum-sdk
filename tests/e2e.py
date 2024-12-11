@@ -1,11 +1,11 @@
 """Integration tests.
 
- These test do not run with the rest of the tests (and did not run in previous versions)
- because of the filename. To manually run them, you need to:
- - set envars ROSSUM_TOKEN, ROSSUM_BASE_URL and ROSSUM_ORGANIZATION_URL
- - pytest tests/e2e.py
+These test do not run with the rest of the tests (and did not run in previous versions)
+because of the filename. To manually run them, you need to:
+- set envars ROSSUM_TOKEN, ROSSUM_BASE_URL and ROSSUM_ORGANIZATION_URL
+- pytest tests/e2e.py
 
- In case of permission issues these tests will fail during cleanup.
+In case of permission issues these tests will fail during cleanup.
 """
 
 from __future__ import annotations

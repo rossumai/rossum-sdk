@@ -573,7 +573,7 @@ class ElisAPIClient:
         self,
         ordering: Sequence[str] = (),
         **filters: Any,
-    ) -> AsyncIterator[Connector]:
+    ) -> AsyncIterator[EmailTemplate]:
         """https://elis.rossum.ai/api/docs/#list-all-email-templates."""
         async for c in self._http_client.fetch_all(Resource.EmailTemplate, ordering, **filters):
             yield self._deserializer(Resource.EmailTemplate, c)

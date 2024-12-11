@@ -13,6 +13,7 @@ dependencies = [
     "dacite",
     "httpx",
     "tenacity",
+    "inflect",
 ]
 
 [project.optional-dependencies]
@@ -24,6 +25,7 @@ tests = [
   "pytest-cov",
   "ruff",
   "types-aiofiles",
+  "pre-commit",
 ]
 
 [tools.setuptools]

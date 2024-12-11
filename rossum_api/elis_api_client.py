@@ -7,7 +7,8 @@ from enum import Enum
 
 import aiofiles
 
-from rossum_api.api_client import APIClient, Resource
+from rossum_api.api_client import APIClient
+from rossum_api.domain_logic.resources import Resource
 from rossum_api.models import deserialize_default
 from rossum_api.models.task import TaskStatus
 

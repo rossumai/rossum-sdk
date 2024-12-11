@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from rossum_api.api_client import Resource
+from rossum_api.domain_logic.resources import Resource
 from rossum_api.models.annotation import Annotation
 from rossum_api.models.automation_blocker import AutomationBlocker, AutomationBlockerContent
 from rossum_api.models.document import Document

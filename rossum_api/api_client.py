@@ -6,7 +6,6 @@ import itertools
 import json
 import logging
 import typing
-from enum import Enum
 
 import httpx
 import tenacity
@@ -16,33 +15,11 @@ if typing.TYPE_CHECKING:
 
     from aiofiles.threadpool.binary import AsyncBufferedReader
 
+    from rossum_api.domain_logic.resources import Resource
+
 
 RETRIED_HTTP_CODES = (408, 429, 500, 502, 503, 504)
 logger = logging.getLogger(__name__)
-
-
-class Resource(Enum):
-    """Convenient representation of resources provided by Elis API.
-
-    Value is always the corresponding URL part.
-    """
-
-    Annotation = "annotations"
-    Auth = "auth"
-    Connector = "connectors"
-    Document = "documents"
-    EmailTemplate = "email_templates"
-    Group = "groups"
-    Hook = "hooks"
-    Inbox = "inboxes"
-    Organization = "organizations"
-    Queue = "queues"
-    Schema = "schemas"
-    Task = "tasks"
-    Upload = "uploads"
-    User = "users"
-    Workspace = "workspaces"
-    Engine = "engines"
 
 
 class APIClientError(Exception):

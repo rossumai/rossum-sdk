@@ -18,6 +18,7 @@ import aiofiles
 import httpx
 import pytest
 import pytest_httpx
+from conftest import ANNOTATIONS, AUTOMATION_BLOCKERS, CONTENT
 
 from rossum_api.api_client import APIClient, APIClientError
 from rossum_api.domain_logic.resources import Resource
@@ -52,67 +53,6 @@ WORKSPACES = [
     },
 ]
 
-ANNOTATIONS = [  # Most fields are stripped as these are not important for the test
-    {
-        "id": 1111,
-        "document": "https://elis.develop.r8.lol/api/v1/documents/11289",
-        "content": "https://elis.develop.r8.lol/api/v1/annotations/1111/content",
-        "automation_blocker": "https://elis.develop.r8.lol/api/v1/automation_blockers/55",
-    },
-    {
-        "id": 2222,
-        "document": "https://elis.develop.r8.lol/api/v1/documents/11288",
-        "content": "https://elis.develop.r8.lol/api/v1/annotations/2222/content",
-        "automation_blocker": "https://elis.develop.r8.lol/api/v1/automation_blockers/55",
-    },
-    {
-        "id": 3333,
-        "document": "https://elis.develop.r8.lol/api/v1/documents/11287",
-        # URL that targets empty content should be translated to an empty list when sideloading
-        "content": "https://elis.develop.r8.lol/api/v1/annotations/3333/content",
-        # None URL is skipped when sideloading
-        "automation_blocker": None,
-    },
-]
-
-AUTOMATION_BLOCKERS = [
-    {
-        "id": 55,
-        "url": "https://elis.develop.r8.lol/api/v1/automation_blockers/55",
-        "content": [{"type": "automation_disabled", "level": "annotation"}],
-        "annotation": "https://elis.develop.r8.lol/api/v1/annotations/971782",
-    }
-]
-
-CONTENT = [
-    {
-        "id": 11,
-        "schema_id": "invoice_id",
-        "category": "datapoint",
-        "url": "https://elis.develop.r8.lol/api/v1/annotations/2222/content/11",
-        "content": {
-            "value": "1234",
-        },
-    },
-    {
-        "id": 22,
-        "schema_id": "invoice_id",
-        "category": "datapoint",
-        "url": "https://elis.develop.r8.lol/api/v1/annotations/1111/content/22",
-        "content": {
-            "value": "5678",
-        },
-    },
-    {
-        "id": 33,
-        "schema_id": "date_issue",
-        "category": "datapoint",
-        "url": "https://elis.develop.r8.lol/api/v1/annotations/2222/content/33",
-        "content": {
-            "value": "2021-12-31",
-        },
-    },
-]
 
 UPLOAD_RESPONSE = {
     "results": [
@@ -379,7 +319,7 @@ async def test_fetch_all_filters(client, httpx_mock):
 async def test_fetch_all_sideload(client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
-        url="https://elis.rossum.ai/api/v1/workspaces?page_size=100&sideload=content,automation_blockers&content.schema_id=invoice_id,date_issue&ordering=",
+        url="https://elis.rossum.ai/api/v1/annotations?page_size=100&sideload=content,automation_blockers&content.schema_id=invoice_id,date_issue&ordering=",
         json={
             "pagination": {"total": 3, "total_pages": 1, "next": None, "previous": None},
             "results": ANNOTATIONS,
@@ -387,10 +327,10 @@ async def test_fetch_all_sideload(client, httpx_mock):
             "automation_blockers": AUTOMATION_BLOCKERS,
         },
     )
-    workspaces = [
+    annotations = [
         w
         async for w in client.fetch_all(
-            Resource.Workspace,
+            Resource.Annotation,
             sideloads=["content", "automation_blockers"],
             content_schema_ids=["invoice_id", "date_issue"],
         )
@@ -403,7 +343,7 @@ async def test_fetch_all_sideload(client, httpx_mock):
     expected_annotations[1]["automation_blocker"] = AUTOMATION_BLOCKERS[0]
     expected_annotations[2]["content"] = []
 
-    assert workspaces == expected_annotations
+    assert annotations == expected_annotations
 
 
 @pytest.mark.asyncio

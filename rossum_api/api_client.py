@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 import functools
-import itertools
 import json
 import logging
 import typing
@@ -10,13 +9,12 @@ import typing
 import httpx
 import tenacity
 
+from rossum_api.domain_logic.sideloads import build_sideload_params, embed_sideloads
 from rossum_api.domain_logic.urls import (
     DEFAULT_BASE_URL,
     build_export_url,
     build_full_login_url,
     build_upload_url,
-    parse_annotation_id_from_datapoint_url,
-    parse_resource_id_from_url,
 )
 
 if typing.TYPE_CHECKING:
@@ -231,8 +229,7 @@ class APIClient:
         query_params = {
             "page_size": 100,
             "ordering": ",".join(ordering),
-            "sideload": ",".join(sideloads),
-            "content.schema_id": ",".join(content_schema_ids),
+            **build_sideload_params(sideloads, content_schema_ids),
             **filters,
         }
         results, total_pages = await self._fetch_page(
@@ -268,42 +265,8 @@ class APIClient:
         json: Optional[dict] = None,
     ) -> Tuple[List[Dict[str, Any]], int]:
         data = await self.request_json(method, url, params=query_params, json=json)
-        self._embed_sideloads(data, sideload_groups)
+        embed_sideloads(data, sideload_groups)
         return data["results"], data["pagination"]["total_pages"]
-
-    def _embed_sideloads(
-        self, response_data: Dict[str, Any], sideload_groups: Sequence[str]
-    ) -> None:
-        """Embed sideloads into the results to enable simple access to the sideloaded objects."""
-        sideloads_by_id: Dict[str, Dict[int, Union[dict, list]]] = {}
-        for sideload_group in sideload_groups:
-            if sideload_group == "content":
-                # Datapoints from all annotations are present in content, we have to construct
-                # content (list of datapoints) for each annotation
-                def annotation_id(datapoint):
-                    return parse_annotation_id_from_datapoint_url(datapoint["url"])
-
-                sideloads_by_id[sideload_group] = {
-                    k: list(v)
-                    for k, v in itertools.groupby(
-                        sorted(response_data[sideload_group], key=annotation_id), key=annotation_id
-                    )
-                }
-            else:
-                sideloads_by_id[sideload_group] = {
-                    s["id"]: s for s in response_data[sideload_group]
-                }
-
-        for result, sideload_group in itertools.product(response_data["results"], sideload_groups):
-            sideload_name = sideload_group.rstrip("s")  # Singular form is used in results
-            url = result[sideload_name]
-            if url is None:
-                continue
-            sideload_id = parse_resource_id_from_url(url)
-
-            result[sideload_name] = sideloads_by_id[sideload_group].get(
-                sideload_id, []
-            )  # `content` can have 0 datapoints, use [] default value in this case
 
     async def create(self, resource: Resource, data: Dict[str, Any]) -> Dict[str, Any]:
         """Create a new object."""

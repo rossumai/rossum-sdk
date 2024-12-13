@@ -12,6 +12,7 @@ dependencies = [
     "aiofiles",
     "dacite",
     "httpx",
+    "inflect",
     "tenacity",
 ]
 

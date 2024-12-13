@@ -379,7 +379,7 @@ async def test_fetch_all_filters(client, httpx_mock):
 async def test_fetch_all_sideload(client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
-        url="https://elis.rossum.ai/api/v1/workspaces?page_size=100&sideload=content,automation_blockers&content.schema_id=invoice_id,date_issue&ordering=",
+        url="https://elis.rossum.ai/api/v1/annotations?page_size=100&sideload=content,automation_blockers&content.schema_id=invoice_id,date_issue&ordering=",
         json={
             "pagination": {"total": 3, "total_pages": 1, "next": None, "previous": None},
             "results": ANNOTATIONS,
@@ -387,10 +387,10 @@ async def test_fetch_all_sideload(client, httpx_mock):
             "automation_blockers": AUTOMATION_BLOCKERS,
         },
     )
-    workspaces = [
+    annotations = [
         w
         async for w in client.fetch_all(
-            Resource.Workspace,
+            Resource.Annotation,
             sideloads=["content", "automation_blockers"],
             content_schema_ids=["invoice_id", "date_issue"],
         )
@@ -403,7 +403,7 @@ async def test_fetch_all_sideload(client, httpx_mock):
     expected_annotations[1]["automation_blocker"] = AUTOMATION_BLOCKERS[0]
     expected_annotations[2]["content"] = []
 
-    assert workspaces == expected_annotations
+    assert annotations == expected_annotations
 
 
 @pytest.mark.asyncio

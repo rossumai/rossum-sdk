@@ -24,7 +24,7 @@ if typing.TYPE_CHECKING:
     from rossum_api.models.connector import Connector
     from rossum_api.models.document import Document
     from rossum_api.models.email_template import EmailTemplate
-    from rossum_api.models.engine import Engine
+    from rossum_api.models.engine import Engine, EngineField
     from rossum_api.models.group import Group
     from rossum_api.models.hook import Hook
     from rossum_api.models.inbox import Inbox
@@ -560,6 +560,27 @@ class ElisAPIClient:
         engine = await self._http_client.fetch_one(Resource.Engine, engine_id)
 
         return self._deserializer(Resource.Engine, engine)
+
+    async def list_all_engines(
+        self,
+        ordering: Sequence[str] = (),
+        sideloads: Sequence[str] = (),
+        **filters: Any,
+    ) -> AsyncIterator[Engine]:
+        """https://elis.rossum.ai/api/docs/internal/#list-all-engines."""
+        async for engine in self._http_client.fetch_all(
+            Resource.Engine, ordering, sideloads, **filters
+        ):
+            yield self._deserializer(Resource.Engine, engine)
+
+    async def retrieve_engine_fields(
+        self, engine_id: int | None = None
+    ) -> AsyncIterator[EngineField]:
+        """https://elis.rossum.ai/api/docs/internal/#engine-field."""
+        async for engine_field in self._http_client.fetch_all(
+            Resource.EngineField, engine=engine_id
+        ):
+            yield self._deserializer(Resource.EngineField, engine_field)
 
     # ##### INBOX #####
     async def create_new_inbox(self, data: Dict[str, Any]) -> Inbox:

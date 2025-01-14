@@ -34,7 +34,7 @@ if typing.TYPE_CHECKING:
     from rossum_api.models.connector import Connector
     from rossum_api.models.document import Document
     from rossum_api.models.email_template import EmailTemplate
-    from rossum_api.models.engine import Engine
+    from rossum_api.models.engine import Engine, EngineField
     from rossum_api.models.group import Group
     from rossum_api.models.hook import Hook
     from rossum_api.models.inbox import Inbox
@@ -282,6 +282,21 @@ class ElisAPIClientSync:
     def retrieve_engine(self, engine_id: int) -> Engine:
         """https://elis.rossum.ai/api/docs/#retrieve-a-schema."""
         return self._run_coroutine(self.elis_api_client.retrieve_engine(engine_id))
+
+    async def list_all_engines(
+        self,
+        ordering: Sequence[str] = (),
+        sideloads: Sequence[str] = (),
+        **filters: Any,
+    ) -> AsyncIterator[Engine]:
+        """https://elis.rossum.ai/api/docs/internal/#list-all-engines."""
+        return self._run_coroutine(
+            self.elis_api_client.list_all_engines(ordering, sideloads, **filters)
+        )
+
+    def retrieve_engine_fields(self, engine_id: int | None = None) -> list[EngineField]:
+        """https://elis.rossum.ai/api/docs/internal/#engine-field."""
+        return self._run_coroutine(self.elis_api_client.retrieve_engine_fields(engine_id))
 
     # ##### USERS #####
     def list_all_users(

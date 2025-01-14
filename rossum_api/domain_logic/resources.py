@@ -14,6 +14,8 @@ class Resource(Enum):
     Connector = "connectors"
     Document = "documents"
     EmailTemplate = "email_templates"
+    Engine = "engines"
+    EngineField = "engine_fields"
     Group = "groups"
     Hook = "hooks"
     Inbox = "inboxes"
@@ -24,4 +26,3 @@ class Resource(Enum):
     Upload = "uploads"
     User = "users"
     Workspace = "workspaces"
-    Engine = "engines"

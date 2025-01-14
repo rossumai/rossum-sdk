@@ -1,6 +1,26 @@
 # CHANGELOG
 
 
+## v0.21.0 (2025-01-14)
+
+### Chores
+
+- Correct resource name in sideloading test integration test
+  ([`a419002`](https://github.com/rossumai/rossum-sdk/commit/a4190024be69ec2f61ab533abee23415598240ec))
+
+### Features
+
+- Add support for retrieving EngineFields
+  ([`c976954`](https://github.com/rossumai/rossum-sdk/commit/c976954d35369ab3f03b40861093f5ff257ec5a4))
+
+### Refactoring
+
+- Extract sideloading logic into domain logic
+  ([`080b7af`](https://github.com/rossumai/rossum-sdk/commit/080b7afbb2f1a7ec3651ee80a6561c9921c55aaf))
+
+...and use inflect to convert resource names to singular.
+
+
 ## v0.20.1 (2024-12-11)
 
 ### Bug Fixes

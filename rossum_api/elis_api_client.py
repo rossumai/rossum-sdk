@@ -553,6 +553,11 @@ class ElisAPIClient:
         ):
             yield self._deserializer(Resource.EngineField, engine_field)
 
+    async def retrieve_engine_queue_stats(self, engine_id: int) -> AsyncIterator[Queue]:
+        """https://elis.rossum.ai/api/docs/internal/#get-queue-statistics-for-an-engine."""
+        async for queue in self._http_client.fetch_all(Resource.Queue, engine=engine_id):
+            yield self._deserializer(Resource.Queue, queue)
+
     # ##### INBOX #####
     async def create_new_inbox(self, data: Dict[str, Any]) -> Inbox:
         """https://elis.rossum.ai/api/docs/#create-a-new-inbox."""

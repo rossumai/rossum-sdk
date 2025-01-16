@@ -279,6 +279,10 @@ class ElisAPIClientSync:
         """https://elis.rossum.ai/api/docs/internal/#engine-field."""
         return self._iter_over_async(self.elis_api_client.retrieve_engine_fields(engine_id))
 
+    def retrieve_engine_queue_stats(self, engine_id: int) -> Iterator[Queue]:
+        """https://elis.rossum.ai/api/docs/internal/#get-queue-statistics-for-an-engine."""
+        return self._iter_over_async(self.elis_api_client.retrieve_engine_queue_stats(engine_id))
+
     # ##### USERS #####
     def list_all_users(self, ordering: Sequence[str] = (), **filters: Any) -> Iterator[User]:
         """https://elis.rossum.ai/api/docs/#list-all-users."""

@@ -129,18 +129,11 @@ class ElisAPIClientSync:
         """https://elis.rossum.ai/api/docs/#retrieve-a-queue-2."""
         return self._run_coroutine(self.elis_api_client.retrieve_queue(queue_id))
 
-    def list_all_queues(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
-    ) -> Iterator[Queue]:
+    def list_all_queues(self, ordering: Sequence[str] = (), **filters: Any) -> Iterator[Queue]:
         """https://elis.rossum.ai/api/docs/#list-all-queues."""
         return self._iter_over_async(self.elis_api_client.list_all_queues(ordering, **filters))
 
-    def create_new_queue(
-        self,
-        data: Dict[str, Any],
-    ) -> Queue:
+    def create_new_queue(self, data: Dict[str, Any]) -> Queue:
         """https://elis.rossum.ai/api/docs/#create-new-queue."""
         return self._run_coroutine(self.elis_api_client.create_new_queue(data))
 
@@ -209,10 +202,7 @@ class ElisAPIClientSync:
             self.elis_api_client.upload_document(queue_id, files, values, metadata)
         )
 
-    def retrieve_upload(
-        self,
-        upload_id: int,
-    ) -> Upload:
+    def retrieve_upload(self, upload_id: int) -> Upload:
         """Implements https://elis.rossum.ai/api/docs/#retrieve-upload."""
 
         return self._run_coroutine(self.elis_api_client.retrieve_upload(upload_id))
@@ -237,9 +227,7 @@ class ElisAPIClientSync:
 
     # ##### ORGANIZATIONS #####
     def list_all_organizations(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> Iterator[Organization]:
         """https://elis.rossum.ai/api/docs/#list-all-organizations."""
         return self._iter_over_async(
@@ -258,11 +246,7 @@ class ElisAPIClientSync:
         return self._run_coroutine(self.elis_api_client.retrieve_own_organization())
 
     # ##### SCHEMAS #####
-    def list_all_schemas(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
-    ) -> Iterator[Schema]:
+    def list_all_schemas(self, ordering: Sequence[str] = (), **filters: Any) -> Iterator[Schema]:
         """https://elis.rossum.ai/api/docs/#list-all-schemas."""
         return self._iter_over_async(self.elis_api_client.list_all_schemas(ordering, **filters))
 
@@ -299,11 +283,7 @@ class ElisAPIClientSync:
         return self._run_coroutine(self.elis_api_client.retrieve_engine_fields(engine_id))
 
     # ##### USERS #####
-    def list_all_users(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
-    ) -> Iterator[User]:
+    def list_all_users(self, ordering: Sequence[str] = (), **filters: Any) -> Iterator[User]:
         """https://elis.rossum.ai/api/docs/#list-all-users."""
         return self._iter_over_async(self.elis_api_client.list_all_users(ordering, **filters))
 
@@ -374,20 +354,11 @@ class ElisAPIClientSync:
             self.elis_api_client.poll_annotation(annotation_id, predicate, sleep_s, sideloads)
         )
 
-    def poll_task(
-        self,
-        task_id: int,
-        predicate: Callable[[Task], bool],
-        sleep_s: int = 3,
-    ) -> Task:
+    def poll_task(self, task_id: int, predicate: Callable[[Task], bool], sleep_s: int = 3) -> Task:
         """Poll on Task until predicate is true."""
         return self._run_coroutine(self.elis_api_client.poll_task(task_id, predicate, sleep_s))
 
-    def poll_task_until_succeeded(
-        self,
-        task_id: int,
-        sleep_s: int = 3,
-    ) -> Task:
+    def poll_task_until_succeeded(self, task_id: int, sleep_s: int = 3) -> Task:
         """Poll on Task until it is succeeded."""
         return self._run_coroutine(
             self.elis_api_client.poll_task_until_succeeded(task_id, sleep_s)
@@ -474,9 +445,7 @@ class ElisAPIClientSync:
 
     # ##### WORKSPACES #####
     def list_all_workspaces(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> Iterator[Workspace]:
         """https://elis.rossum.ai/api/docs/#list-all-workspaces."""
         return self._iter_over_async(self.elis_api_client.list_all_workspaces(ordering, **filters))
@@ -494,18 +463,13 @@ class ElisAPIClientSync:
         return self._run_coroutine(self.elis_api_client.delete_workspace(workspace_id))
 
     # ##### INBOX #####
-    def create_new_inbox(
-        self,
-        data: Dict[str, Any],
-    ) -> Inbox:
+    def create_new_inbox(self, data: Dict[str, Any]) -> Inbox:
         """https://elis.rossum.ai/api/docs/#create-a-new-inbox."""
         return self._run_coroutine(self.elis_api_client.create_new_inbox(data))
 
     # ##### EMAIL TEMPLATES #####
     def list_all_email_templates(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> Iterator[Connector]:
         """https://elis.rossum.ai/api/docs/#list-all-email-templates."""
         return self._iter_over_async(
@@ -522,9 +486,7 @@ class ElisAPIClientSync:
 
     # ##### CONNECTORS #####
     def list_all_connectors(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> Iterator[Connector]:
         """https://elis.rossum.ai/api/docs/#list-all-connectors."""
         return self._iter_over_async(self.elis_api_client.list_all_connectors(ordering, **filters))
@@ -538,11 +500,7 @@ class ElisAPIClientSync:
         return self._run_coroutine(self.elis_api_client.create_new_connector(data))
 
     # ##### HOOKS #####
-    def list_all_hooks(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
-    ) -> Iterator[Hook]:
+    def list_all_hooks(self, ordering: Sequence[str] = (), **filters: Any) -> Iterator[Hook]:
         """https://elis.rossum.ai/api/docs/#list-all-hooks."""
         return self._iter_over_async(self.elis_api_client.list_all_hooks(ordering, **filters))
 
@@ -563,11 +521,7 @@ class ElisAPIClientSync:
         return self._run_coroutine(self.elis_api_client.delete_hook(hook_id))
 
     # ##### USER ROLES #####
-    def list_all_user_roles(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
-    ) -> Iterator[Group]:
+    def list_all_user_roles(self, ordering: Sequence[str] = (), **filters: Any) -> Iterator[Group]:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles."""
         return self._iter_over_async(self.elis_api_client.list_all_user_roles(ordering, **filters))
 

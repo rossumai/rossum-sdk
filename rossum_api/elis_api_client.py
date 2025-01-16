@@ -70,19 +70,14 @@ class ElisAPIClient:
         self._deserializer = deserializer or deserialize_default
 
     # ##### QUEUE #####
-    async def retrieve_queue(
-        self,
-        queue_id: int,
-    ) -> Queue:
+    async def retrieve_queue(self, queue_id: int) -> Queue:
         """https://elis.rossum.ai/api/docs/#retrieve-a-queue-2."""
         queue = await self._http_client.fetch_one(Resource.Queue, queue_id)
 
         return self._deserializer(Resource.Queue, queue)
 
     async def list_all_queues(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> AsyncIterator[Queue]:
         """https://elis.rossum.ai/api/docs/#list-all-queues."""
         async for q in self._http_client.fetch_all(Resource.Queue, ordering, **filters):
@@ -204,18 +199,12 @@ class ElisAPIClient:
 
             return await self.retrieve_task(task_id)
 
-    async def retrieve_upload(
-        self,
-        upload_id: int,
-    ) -> Upload:
+    async def retrieve_upload(self, upload_id: int) -> Upload:
         """Implements https://elis.rossum.ai/api/docs/#retrieve-upload."""
         upload = await self._http_client.fetch_one(Resource.Upload, upload_id)
         return self._deserializer(Resource.Upload, upload)
 
-    async def export_annotations_to_json(
-        self,
-        queue_id: int,
-    ) -> AsyncIterator[Annotation]:
+    async def export_annotations_to_json(self, queue_id: int) -> AsyncIterator[Annotation]:
         """https://elis.rossum.ai/api/docs/#export-annotations.
 
         JSON export is paginated and returns the result in a way similar to other list_all methods.
@@ -236,9 +225,7 @@ class ElisAPIClient:
 
     # ##### ORGANIZATIONS #####
     async def list_all_organizations(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> AsyncIterator[Organization]:
         """https://elis.rossum.ai/api/docs/#list-all-organizations."""
         async for o in self._http_client.fetch_all(Resource.Organization, ordering, **filters):
@@ -258,9 +245,7 @@ class ElisAPIClient:
 
     # ##### SCHEMAS #####
     async def list_all_schemas(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> AsyncIterator[Schema]:
         """https://elis.rossum.ai/api/docs/#list-all-schemas."""
         async for s in self._http_client.fetch_all(Resource.Schema, ordering, **filters):
@@ -284,9 +269,7 @@ class ElisAPIClient:
 
     # ##### USERS #####
     async def list_all_users(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> AsyncIterator[User]:
         """https://elis.rossum.ai/api/docs/#list-all-users."""
         async for u in self._http_client.fetch_all(Resource.User, ordering, **filters):
@@ -399,10 +382,7 @@ class ElisAPIClient:
         )
 
     async def poll_task(
-        self,
-        task_id: int,
-        predicate: Callable[[Task], bool],
-        sleep_s: int = 3,
+        self, task_id: int, predicate: Callable[[Task], bool], sleep_s: int = 3
     ) -> Task:
         """Poll on Task until predicate is true.
 
@@ -415,11 +395,7 @@ class ElisAPIClient:
 
         return task
 
-    async def poll_task_until_succeeded(
-        self,
-        task_id: int,
-        sleep_s: int = 3,
-    ) -> Task:
+    async def poll_task_until_succeeded(self, task_id: int, sleep_s: int = 3) -> Task:
         """Poll on Task until it is succeeded."""
         return await self.poll_task(task_id, lambda a: a.status == TaskStatus.SUCCEEDED, sleep_s)
 
@@ -530,9 +506,7 @@ class ElisAPIClient:
 
     # ##### WORKSPACES #####
     async def list_all_workspaces(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> AsyncIterator[Workspace]:
         """https://elis.rossum.ai/api/docs/#list-all-workspaces."""
         async for w in self._http_client.fetch_all(Resource.Workspace, ordering, **filters):
@@ -562,10 +536,7 @@ class ElisAPIClient:
         return self._deserializer(Resource.Engine, engine)
 
     async def list_all_engines(
-        self,
-        ordering: Sequence[str] = (),
-        sideloads: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), sideloads: Sequence[str] = (), **filters: Any
     ) -> AsyncIterator[Engine]:
         """https://elis.rossum.ai/api/docs/internal/#list-all-engines."""
         async for engine in self._http_client.fetch_all(
@@ -591,9 +562,7 @@ class ElisAPIClient:
 
     # ##### EMAIL TEMPLATES #####
     async def list_all_email_templates(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> AsyncIterator[Connector]:
         """https://elis.rossum.ai/api/docs/#list-all-email-templates."""
         async for c in self._http_client.fetch_all(Resource.EmailTemplate, ordering, **filters):
@@ -615,9 +584,7 @@ class ElisAPIClient:
 
     # ##### CONNECTORS #####
     async def list_all_connectors(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> AsyncIterator[Connector]:
         """https://elis.rossum.ai/api/docs/#list-all-connectors."""
         async for c in self._http_client.fetch_all(Resource.Connector, ordering, **filters):
@@ -637,9 +604,7 @@ class ElisAPIClient:
 
     # ##### HOOKS #####
     async def list_all_hooks(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> AsyncIterator[Hook]:
         """https://elis.rossum.ai/api/docs/#list-all-hooks."""
         async for h in self._http_client.fetch_all(Resource.Hook, ordering, **filters):
@@ -669,9 +634,7 @@ class ElisAPIClient:
 
     # ##### USER ROLES #####
     async def list_all_user_roles(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> AsyncIterator[Group]:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles."""
         async for g in self._http_client.fetch_all(Resource.Group, ordering, **filters):

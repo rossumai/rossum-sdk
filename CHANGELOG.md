@@ -1,6 +1,30 @@
 # CHANGELOG
 
 
+## v0.22.0 (2025-01-16)
+
+### Bug Fixes
+
+- Remove 'button' possibility for EngineField.type as it should not happen
+  ([`da698b0`](https://github.com/rossumai/rossum-sdk/commit/da698b01ef2438ebe658dc7e6e67a5b48a60ec81))
+
+- Use _iter_over_async instead of _run_coroutine and Iterator instead of list
+  ([`9540929`](https://github.com/rossumai/rossum-sdk/commit/95409299c468e28a4d89e2a90646d9d2aa73a33e))
+
+Fixing several implementation as well as typing errors introduced in one of the recent pull
+  requests.
+
+### Code Style
+
+- Reformat method parameters - do not break lines if not necessary
+  ([`31537af`](https://github.com/rossumai/rossum-sdk/commit/31537af555c87f2f3563135692e6530d384e42a3))
+
+### Features
+
+- Support retrieval of Queues associated with the given Engine
+  ([`8aee3d4`](https://github.com/rossumai/rossum-sdk/commit/8aee3d43a52a8d18bbdb19746675050a7efa89b8))
+
+
 ## v0.21.0 (2025-01-14)
 
 ### Chores

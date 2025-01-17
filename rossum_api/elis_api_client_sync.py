@@ -207,22 +207,24 @@ class ElisAPIClientSync:
 
         return self._run_coroutine(self.elis_api_client.retrieve_upload(upload_id))
 
-    def export_annotations_to_json(self, queue_id: int) -> Iterator[Annotation]:
+    def export_annotations_to_json(self, queue_id: int, **filters: Any) -> Iterator[Annotation]:
         """https://elis.rossum.ai/api/docs/#export-annotations.
 
         JSON export is paginated and returns the result in a way similar to other list_all methods.
         """
-        return self._iter_over_async(self.elis_api_client.export_annotations_to_json(queue_id))
+        return self._iter_over_async(
+            self.elis_api_client.export_annotations_to_json(queue_id, **filters)
+        )
 
     def export_annotations_to_file(
-        self, queue_id: int, export_format: ExportFileFormats
+        self, queue_id: int, export_format: ExportFileFormats, **filters: Any
     ) -> Iterator[bytes]:
         """https://elis.rossum.ai/api/docs/#export-annotations.
 
         XLSX/CSV/XML exports can be huge, therefore byte streaming is used to keep memory consumption low.
         """
         return self._iter_over_async(
-            self.elis_api_client.export_annotations_to_file(queue_id, export_format)
+            self.elis_api_client.export_annotations_to_file(queue_id, export_format, **filters)
         )
 
     # ##### ORGANIZATIONS #####

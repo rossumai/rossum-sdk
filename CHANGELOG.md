@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v0.23.0 (2025-01-20)
+
+### Features
+
+- Add more information to APIClientError
+  ([`53d0781`](https://github.com/rossumai/rossum-sdk/commit/53d07810ccad959a3d110f622c8c46316a374a01))
+
+- Add support for filters in export helper methods
+  ([`8a94d6f`](https://github.com/rossumai/rossum-sdk/commit/8a94d6fbba26ed9db1c59499577f93d53a252d36))
+
+
 ## v0.22.0 (2025-01-16)
 
 ### Bug Fixes

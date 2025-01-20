@@ -204,23 +204,27 @@ class ElisAPIClient:
         upload = await self._http_client.fetch_one(Resource.Upload, upload_id)
         return self._deserializer(Resource.Upload, upload)
 
-    async def export_annotations_to_json(self, queue_id: int) -> AsyncIterator[Annotation]:
+    async def export_annotations_to_json(
+        self, queue_id: int, **filters: Any
+    ) -> AsyncIterator[Annotation]:
         """https://elis.rossum.ai/api/docs/#export-annotations.
 
         JSON export is paginated and returns the result in a way similar to other list_all methods.
         """
-        async for chunk in self._http_client.export(Resource.Queue, queue_id, "json"):
+        async for chunk in self._http_client.export(Resource.Queue, queue_id, "json", **filters):
             # JSON export can be translated directly to Annotation object
             yield self._deserializer(Resource.Annotation, typing.cast(typing.Dict, chunk))
 
     async def export_annotations_to_file(
-        self, queue_id: int, export_format: ExportFileFormats
+        self, queue_id: int, export_format: ExportFileFormats, **filters: Any
     ) -> AsyncIterator[bytes]:
         """https://elis.rossum.ai/api/docs/#export-annotations.
 
         XLSX/CSV/XML exports can be huge, therefore byte streaming is used to keep memory consumption low.
         """
-        async for chunk in self._http_client.export(Resource.Queue, queue_id, str(export_format)):
+        async for chunk in self._http_client.export(
+            Resource.Queue, queue_id, str(export_format), **filters
+        ):
             yield typing.cast(bytes, chunk)
 
     # ##### ORGANIZATIONS #####

@@ -30,12 +30,14 @@ logger = logging.getLogger(__name__)
 
 
 class APIClientError(Exception):
-    def __init__(self, status_code, error):
+    def __init__(self, method, url, status_code, error):
+        self.method = method
+        self.url = url
         self.status_code = status_code
         self.error = error
 
     def __str__(self):
-        return f"HTTP {self.status_code}, content: {self.error}"
+        return f"[{self.method}] {self.url} - HTTP {self.status_code} - {self.error}"
 
 
 def authenticate_if_needed(method):
@@ -375,7 +377,7 @@ class APIClient:
                     build_full_login_url(self.base_url),
                     data={"username": self.username, "password": self.password},
                 )
-                await self._raise_for_status(response)
+                await self._raise_for_status(response, "POST")
         self.token = response.json()["key"]
 
     def _retrying(self):
@@ -415,7 +417,7 @@ class APIClient:
         async for attempt in self._retrying():
             with attempt:
                 response = await self.client.request(method, url, headers=headers, *args, **kwargs)
-                await self._raise_for_status(response)
+                await self._raise_for_status(response, method)
         return response
 
     @authenticate_generator_if_needed
@@ -427,11 +429,11 @@ class APIClient:
         headers = kwargs.pop("headers", {})
         headers["Authorization"] = f"token {self.token}"
         async with self.client.stream(method, url, headers=headers, *args, **kwargs) as response:
-            await self._raise_for_status(response)
+            await self._raise_for_status(response, method)
             async for chunk in response.aiter_bytes():
                 yield chunk
 
-    async def _raise_for_status(self, response: httpx.Response):
+    async def _raise_for_status(self, response: httpx.Response, method: str) -> None:
         """Raise an exception in case of HTTP error.
 
         Re-pack to our own exception class to shield users from the fact that we're using
@@ -441,4 +443,6 @@ class APIClient:
             response.raise_for_status()
         except httpx.HTTPStatusError as e:
             content = response.content if response.stream is None else await response.aread()
-            raise APIClientError(response.status_code, content.decode("utf-8")) from e
+            raise APIClientError(
+                method, response.url, response.status_code, content.decode("utf-8")
+            ) from e

@@ -699,7 +699,10 @@ async def test_request_repacks_exception(client, httpx_mock):
     )
     with pytest.raises(APIClientError) as err:
         await client._request("GET", "workspaces/123")
-    assert str(err.value) == 'HTTP 404, content: {"detail":"Not found."}'
+    assert str(err.value) == (
+        "[GET] https://elis.rossum.ai/api/v1/workspaces/123 - "
+        'HTTP 404 - {"detail":"Not found."}'
+    )
 
 
 @pytest.mark.asyncio
@@ -713,7 +716,10 @@ async def test_stream_repacks_exception(client, httpx_mock):
     with pytest.raises(APIClientError) as err:
         async for _w in client._stream("GET", "queues/123/export?format=csv&exported_at=invalid"):
             pass
-    assert str(err.value) == "HTTP 404, content: exported_at: Enter a valid date/time"
+    assert str(err.value) == (
+        "[GET] https://elis.rossum.ai/api/v1/queues/123/export?format=csv&exported_at=invalid "
+        "- HTTP 404 - exported_at: Enter a valid date/time"
+    )
 
 
 @pytest.mark.asyncio

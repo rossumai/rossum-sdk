@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v0.23.1 (2025-01-23)
+
+### Bug Fixes
+
+- Rename retrieve_engine_queue_stats to retrieve_engine_queues
+  ([`7583358`](https://github.com/rossumai/rossum-sdk/commit/7583358da05b37f822e60f9c7b440064d20fbe7c))
+
+The new name better conveys the essence that we're retrieving only a list of queues associated with
+  the given engine. The docstring pointing to official documentation was also corrected.
+
+
 ## v0.23.0 (2025-01-20)
 
 ### Features

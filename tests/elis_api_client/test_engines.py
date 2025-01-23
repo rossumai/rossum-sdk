@@ -44,11 +44,11 @@ class TestEngine:
 
         http_client.fetch_all.assert_called_with(Resource.Engine, (), ())
 
-    async def test_retrieve_engine_queue_stats(self, elis_client, dummy_queue, mock_generator):
+    async def test_retrieve_engine_queues(self, elis_client, dummy_queue, mock_generator):
         client, http_client = elis_client
         http_client.fetch_all.return_value = mock_generator(dummy_queue)
 
-        queues = client.retrieve_engine_queue_stats(TEST_ENGINE_ID)
+        queues = client.retrieve_engine_queues(TEST_ENGINE_ID)
 
         async for queue in queues:
             assert queue == Queue(**dummy_queue)

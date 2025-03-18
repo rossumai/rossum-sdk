@@ -8,11 +8,15 @@ import asyncio
 import logging
 import os
 import random
+import typing
 
 import aiofiles
 
 from rossum_api import ElisAPIClient, ElisAPIClientSync
 from rossum_api.api_client import APIClient
+
+if typing.TYPE_CHECKING:
+    from rossum_api.elis_api_client import ElisClientWithDefaultSerializer
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
@@ -111,7 +115,7 @@ async def main():
 
 
 async def main_with_async_client():
-    client = ElisAPIClient(
+    client: ElisClientWithDefaultSerializer = ElisAPIClient(
         os.environ["ELIS_USERNAME"],
         os.environ["ELIS_PASSWORD"],
         base_url="https://elis.develop.r8.lol/api/v1",

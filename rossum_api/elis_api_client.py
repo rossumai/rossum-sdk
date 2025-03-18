@@ -11,30 +11,56 @@ from rossum_api.api_client import APIClient
 from rossum_api.domain_logic.resources import Resource
 from rossum_api.domain_logic.urls import DEFAULT_BASE_URL
 from rossum_api.models import deserialize_default
-from rossum_api.models.task import TaskStatus
+from rossum_api.models.annotation import Annotation
+from rossum_api.models.connector import Connector
+from rossum_api.models.document import Document
+from rossum_api.models.email_template import EmailTemplate
+from rossum_api.models.engine import Engine, EngineField
+from rossum_api.models.group import Group
+from rossum_api.models.hook import Hook
+from rossum_api.models.inbox import Inbox
+from rossum_api.models.organization import Organization
+from rossum_api.models.queue import Queue
+from rossum_api.models.schema import Schema
+from rossum_api.models.task import Task, TaskStatus
+from rossum_api.models.upload import Upload
+from rossum_api.models.user import User
+from rossum_api.models.workspace import Workspace
 
 if typing.TYPE_CHECKING:
     import pathlib
-    from typing import Any, AsyncIterator, Callable, Dict, List, Optional, Sequence, Tuple, Union
+    from typing import (
+        Any,
+        AsyncIterator,
+        Callable,
+        Dict,
+        List,
+        Optional,
+        Sequence,
+        Tuple,
+        Union,
+    )
 
     import httpx
 
     from rossum_api.models import Deserializer
-    from rossum_api.models.annotation import Annotation
-    from rossum_api.models.connector import Connector
-    from rossum_api.models.document import Document
-    from rossum_api.models.email_template import EmailTemplate
-    from rossum_api.models.engine import Engine, EngineField
-    from rossum_api.models.group import Group
-    from rossum_api.models.hook import Hook
-    from rossum_api.models.inbox import Inbox
-    from rossum_api.models.organization import Organization
-    from rossum_api.models.queue import Queue
-    from rossum_api.models.schema import Schema
-    from rossum_api.models.task import Task
-    from rossum_api.models.upload import Upload
-    from rossum_api.models.user import User
-    from rossum_api.models.workspace import Workspace
+
+AnnotationType = typing.TypeVar("AnnotationType")
+ConnectorType = typing.TypeVar("ConnectorType")
+DocumentType = typing.TypeVar("DocumentType")
+EmailTemplateType = typing.TypeVar("EmailTemplateType")
+EngineType = typing.TypeVar("EngineType")
+EngineFieldType = typing.TypeVar("EngineFieldType")
+GroupType = typing.TypeVar("GroupType")
+HookType = typing.TypeVar("HookType")
+InboxType = typing.TypeVar("InboxType")
+OrganizationType = typing.TypeVar("OrganizationType")
+QueueType = typing.TypeVar("QueueType")
+SchemaType = typing.TypeVar("SchemaType")
+TaskType = typing.TypeVar("TaskType")
+UploadType = typing.TypeVar("UploadType")
+UserType = typing.TypeVar("UserType")
+WorkspaceType = typing.TypeVar("WorkspaceType")
 
 
 class ExportFileFormats(Enum):
@@ -47,7 +73,26 @@ class Sideload:
     pass
 
 
-class ElisAPIClient:
+class ElisAPIClient(
+    typing.Generic[
+        AnnotationType,
+        ConnectorType,
+        DocumentType,
+        EmailTemplateType,
+        EngineType,
+        EngineFieldType,
+        GroupType,
+        HookType,
+        InboxType,
+        OrganizationType,
+        QueueType,
+        SchemaType,
+        TaskType,
+        UploadType,
+        UserType,
+        WorkspaceType,
+    ]
+):
     def __init__(
         self,
         username: Optional[str] = None,
@@ -70,7 +115,7 @@ class ElisAPIClient:
         self._deserializer = deserializer or deserialize_default
 
     # ##### QUEUE #####
-    async def retrieve_queue(self, queue_id: int) -> Queue:
+    async def retrieve_queue(self, queue_id: int) -> QueueType:
         """https://elis.rossum.ai/api/docs/#retrieve-a-queue-2."""
         queue = await self._http_client.fetch_one(Resource.Queue, queue_id)
 
@@ -78,12 +123,12 @@ class ElisAPIClient:
 
     async def list_all_queues(
         self, ordering: Sequence[str] = (), **filters: Any
-    ) -> AsyncIterator[Queue]:
+    ) -> AsyncIterator[QueueType]:
         """https://elis.rossum.ai/api/docs/#list-all-queues."""
         async for q in self._http_client.fetch_all(Resource.Queue, ordering, **filters):
             yield self._deserializer(Resource.Queue, q)
 
-    async def create_new_queue(self, data: Dict[str, Any]) -> Queue:
+    async def create_new_queue(self, data: Dict[str, Any]) -> QueueType:
         """https://elis.rossum.ai/api/docs/#create-new-queue."""
         queue = await self._http_client.create(Resource.Queue, data)
 
@@ -145,7 +190,7 @@ class ElisAPIClient:
         files: Sequence[Tuple[Union[str, pathlib.Path], str]],
         values: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-    ) -> List[Task]:
+    ) -> List[TaskType]:
         """https://elis.rossum.ai/api/docs/#create-upload.
 
         Parameters
@@ -166,7 +211,7 @@ class ElisAPIClient:
             Tasks can be polled using poll_task and if succeeded, will contain a
             link to an Upload object that contains info on uploaded documents/annotations
         """
-        tasks: list[typing.Awaitable[Task]] = [
+        tasks: list[typing.Awaitable[TaskType]] = [
             asyncio.create_task(self._create_upload(file, queue_id, filename, values, metadata))
             for file, filename in files
         ]
@@ -180,7 +225,7 @@ class ElisAPIClient:
         filename: str,
         values: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None,
-    ) -> Task:
+    ) -> TaskType:
         """Helper method that uploads the files and gets back Task response for each.
 
         A successful Task will create an Upload object."""
@@ -199,14 +244,14 @@ class ElisAPIClient:
 
             return await self.retrieve_task(task_id)
 
-    async def retrieve_upload(self, upload_id: int) -> Upload:
+    async def retrieve_upload(self, upload_id: int) -> UploadType:
         """Implements https://elis.rossum.ai/api/docs/#retrieve-upload."""
         upload = await self._http_client.fetch_one(Resource.Upload, upload_id)
         return self._deserializer(Resource.Upload, upload)
 
     async def export_annotations_to_json(
         self, queue_id: int, **filters: Any
-    ) -> AsyncIterator[Annotation]:
+    ) -> AsyncIterator[AnnotationType]:
         """https://elis.rossum.ai/api/docs/#export-annotations.
 
         JSON export is paginated and returns the result in a way similar to other list_all methods.
@@ -230,18 +275,18 @@ class ElisAPIClient:
     # ##### ORGANIZATIONS #####
     async def list_all_organizations(
         self, ordering: Sequence[str] = (), **filters: Any
-    ) -> AsyncIterator[Organization]:
+    ) -> AsyncIterator[OrganizationType]:
         """https://elis.rossum.ai/api/docs/#list-all-organizations."""
         async for o in self._http_client.fetch_all(Resource.Organization, ordering, **filters):
             yield self._deserializer(Resource.Organization, o)
 
-    async def retrieve_organization(self, org_id: int) -> Organization:
+    async def retrieve_organization(self, org_id: int) -> OrganizationType:
         """https://elis.rossum.ai/api/docs/#retrieve-an-organization."""
         organization = await self._http_client.fetch_one(Resource.Organization, org_id)
 
         return self._deserializer(Resource.Organization, organization)
 
-    async def retrieve_own_organization(self) -> Organization:
+    async def retrieve_own_organization(self) -> OrganizationType:
         """Retrieve organization of currently logged in user."""
         user: Dict[Any, Any] = await self._http_client.fetch_one(Resource.Auth, "user")
         organization_id = user["organization"].split("/")[-1]
@@ -250,18 +295,18 @@ class ElisAPIClient:
     # ##### SCHEMAS #####
     async def list_all_schemas(
         self, ordering: Sequence[str] = (), **filters: Any
-    ) -> AsyncIterator[Schema]:
+    ) -> AsyncIterator[SchemaType]:
         """https://elis.rossum.ai/api/docs/#list-all-schemas."""
         async for s in self._http_client.fetch_all(Resource.Schema, ordering, **filters):
             yield self._deserializer(Resource.Schema, s)
 
-    async def retrieve_schema(self, schema_id: int) -> Schema:
+    async def retrieve_schema(self, schema_id: int) -> SchemaType:
         """https://elis.rossum.ai/api/docs/#retrieve-a-schema."""
         schema: Dict[Any, Any] = await self._http_client.fetch_one(Resource.Schema, schema_id)
 
         return self._deserializer(Resource.Schema, schema)
 
-    async def create_new_schema(self, data: Dict[str, Any]) -> Schema:
+    async def create_new_schema(self, data: Dict[str, Any]) -> SchemaType:
         """https://elis.rossum.ai/api/docs/#create-a-new-schema."""
         schema = await self._http_client.create(Resource.Schema, data)
 
@@ -274,18 +319,18 @@ class ElisAPIClient:
     # ##### USERS #####
     async def list_all_users(
         self, ordering: Sequence[str] = (), **filters: Any
-    ) -> AsyncIterator[User]:
+    ) -> AsyncIterator[UserType]:
         """https://elis.rossum.ai/api/docs/#list-all-users."""
         async for u in self._http_client.fetch_all(Resource.User, ordering, **filters):
             yield self._deserializer(Resource.User, u)
 
-    async def retrieve_user(self, user_id: int) -> User:
+    async def retrieve_user(self, user_id: int) -> UserType:
         """https://elis.rossum.ai/api/docs/#retrieve-a-user-2."""
         user = await self._http_client.fetch_one(Resource.User, user_id)
 
         return self._deserializer(Resource.User, user)
 
-    async def create_new_user(self, data: Dict[str, Any]) -> User:
+    async def create_new_user(self, data: Dict[str, Any]) -> UserType:
         """https://elis.rossum.ai/api/docs/#create-new-user."""
         user = await self._http_client.create(Resource.User, data)
 
@@ -306,7 +351,7 @@ class ElisAPIClient:
         sideloads: Sequence[str] = (),
         content_schema_ids: Sequence[str] = (),
         **filters: Any,
-    ) -> AsyncIterator[Annotation]:
+    ) -> AsyncIterator[AnnotationType]:
         """https://elis.rossum.ai/api/docs/#list-all-annotations."""
         if sideloads and "content" in sideloads and not content_schema_ids:
             raise ValueError(
@@ -324,7 +369,7 @@ class ElisAPIClient:
         ordering: Sequence[str] = (),
         sideloads: Sequence[str] = (),
         **kwargs: Any,
-    ) -> AsyncIterator[Annotation]:
+    ) -> AsyncIterator[AnnotationType]:
         """https://elis.rossum.ai/api/docs/#search-for-annotations."""
         if not query and not query_string:
             raise ValueError("Either query or query_string must be provided")
@@ -346,7 +391,7 @@ class ElisAPIClient:
 
     async def retrieve_annotation(
         self, annotation_id: int, sideloads: Sequence[str] = ()
-    ) -> Annotation:
+    ) -> AnnotationType:
         """https://elis.rossum.ai/api/docs/#retrieve-an-annotation."""
         annotation_json = await self._http_client.fetch_one(Resource.Annotation, annotation_id)
         if sideloads:
@@ -356,10 +401,10 @@ class ElisAPIClient:
     async def poll_annotation(
         self,
         annotation_id: int,
-        predicate: Callable[[Annotation], bool],
+        predicate: Callable[[AnnotationType], bool],
         sleep_s: int = 3,
         sideloads: Sequence[str] = (),
-    ) -> Annotation:
+    ) -> AnnotationType:
         """Poll on Annotation until predicate is true.
 
         Sideloading is done only once after the predicate becomes true to avoid spamming the server.
@@ -379,15 +424,17 @@ class ElisAPIClient:
 
     async def poll_annotation_until_imported(
         self, annotation_id: int, **poll_kwargs: Any
-    ) -> Annotation:
+    ) -> AnnotationType:
         """A shortcut for waiting until annotation is imported."""
+        # Mypy complains that TaskType has no "status" attribute, let's ignore that -> assume user's custom deserializer
+        # matches that.
         return await self.poll_annotation(
-            annotation_id, lambda a: a.status not in ("importing", "created"), **poll_kwargs
+            annotation_id, lambda a: a.status not in ("importing", "created"), **poll_kwargs  # type: ignore
         )
 
     async def poll_task(
-        self, task_id: int, predicate: Callable[[Task], bool], sleep_s: int = 3
-    ) -> Task:
+        self, task_id: int, predicate: Callable[[TaskType], bool], sleep_s: int = 3
+    ) -> TaskType:
         """Poll on Task until predicate is true.
 
         As with Annotation polling, there is no innate retry limit."""
@@ -399,11 +446,13 @@ class ElisAPIClient:
 
         return task
 
-    async def poll_task_until_succeeded(self, task_id: int, sleep_s: int = 3) -> Task:
+    async def poll_task_until_succeeded(self, task_id: int, sleep_s: int = 3) -> TaskType:
         """Poll on Task until it is succeeded."""
-        return await self.poll_task(task_id, lambda a: a.status == TaskStatus.SUCCEEDED, sleep_s)
+        # Mypy complains that TaskType has no "status" attribute, let's ignore that -> assume user's custom deserializer
+        # matches that.
+        return await self.poll_task(task_id, lambda a: a.status == TaskStatus.SUCCEEDED, sleep_s)  # type: ignore
 
-    async def retrieve_task(self, task_id: int) -> Task:
+    async def retrieve_task(self, task_id: int) -> TaskType:
         """Implements https://elis.rossum.ai/api/docs/#retrieve-task."""
         task = await self._http_client.fetch_one(
             Resource.Task, task_id, request_params={"no_redirect": "True"}
@@ -413,7 +462,7 @@ class ElisAPIClient:
 
     async def upload_and_wait_until_imported(
         self, queue_id: int, filepath: Union[str, pathlib.Path], filename: str, **poll_kwargs
-    ) -> Annotation:
+    ) -> AnnotationType:
         """A shortcut for uploading a single file and waiting until its annotation is imported."""
         (annotation_id,) = await self.import_document(queue_id, [(filepath, filename)])
         return await self.poll_annotation_until_imported(annotation_id, **poll_kwargs)
@@ -424,13 +473,15 @@ class ElisAPIClient:
             "POST", f"{Resource.Annotation.value}/{annotation_id}/start"
         )
 
-    async def update_annotation(self, annotation_id: int, data: Dict[str, Any]) -> Annotation:
+    async def update_annotation(self, annotation_id: int, data: Dict[str, Any]) -> AnnotationType:
         """https://elis.rossum.ai/api/docs/#update-an-annotation."""
         annotation = await self._http_client.replace(Resource.Annotation, annotation_id, data)
 
         return self._deserializer(Resource.Annotation, annotation)
 
-    async def update_part_annotation(self, annotation_id: int, data: Dict[str, Any]) -> Annotation:
+    async def update_part_annotation(
+        self, annotation_id: int, data: Dict[str, Any]
+    ) -> AnnotationType:
         """https://elis.rossum.ai/api/docs/#update-part-of-an-annotation."""
         annotation = await self._http_client.update(Resource.Annotation, annotation_id, data)
 
@@ -452,7 +503,7 @@ class ElisAPIClient:
             "POST", f"{Resource.Annotation.value}/{annotation_id}/confirm"
         )
 
-    async def create_new_annotation(self, data: dict[str, Any]) -> Annotation:
+    async def create_new_annotation(self, data: dict[str, Any]) -> AnnotationType:
         """https://elis.rossum.ai/api/docs/#create-an-annotation"""
         annotation = await self._http_client.create(Resource.Annotation, data)
 
@@ -471,7 +522,7 @@ class ElisAPIClient:
         )
 
     # ##### DOCUMENTS #####
-    async def retrieve_document(self, document_id: int) -> Document:
+    async def retrieve_document(self, document_id: int) -> DocumentType:
         """https://elis.rossum.ai/api/docs/#retrieve-a-document"""
         document: Dict[Any, Any] = await self._http_client.fetch_one(
             Resource.Document, document_id
@@ -492,7 +543,7 @@ class ElisAPIClient:
         file_data: bytes,
         metadata: Optional[Dict[str, Any]] = None,
         parent: Optional[str] = None,
-    ) -> Document:
+    ) -> DocumentType:
         """https://elis.rossum.ai/api/docs/#create-document"""
         metadata = metadata or {}
         files: httpx._types.RequestFiles = {
@@ -511,18 +562,18 @@ class ElisAPIClient:
     # ##### WORKSPACES #####
     async def list_all_workspaces(
         self, ordering: Sequence[str] = (), **filters: Any
-    ) -> AsyncIterator[Workspace]:
+    ) -> AsyncIterator[WorkspaceType]:
         """https://elis.rossum.ai/api/docs/#list-all-workspaces."""
         async for w in self._http_client.fetch_all(Resource.Workspace, ordering, **filters):
             yield self._deserializer(Resource.Workspace, w)
 
-    async def retrieve_workspace(self, workspace_id: int) -> Workspace:
+    async def retrieve_workspace(self, workspace_id: int) -> WorkspaceType:
         """https://elis.rossum.ai/api/docs/#retrieve-a-workspace."""
         workspace = await self._http_client.fetch_one(Resource.Workspace, workspace_id)
 
         return self._deserializer(Resource.Workspace, workspace)
 
-    async def create_new_workspace(self, data: Dict[str, Any]) -> Workspace:
+    async def create_new_workspace(self, data: Dict[str, Any]) -> WorkspaceType:
         """https://elis.rossum.ai/api/docs/#create-a-new-workspace."""
         workspace = await self._http_client.create(Resource.Workspace, data)
 
@@ -533,7 +584,7 @@ class ElisAPIClient:
         return await self._http_client.delete(Resource.Workspace, workspace_id)
 
     # ##### ENGINE #####
-    async def retrieve_engine(self, engine_id: int) -> Engine:
+    async def retrieve_engine(self, engine_id: int) -> EngineType:
         """ "https://elis.rossum.ai/api/docs/#retrieve-an-engine."""
         engine = await self._http_client.fetch_one(Resource.Engine, engine_id)
 
@@ -541,7 +592,7 @@ class ElisAPIClient:
 
     async def list_all_engines(
         self, ordering: Sequence[str] = (), sideloads: Sequence[str] = (), **filters: Any
-    ) -> AsyncIterator[Engine]:
+    ) -> AsyncIterator[EngineType]:
         """https://elis.rossum.ai/api/docs/internal/#list-all-engines."""
         async for engine in self._http_client.fetch_all(
             Resource.Engine, ordering, sideloads, **filters
@@ -550,20 +601,20 @@ class ElisAPIClient:
 
     async def retrieve_engine_fields(
         self, engine_id: int | None = None
-    ) -> AsyncIterator[EngineField]:
+    ) -> AsyncIterator[EngineFieldType]:
         """https://elis.rossum.ai/api/docs/internal/#engine-field."""
         async for engine_field in self._http_client.fetch_all(
             Resource.EngineField, engine=engine_id
         ):
             yield self._deserializer(Resource.EngineField, engine_field)
 
-    async def retrieve_engine_queues(self, engine_id: int) -> AsyncIterator[Queue]:
+    async def retrieve_engine_queues(self, engine_id: int) -> AsyncIterator[QueueType]:
         """https://elis.rossum.ai/api/docs/internal/#list-all-queues."""
         async for queue in self._http_client.fetch_all(Resource.Queue, engine=engine_id):
             yield self._deserializer(Resource.Queue, queue)
 
     # ##### INBOX #####
-    async def create_new_inbox(self, data: Dict[str, Any]) -> Inbox:
+    async def create_new_inbox(self, data: Dict[str, Any]) -> InboxType:
         """https://elis.rossum.ai/api/docs/#create-a-new-inbox."""
         inbox = await self._http_client.create(Resource.Inbox, data)
 
@@ -572,12 +623,12 @@ class ElisAPIClient:
     # ##### EMAIL TEMPLATES #####
     async def list_all_email_templates(
         self, ordering: Sequence[str] = (), **filters: Any
-    ) -> AsyncIterator[Connector]:
+    ) -> AsyncIterator[ConnectorType]:
         """https://elis.rossum.ai/api/docs/#list-all-email-templates."""
         async for c in self._http_client.fetch_all(Resource.EmailTemplate, ordering, **filters):
             yield self._deserializer(Resource.EmailTemplate, c)
 
-    async def retrieve_email_template(self, email_template_id: int) -> EmailTemplate:
+    async def retrieve_email_template(self, email_template_id: int) -> EmailTemplateType:
         """https://elis.rossum.ai/api/docs/#retrieve-an-email-template-object."""
         email_template = await self._http_client.fetch_one(
             Resource.EmailTemplate, email_template_id
@@ -585,7 +636,7 @@ class ElisAPIClient:
 
         return self._deserializer(Resource.EmailTemplate, email_template)
 
-    async def create_new_email_template(self, data: Dict[str, Any]) -> EmailTemplate:
+    async def create_new_email_template(self, data: Dict[str, Any]) -> EmailTemplateType:
         """https://elis.rossum.ai/api/docs/#create-new-email-template-object."""
         email_template = await self._http_client.create(Resource.EmailTemplate, data)
 
@@ -594,18 +645,18 @@ class ElisAPIClient:
     # ##### CONNECTORS #####
     async def list_all_connectors(
         self, ordering: Sequence[str] = (), **filters: Any
-    ) -> AsyncIterator[Connector]:
+    ) -> AsyncIterator[ConnectorType]:
         """https://elis.rossum.ai/api/docs/#list-all-connectors."""
         async for c in self._http_client.fetch_all(Resource.Connector, ordering, **filters):
             yield self._deserializer(Resource.Connector, c)
 
-    async def retrieve_connector(self, connector_id: int) -> Connector:
+    async def retrieve_connector(self, connector_id: int) -> ConnectorType:
         """https://elis.rossum.ai/api/docs/#retrieve-a-connector."""
         connector = await self._http_client.fetch_one(Resource.Connector, connector_id)
 
         return self._deserializer(Resource.Connector, connector)
 
-    async def create_new_connector(self, data: Dict[str, Any]) -> Connector:
+    async def create_new_connector(self, data: Dict[str, Any]) -> ConnectorType:
         """https://elis.rossum.ai/api/docs/#create-a-new-connector."""
         connector = await self._http_client.create(Resource.Connector, data)
 
@@ -614,24 +665,24 @@ class ElisAPIClient:
     # ##### HOOKS #####
     async def list_all_hooks(
         self, ordering: Sequence[str] = (), **filters: Any
-    ) -> AsyncIterator[Hook]:
+    ) -> AsyncIterator[HookType]:
         """https://elis.rossum.ai/api/docs/#list-all-hooks."""
         async for h in self._http_client.fetch_all(Resource.Hook, ordering, **filters):
             yield self._deserializer(Resource.Hook, h)
 
-    async def retrieve_hook(self, hook_id: int) -> Hook:
+    async def retrieve_hook(self, hook_id: int) -> HookType:
         """https://elis.rossum.ai/api/docs/#retrieve-a-hook."""
         hook = await self._http_client.fetch_one(Resource.Hook, hook_id)
 
         return self._deserializer(Resource.Hook, hook)
 
-    async def create_new_hook(self, data: Dict[str, Any]) -> Hook:
+    async def create_new_hook(self, data: Dict[str, Any]) -> HookType:
         """https://elis.rossum.ai/api/docs/#create-a-new-hook."""
         hook = await self._http_client.create(Resource.Hook, data)
 
         return self._deserializer(Resource.Hook, hook)
 
-    async def update_part_hook(self, hook_id: int, data: Dict[str, Any]) -> Hook:
+    async def update_part_hook(self, hook_id: int, data: Dict[str, Any]) -> HookType:
         """https://elis.rossum.ai/api/docs/#update-part-of-a-hook"""
         hook = await self._http_client.update(Resource.Hook, hook_id, data)
 
@@ -644,7 +695,7 @@ class ElisAPIClient:
     # ##### USER ROLES #####
     async def list_all_user_roles(
         self, ordering: Sequence[str] = (), **filters: Any
-    ) -> AsyncIterator[Group]:
+    ) -> AsyncIterator[GroupType]:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles."""
         async for g in self._http_client.fetch_all(Resource.Group, ordering, **filters):
             yield self._deserializer(Resource.Group, g)
@@ -693,3 +744,24 @@ class ElisAPIClient:
             if sideload == "content":  # Content (i.e. list of sections is wrapped in a dict)
                 sideloaded_json = sideloaded_json["content"]
             resource[sideload] = sideloaded_json
+
+
+# Type alias for an ElisAPIClient that uses the default deserializer
+ElisClientWithDefaultSerializer = ElisAPIClient[
+    Annotation,
+    Connector,
+    Document,
+    EmailTemplate,
+    Engine,
+    EngineField,
+    Group,
+    Hook,
+    Inbox,
+    Organization,
+    Queue,
+    Schema,
+    Task,
+    Upload,
+    User,
+    Workspace,
+]

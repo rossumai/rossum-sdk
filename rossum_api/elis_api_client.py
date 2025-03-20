@@ -43,7 +43,7 @@ if typing.TYPE_CHECKING:
 
     import httpx
 
-    from rossum_api.models import Deserializer
+    from rossum_api.models import Deserializer, ResponsePostProcessor
 
 AnnotationType = typing.TypeVar("AnnotationType")
 ConnectorType = typing.TypeVar("ConnectorType")
@@ -101,6 +101,7 @@ class ElisAPIClient(
         base_url: str = DEFAULT_BASE_URL,
         http_client: Optional[APIClient] = None,
         deserializer: Optional[Deserializer] = None,
+        response_post_processor: Optional[ResponsePostProcessor] = None,
     ):
         """
         Parameters
@@ -110,8 +111,12 @@ class ElisAPIClient(
             "https://elis.rossum.ai/api/v1"
         deserializer
             pass a custom deserialization callable if different model classes should be returned
+        response_post_processor
+            pass a custom response post-processing callable. Applied only if `http_client` is not provided.
         """
-        self._http_client = http_client or APIClient(username, password, token, base_url)
+        self._http_client = http_client or APIClient(
+            username, password, token, base_url, response_post_processor=response_post_processor
+        )
         self._deserializer = deserializer or deserialize_default
 
     # ##### QUEUE #####

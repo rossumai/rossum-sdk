@@ -23,6 +23,7 @@ if typing.TYPE_CHECKING:
     from aiofiles.threadpool.binary import AsyncBufferedReader
 
     from rossum_api.domain_logic.resources import Resource
+    from rossum_api.models import ResponsePostProcessor
 
 
 RETRIED_HTTP_CODES = (408, 429, 500, 502, 503, 504)
@@ -115,6 +116,7 @@ class APIClient:
         retry_backoff_factor: float = 1.0,
         retry_max_jitter: float = 1.0,
         max_in_flight_requests: int = 4,
+        response_post_processor: Optional[ResponsePostProcessor] = None,
     ):
         if token is None and (username is None and password is None):
             raise TypeError(
@@ -130,6 +132,7 @@ class APIClient:
         self.retry_backoff_factor = retry_backoff_factor
         self.retry_max_jitter = retry_max_jitter
         self.max_in_flight_requests = max_in_flight_requests
+        self.response_post_processor = response_post_processor
 
     @property
     def _headers(self):
@@ -373,10 +376,13 @@ class APIClient:
     async def _authenticate(self) -> None:
         async for attempt in self._retrying():
             with attempt:
+                url = build_full_login_url(self.base_url)
                 response = await self.client.post(
-                    build_full_login_url(self.base_url),
+                    url,
                     data={"username": self.username, "password": self.password},
                 )
+                if self.response_post_processor is not None:
+                    self.response_post_processor(response)
                 await self._raise_for_status(response, "POST")
         self.token = response.json()["key"]
 
@@ -417,6 +423,8 @@ class APIClient:
         async for attempt in self._retrying():
             with attempt:
                 response = await self.client.request(method, url, headers=headers, *args, **kwargs)
+                if self.response_post_processor is not None:
+                    self.response_post_processor(response)
                 await self._raise_for_status(response, method)
         return response
 
@@ -429,6 +437,8 @@ class APIClient:
         headers = kwargs.pop("headers", {})
         headers["Authorization"] = f"token {self.token}"
         async with self.client.stream(method, url, headers=headers, *args, **kwargs) as response:
+            if self.response_post_processor is not None:
+                self.response_post_processor(response)
             await self._raise_for_status(response, method)
             async for chunk in response.aiter_bytes():
                 yield chunk

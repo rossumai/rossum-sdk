@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import typing
 from unittest.mock import MagicMock
 
 import aiofiles
@@ -8,6 +9,10 @@ import pytest_asyncio
 
 from rossum_api import ElisAPIClient, ElisAPIClientSync
 from rossum_api.api_client import APIClient
+
+if typing.TYPE_CHECKING:
+    from rossum_api.elis_api_client import ElisClientWithDefaultSerializer
+    from rossum_api.elis_api_client_sync import ElisAPIClientSyncWithDefaultSerializer
 
 ANNOTATIONS = [  # Most fields are stripped as these are not important for the test
     {
@@ -73,20 +78,26 @@ CONTENT = [
 
 
 @pytest.fixture
-def http_client():
+def http_client() -> APIClient:
     return MagicMock(APIClient)
 
 
 @pytest_asyncio.fixture
-def elis_client(http_client):
-    client = ElisAPIClient(username="", password="", base_url=None, http_client=http_client)
-    return (client, http_client)
+def elis_client(http_client: APIClient) -> tuple[ElisClientWithDefaultSerializer, APIClient]:
+    client: ElisClientWithDefaultSerializer = ElisAPIClient(
+        username="", password="", base_url="", http_client=http_client
+    )
+    return client, http_client
 
 
 @pytest.fixture
-def elis_client_sync(http_client):
-    client = ElisAPIClientSync(username="", password="", base_url=None, http_client=http_client)
-    return (client, http_client)
+def elis_client_sync(
+    http_client: APIClient,
+) -> tuple[ElisAPIClientSyncWithDefaultSerializer, APIClient]:
+    client: ElisAPIClientSyncWithDefaultSerializer = ElisAPIClientSync(
+        username="", password="", base_url="", http_client=http_client
+    )
+    return client, http_client
 
 
 @pytest_asyncio.fixture

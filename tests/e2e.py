@@ -24,6 +24,7 @@ from rossum_api.domain_logic.resources import Resource
 if TYPE_CHECKING:
     from typing import Optional
 
+    from rossum_api.elis_api_client import ElisClientWithDefaultSerializer
     from rossum_api.models.queue import Queue
     from rossum_api.models.schema import Schema
     from rossum_api.models.workspace import Workspace
@@ -44,7 +45,7 @@ class TestE2E:
         queue: Optional[Queue] = None
         schema: Optional[Schema] = None
 
-        client = ElisAPIClient(
+        client: ElisClientWithDefaultSerializer = ElisAPIClient(
             token=os.environ["ROSSUM_TOKEN"],
             base_url=os.environ["ROSSUM_BASE_URL"],
         )
@@ -89,7 +90,7 @@ class TestE2E:
         queue: Optional[Queue] = None
         schema: Optional[Schema] = None
 
-        client = ElisAPIClient(
+        client: ElisClientWithDefaultSerializer = ElisAPIClient(
             token=os.environ["ROSSUM_TOKEN"],
             base_url=os.environ["ROSSUM_BASE_URL"],
         )

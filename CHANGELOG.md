@@ -1,6 +1,17 @@
 # CHANGELOG
 
 
+## v0.23.2 (2025-03-20)
+
+### Bug Fixes
+
+- Resolve problem with typing and custom deserializer
+  ([`a9b95bd`](https://github.com/rossumai/rossum-sdk/commit/a9b95bd16bb2df227727cc30b52d3189ed97f0e9))
+
+When user used a custom deserializer, the typing hints were wrong. This should fix it in a
+  backwards-compatible manner.
+
+
 ## v0.23.1 (2025-01-23)
 
 ### Bug Fixes

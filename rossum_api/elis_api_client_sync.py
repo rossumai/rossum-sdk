@@ -44,7 +44,7 @@ if typing.TYPE_CHECKING:
 
     from rossum_api import ExportFileFormats
     from rossum_api.api_client import APIClient
-    from rossum_api.models import Deserializer
+    from rossum_api.models import Deserializer, ResponsePostProcessor
 
     T = TypeVar("T")
 
@@ -116,6 +116,7 @@ class ElisAPIClientSync(
         base_url: str = DEFAULT_BASE_URL,
         http_client: Optional[APIClient] = None,
         deserializer: Optional[Deserializer] = None,
+        response_post_processor: Optional[ResponsePostProcessor] = None,
     ):
         """
         Parameters
@@ -125,6 +126,8 @@ class ElisAPIClientSync(
             "https://elis.rossum.ai/api/v1"
         deserializer
             pass a custom deserialization callable if different model classes should be returned
+        response_post_processor
+            pass a custom response post-processing callable
         """
         self.elis_api_client: ElisAPIClient[
             AnnotationType,
@@ -143,7 +146,9 @@ class ElisAPIClientSync(
             UploadType,
             UserType,
             WorkspaceType,
-        ] = ElisAPIClient(username, password, token, base_url, http_client, deserializer)
+        ] = ElisAPIClient(
+            username, password, token, base_url, http_client, deserializer, response_post_processor
+        )
         # The executor is never terminated. We would either need to turn the client into a context manager which is inconvenient for users or terminate it after each request which is wasteful. Keeping one thread around seems like the lesser evil.
         self.executor = ThreadPoolExecutor(max_workers=1)
 

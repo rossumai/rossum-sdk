@@ -12,6 +12,7 @@ import contextlib
 import copy
 import functools
 import json
+import logging
 import unittest.mock as mock
 
 import aiofiles
@@ -22,6 +23,7 @@ from conftest import ANNOTATIONS, AUTOMATION_BLOCKERS, CONTENT
 
 from rossum_api.api_client import APIClient, APIClientError
 from rossum_api.domain_logic.resources import Resource
+from rossum_api.domain_logic.urls import build_full_login_url
 
 WORKSPACES = [
     {
@@ -740,3 +742,63 @@ async def test_get_token_old(client):
 async def test_get_token_force_refresh(client, login_mock):
     token = await client.get_token(refresh=True)
     assert token == NEW_TOKEN
+
+
+def response_post_processor(response: httpx.Response) -> None:
+    logging.info("response_post_processor visited")
+
+
+@pytest.fixture
+def client_with_response_post_processor():
+    client = APIClient("username", "password", response_post_processor=response_post_processor)
+    client.token = FAKE_TOKEN
+    return client
+
+
+@pytest.mark.asyncio
+async def test_request_response_post_processor(
+    client_with_response_post_processor, httpx_mock, caplog
+):
+    """Test the `request` method with a custom response post processor."""
+    caplog.set_level(logging.INFO)
+    url = "https://elis.rossum.ai/api/v1/queues/123"
+    method = "GET"
+    httpx_mock.add_response(method=method, url=url)
+
+    await client_with_response_post_processor.request(method, url)
+    assert "response_post_processor visited" in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_stream_response_post_processor(
+    client_with_response_post_processor, httpx_mock, caplog
+):
+    """Test the `_stream` method with a custom response post processor."""
+    caplog.set_level(logging.INFO)
+    url = "https://elis.rossum.ai/api/v1/queues/123"
+    method = "GET"
+    httpx_mock.add_response(
+        method=method,
+        url=url,
+        stream=pytest_httpx.IteratorStream([CSV_EXPORT]),
+    )
+
+    async for _ in client_with_response_post_processor._stream(method, url):
+        pass
+    assert "response_post_processor visited" in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_authenticate_response_post_processor(
+    client_with_response_post_processor, httpx_mock, caplog
+):
+    """Test the `_authenticate` method with a custom response post processor."""
+    caplog.set_level(logging.INFO)
+    httpx_mock.add_response(
+        method="POST",
+        url=build_full_login_url(client_with_response_post_processor.base_url),
+        json={"key": NEW_TOKEN},
+    )
+
+    await client_with_response_post_processor._authenticate()
+    assert "response_post_processor visited" in caplog.text

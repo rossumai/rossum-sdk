@@ -25,8 +25,11 @@ from rossum_api.models.workspace import Workspace
 if TYPE_CHECKING:
     from typing import Any, Callable, Dict
 
+    import httpx
+
     JsonDict = Dict[str, Any]
     Deserializer = Callable[[Resource, JsonDict], Any]
+    ResponsePostProcessor = Callable[[httpx.Response], Any]
 
 
 RESOURCE_TO_MODEL = {

@@ -1,6 +1,16 @@
 # CHANGELOG
 
 
+## v0.24.0 (2025-03-21)
+
+### Features
+
+- Add response post-processor
+  ([`a1ab75f`](https://github.com/rossumai/rossum-sdk/commit/a1ab75fe505af59ffb363b69439abc4596a156bb))
+
+Useful e.g. for logging.
+
+
 ## v0.23.2 (2025-03-20)
 
 ### Bug Fixes

@@ -41,11 +41,11 @@ def dummy_hook():
 
 @pytest.mark.asyncio
 class TestHooks:
-    async def test_list_all_hooks(self, elis_client, dummy_hook, mock_generator):
+    async def test_list_hooks(self, elis_client, dummy_hook, mock_generator):
         client, http_client = elis_client
         http_client.fetch_all.return_value = mock_generator(dummy_hook)
 
-        hooks = client.list_all_hooks()
+        hooks = client.list_hooks()
 
         async for h in hooks:
             assert h == Hook(**dummy_hook)
@@ -104,27 +104,27 @@ class TestHooks:
 
 
 class TestHooksSync:
-    def test_list_all_hooks(self, elis_client_sync, dummy_hook, mock_generator):
+    def test_list_hooks(self, elis_client_sync, dummy_hook):
         client, http_client = elis_client_sync
-        http_client.fetch_all.return_value = mock_generator(dummy_hook)
+        http_client.fetch_resources.return_value = iter((dummy_hook,))
 
-        hooks = client.list_all_hooks()
+        hooks = client.list_hooks()
 
         for h in hooks:
             assert h == Hook(**dummy_hook)
 
-        http_client.fetch_all.assert_called_with(Resource.Hook, ())
+        http_client.fetch_resources.assert_called_with(Resource.Hook, ())
 
     def test_retrieve_hook(self, elis_client_sync, dummy_hook):
         client, http_client = elis_client_sync
-        http_client.fetch_one.return_value = dummy_hook
+        http_client.fetch_resource.return_value = dummy_hook
 
         uid = dummy_hook["id"]
         hook = client.retrieve_hook(uid)
 
         assert hook == Hook(**dummy_hook)
 
-        http_client.fetch_one.assert_called_with(Resource.Hook, uid)
+        http_client.fetch_resource.assert_called_with(Resource.Hook, uid)
 
     def test_create_new_hook(self, elis_client_sync, dummy_hook):
         client, http_client = elis_client_sync

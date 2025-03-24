@@ -28,11 +28,11 @@ def dummy_organization():
 
 @pytest.mark.asyncio
 class TestOrganizations:
-    async def test_list_all_organizations(self, elis_client, dummy_organization, mock_generator):
+    async def test_list_organizations(self, elis_client, dummy_organization, mock_generator):
         client, http_client = elis_client
         http_client.fetch_all.return_value = mock_generator(dummy_organization)
 
-        organizations = client.list_all_organizations()
+        organizations = client.list_organizations()
 
         async for o in organizations:
             assert o == Organization(**dummy_organization)
@@ -59,41 +59,41 @@ class TestOrganizations:
         assert organization == Organization(**dummy_organization)
 
         http_client.fetch_one.assert_has_calls(
-            [call(Resource.Auth, "user"), call(Resource.Organization, "406")]
+            [call(Resource.Auth, "user"), call(Resource.Organization, 406)]
         )
 
 
 class TestOrganizationsSync:
-    def test_list_all_organizations(self, elis_client_sync, dummy_organization, mock_generator):
+    def test_list_organizations(self, elis_client_sync, dummy_organization):
         client, http_client = elis_client_sync
-        http_client.fetch_all.return_value = mock_generator(dummy_organization)
+        http_client.fetch_resources.return_value = iter((dummy_organization,))
 
-        organizations = client.list_all_organizations()
+        organizations = client.list_organizations()
 
         for o in organizations:
             assert o == Organization(**dummy_organization)
 
-        http_client.fetch_all.assert_called_with(Resource.Organization, ())
+        http_client.fetch_resources.assert_called_with(Resource.Organization, ())
 
     def test_retrieve_organization(self, elis_client_sync, dummy_organization):
         client, http_client = elis_client_sync
-        http_client.fetch_one.return_value = dummy_organization
+        http_client.fetch_resource.return_value = dummy_organization
 
         oid = dummy_organization["id"]
         organization = client.retrieve_organization(oid)
 
         assert organization == Organization(**dummy_organization)
 
-        http_client.fetch_one.assert_called_with(Resource.Organization, oid)
+        http_client.fetch_resource.assert_called_with(Resource.Organization, oid)
 
-    def test_retrieve_own_organization(self, elis_client_sync, dummy_user, dummy_organization):
+    def test_retrieve_my_organization(self, elis_client_sync, dummy_user, dummy_organization):
         client, http_client = elis_client_sync
-        http_client.fetch_one.side_effect = [dummy_user, dummy_organization]
+        http_client.fetch_resource.side_effect = [dummy_user, dummy_organization]
 
-        organization = client.retrieve_own_organization()
+        organization = client.retrieve_my_organization()
 
         assert organization == Organization(**dummy_organization)
 
-        http_client.fetch_one.assert_has_calls(
-            [call(Resource.Auth, "user"), call(Resource.Organization, "406")]
+        http_client.fetch_resource.assert_has_calls(
+            [call(Resource.Auth, "user"), call(Resource.Organization, 406)]
         )

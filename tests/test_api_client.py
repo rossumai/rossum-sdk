@@ -21,7 +21,8 @@ import pytest
 import pytest_httpx
 from conftest import ANNOTATIONS, AUTOMATION_BLOCKERS, CONTENT
 
-from rossum_api.api_client import APIClient, APIClientError
+from exceptions import APIClientError
+from rossum_api.clients.internal_async_client import InternalAsyncClient
 from rossum_api.domain_logic.resources import Resource
 from rossum_api.domain_logic.urls import build_full_login_url
 
@@ -92,7 +93,9 @@ def count_calls(func):
 @pytest.fixture
 def client():
     # Set retrying parameters to zero to keep tests fast
-    client = APIClient("username", "password", retry_backoff_factor=0, retry_max_jitter=0)
+    client = InternalAsyncClient(
+        username="username", password="password", retry_backoff_factor=0, retry_max_jitter=0
+    )
     client.token = FAKE_TOKEN
     return client
 
@@ -149,7 +152,7 @@ async def test_authenticate_is_retried(client, httpx_mock):
 @pytest.mark.asyncio
 async def test_init_token(httpx_mock):
     """Verifies that we can create client using token and call API without 'auth' call."""
-    client = APIClient(token=FAKE_TOKEN)
+    client = InternalAsyncClient(token=FAKE_TOKEN)
 
     httpx_mock.add_response(
         method="GET",
@@ -164,7 +167,7 @@ async def test_init_token(httpx_mock):
 @pytest.mark.asyncio
 async def test_reauth_no_credentials(httpx_mock):
     """Invalid token used but no credentials available for re-authentication. Raise 401."""
-    client = APIClient(token=FAKE_TOKEN)
+    client = InternalAsyncClient(token=FAKE_TOKEN)
 
     httpx_mock.add_response(
         method="GET",
@@ -181,7 +184,7 @@ async def test_reauth_no_credentials(httpx_mock):
 @pytest.mark.asyncio
 async def test_reauth_success(login_mock, httpx_mock):
     """Invalid token used, credentials available => reauthenticate in the background. Fetch user without raising any errors."""
-    client = APIClient("username", "password", token=FAKE_TOKEN)
+    client = InternalAsyncClient(username="username", password="password", token=FAKE_TOKEN)
 
     httpx_mock.add_response(
         method="GET",
@@ -620,7 +623,7 @@ async def test_authenticate_generator_if_needed_token_expired(client, httpx_mock
 
 @pytest.mark.asyncio
 async def test_authenticate_if_needed_no_token(httpx_mock):
-    client = APIClient("username", "password")
+    client = InternalAsyncClient(username="username", password="password")
     httpx_mock.add_response(
         method="GET",
         url="https://elis.rossum.ai/api/v1/workspaces/7694",
@@ -639,7 +642,7 @@ async def test_authenticate_if_needed_no_token(httpx_mock):
 
 @pytest.mark.asyncio
 async def test_authenticate_generator_if_needed_no_token(client, httpx_mock):
-    client = APIClient("username", "password")
+    client = InternalAsyncClient(username="username", password="password")
     httpx_mock.add_response(
         method="GET",
         url="https://elis.rossum.ai/api/v1/queues/123/export?format=csv",
@@ -749,8 +752,10 @@ def response_post_processor(response: httpx.Response) -> None:
 
 
 @pytest.fixture
-def client_with_response_post_processor():
-    client = APIClient("username", "password", response_post_processor=response_post_processor)
+def client_with_response_post_processor() -> InternalAsyncClient:
+    client = InternalAsyncClient(
+        username="username", password="password", response_post_processor=response_post_processor
+    )
     client.token = FAKE_TOKEN
     return client
 

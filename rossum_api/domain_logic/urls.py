@@ -34,3 +34,31 @@ def build_upload_url(resource: Resource, id_: int) -> str:
 
 def build_full_login_url(base_url: str) -> str:
     return f"{base_url}/auth/login"
+
+
+def build_resource_search_url(resource: Resource) -> str:
+    return f"{resource.value}/search"
+
+
+def build_resource_delete_url(resource: Resource, id_: int) -> str:
+    return f"{resource.value}/{id_}/delete"
+
+
+def build_resource_start_url(resource: Resource, id_: int) -> str:
+    return f"{resource.value}/{id_}/start"
+
+
+def build_resource_cancel_url(resource: Resource, id_: int) -> str:
+    return f"{resource.value}/{id_}/cancel"
+
+
+def build_resource_confirm_url(resource: Resource, id_: int) -> str:
+    return f"{resource.value}/{id_}/confirm"
+
+
+def build_resource_content_url(resource: Resource, id_: int) -> str:
+    return f"{resource.value}/{id_}/content"
+
+
+def build_resource_content_operations_url(resource: Resource, id_: int) -> str:
+    return f"{resource.value}/{id_}/content/operations"

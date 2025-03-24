@@ -33,11 +33,11 @@ class TestEngine:
         assert engine == Engine(**dummy_engine)
         http_client.fetch_one.assert_called_with(Resource.Engine, TEST_ENGINE_ID)
 
-    async def test_list_all_engines(self, elis_client, dummy_engine, mock_generator):
+    async def test_list_engines(self, elis_client, dummy_engine, mock_generator):
         client, http_client = elis_client
         http_client.fetch_all.return_value = mock_generator(dummy_engine)
 
-        engines = client.list_all_engines()
+        engines = client.list_engines()
 
         async for engine in engines:
             assert engine == Engine(**dummy_engine)

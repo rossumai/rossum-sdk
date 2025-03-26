@@ -1,6 +1,20 @@
 # CHANGELOG
 
 
+## v1.0.0 (2025-03-26)
+
+### Features
+
+- Implement sync client without event loop
+  ([`3964632`](https://github.com/rossumai/rossum-sdk/commit/3964632e9fd112cef5bc8c8c001ef39398fff48f))
+
+BREAKING CHANGE: Public interface changed.
+
+### Breaking Changes
+
+- Public interface changed.
+
+
 ## v0.24.0 (2025-03-21)
 
 ### Features

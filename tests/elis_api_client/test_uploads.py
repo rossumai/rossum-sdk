@@ -39,11 +39,11 @@ class TestUploads:
 class TestUploadsSync:
     def test_retrieve_upload(self, elis_client_sync, dummy_upload):
         client, http_client = elis_client_sync
-        http_client.fetch_one.return_value = dummy_upload
+        http_client.fetch_resource.return_value = dummy_upload
 
         uid = dummy_upload["id"]
         upload = client.retrieve_upload(uid)
 
         assert upload == Upload(**dummy_upload)
 
-        http_client.fetch_one.assert_called_with(Resource.Upload, uid)
+        http_client.fetch_resource.assert_called_with(Resource.Upload, uid)

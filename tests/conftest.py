@@ -7,12 +7,17 @@ import aiofiles
 import pytest
 import pytest_asyncio
 
-from rossum_api import ElisAPIClient, ElisAPIClientSync
-from rossum_api.api_client import APIClient
+from rossum_api.clients.external_async_client import AsyncRossumAPIClient
+from rossum_api.clients.external_sync_client import SyncRossumAPIClient
+from rossum_api.clients.internal_async_client import InternalAsyncClient
+from rossum_api.clients.internal_sync_client import InternalSyncClient
+from rossum_api.dtos import Token
 
 if typing.TYPE_CHECKING:
-    from rossum_api.elis_api_client import ElisClientWithDefaultSerializer
-    from rossum_api.elis_api_client_sync import ElisAPIClientSyncWithDefaultSerializer
+    from rossum_api.clients.external_async_client import (
+        AsyncRossumAPIClientWithDefaultDeserializer,
+    )
+    from rossum_api.clients.external_sync_client import SyncRossumAPIClientWithDefaultDeserializer
 
 ANNOTATIONS = [  # Most fields are stripped as these are not important for the test
     {
@@ -78,26 +83,35 @@ CONTENT = [
 
 
 @pytest.fixture
-def http_client() -> APIClient:
-    return MagicMock(APIClient)
+def internal_async_client() -> MagicMock:
+    return MagicMock(InternalAsyncClient)
 
 
-@pytest_asyncio.fixture
-def elis_client(http_client: APIClient) -> tuple[ElisClientWithDefaultSerializer, APIClient]:
-    client: ElisClientWithDefaultSerializer = ElisAPIClient(
-        username="", password="", base_url="", http_client=http_client
+@pytest.fixture
+def internal_sync_client() -> MagicMock:
+    return MagicMock(InternalSyncClient)
+
+
+@pytest.fixture
+def elis_client(
+    internal_async_client: MagicMock,
+) -> tuple[AsyncRossumAPIClientWithDefaultDeserializer, MagicMock]:
+    client: AsyncRossumAPIClientWithDefaultDeserializer = AsyncRossumAPIClient(
+        base_url="", credentials=Token("abc")
     )
-    return client, http_client
+    client._http_client = internal_async_client
+    return client, internal_async_client
 
 
 @pytest.fixture
 def elis_client_sync(
-    http_client: APIClient,
-) -> tuple[ElisAPIClientSyncWithDefaultSerializer, APIClient]:
-    client: ElisAPIClientSyncWithDefaultSerializer = ElisAPIClientSync(
-        username="", password="", base_url="", http_client=http_client
+    internal_sync_client: MagicMock,
+) -> tuple[SyncRossumAPIClientWithDefaultDeserializer, MagicMock]:
+    client: SyncRossumAPIClientWithDefaultDeserializer = SyncRossumAPIClient(
+        base_url="", credentials=Token("abc")
     )
-    return client, http_client
+    client.internal_client = internal_sync_client
+    return client, internal_sync_client
 
 
 @pytest_asyncio.fixture
@@ -115,6 +129,15 @@ async def mock_file_read():
         async with aiofiles.open(path, "rb") as fp:
             async for line in fp:
                 yield line
+
+    return f
+
+
+@pytest_asyncio.fixture
+async def mock_file_read_sync():
+    def f(path):
+        with open(path, "rb") as fp:
+            yield from fp
 
     return f
 

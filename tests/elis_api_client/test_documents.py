@@ -84,14 +84,14 @@ class TestDocuments:
 class TestDocumentsSync:
     def test_retrieve_document(self, elis_client_sync, dummy_document):
         client, http_client = elis_client_sync
-        http_client.fetch_one.return_value = dummy_document
+        http_client.fetch_resource.return_value = dummy_document
 
         did = dummy_document["id"]
         document = client.retrieve_document(did)
 
         assert document == Document(**dummy_document)
 
-        http_client.fetch_one.assert_called_with(Resource.Document, did)
+        http_client.fetch_resource.assert_called_with(Resource.Document, did)
 
     def test_retrieve_document_content(self, elis_client_sync, file_data):
         client, http_client = elis_client_sync

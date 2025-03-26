@@ -1,11 +1,11 @@
 """Integration tests.
 
- These test do not run with the rest of the tests (and did not run in previous versions)
- because of the filename. To manually run them, you need to:
- - set envars ROSSUM_TOKEN, ROSSUM_BASE_URL and ROSSUM_ORGANIZATION_URL
- - pytest tests/e2e.py
+These test do not run with the rest of the tests (and did not run in previous versions)
+because of the filename. To manually run them, you need to:
+- set envars ROSSUM_TOKEN, ROSSUM_BASE_URL and ROSSUM_ORGANIZATION_URL
+- pytest tests/e2e.py
 
- In case of permission issues these tests will fail during cleanup.
+In case of permission issues these tests will fail during cleanup.
 """
 
 from __future__ import annotations
@@ -18,13 +18,16 @@ import aiofiles
 import pytest
 from aiofiles import os as aios
 
-from rossum_api import ElisAPIClient
+from rossum_api import AsyncRossumAPIClient
 from rossum_api.domain_logic.resources import Resource
+from rossum_api.dtos import Token
 
 if TYPE_CHECKING:
     from typing import Optional
 
-    from rossum_api.elis_api_client import ElisClientWithDefaultSerializer
+    from rossum_api.clients.external_async_client import (
+        AsyncRossumAPIClientWithDefaultDeserializer,
+    )
     from rossum_api.models.queue import Queue
     from rossum_api.models.schema import Schema
     from rossum_api.models.workspace import Workspace
@@ -44,9 +47,8 @@ class TestE2E:
         workspace: Optional[Workspace] = None
         queue: Optional[Queue] = None
         schema: Optional[Schema] = None
-
-        client: ElisClientWithDefaultSerializer = ElisAPIClient(
-            token=os.environ["ROSSUM_TOKEN"],
+        client: AsyncRossumAPIClientWithDefaultDeserializer = AsyncRossumAPIClient(
+            credentials=Token(os.environ["ROSSUM_TOKEN"]),
             base_url=os.environ["ROSSUM_BASE_URL"],
         )
         try:
@@ -89,9 +91,8 @@ class TestE2E:
         workspace: Optional[Workspace] = None
         queue: Optional[Queue] = None
         schema: Optional[Schema] = None
-
-        client: ElisClientWithDefaultSerializer = ElisAPIClient(
-            token=os.environ["ROSSUM_TOKEN"],
+        client: AsyncRossumAPIClientWithDefaultDeserializer = AsyncRossumAPIClient(
+            credentials=Token(os.environ["ROSSUM_TOKEN"]),
             base_url=os.environ["ROSSUM_BASE_URL"],
         )
         try:

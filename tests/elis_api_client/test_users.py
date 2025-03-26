@@ -8,11 +8,11 @@ from rossum_api.models.user import User
 
 @pytest.mark.asyncio
 class TestUsers:
-    async def test_list_all_users(self, elis_client, dummy_user, mock_generator):
+    async def test_list_users(self, elis_client, dummy_user, mock_generator):
         client, http_client = elis_client
         http_client.fetch_all.return_value = mock_generator(dummy_user)
 
-        users = client.list_all_users()
+        users = client.list_users()
 
         async for u in users:
             assert u == User(**dummy_user)
@@ -49,27 +49,27 @@ class TestUsers:
 
 
 class TestUsersSync:
-    def test_list_all_users(self, elis_client_sync, dummy_user, mock_generator):
+    def test_list_users(self, elis_client_sync, dummy_user):
         client, http_client = elis_client_sync
-        http_client.fetch_all.return_value = mock_generator(dummy_user)
+        http_client.fetch_resources.return_value = iter((dummy_user,))
 
-        users = client.list_all_users()
+        users = client.list_users()
 
         for u in users:
             assert u == User(**dummy_user)
 
-        http_client.fetch_all.assert_called_with(Resource.User, ())
+        http_client.fetch_resources.assert_called_with(Resource.User, ())
 
     def test_retrieve_user(self, elis_client_sync, dummy_user):
         client, http_client = elis_client_sync
-        http_client.fetch_one.return_value = dummy_user
+        http_client.fetch_resource.return_value = dummy_user
 
         uid = dummy_user["id"]
         user = client.retrieve_user(uid)
 
         assert user == User(**dummy_user)
 
-        http_client.fetch_one.assert_called_with(Resource.User, uid)
+        http_client.fetch_resource.assert_called_with(Resource.User, uid)
 
     def test_create_new_user(self, elis_client_sync, dummy_user):
         client, http_client = elis_client_sync

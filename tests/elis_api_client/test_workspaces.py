@@ -24,11 +24,11 @@ def dummy_workspace():
 
 @pytest.mark.asyncio
 class TestWorkspaces:
-    async def test_list_all_workspaces(self, elis_client, dummy_workspace, mock_generator):
+    async def test_list_workspaces(self, elis_client, dummy_workspace, mock_generator):
         client, http_client = elis_client
         http_client.fetch_all.return_value = mock_generator(dummy_workspace)
 
-        workspaces = client.list_all_workspaces()
+        workspaces = client.list_workspaces()
 
         async for w in workspaces:
             assert w == Workspace(**dummy_workspace)
@@ -72,27 +72,27 @@ class TestWorkspaces:
 
 
 class TestWorkspacesSync:
-    def test_list_all_workspaces(self, elis_client_sync, dummy_workspace, mock_generator):
+    def test_list_workspaces(self, elis_client_sync, dummy_workspace):
         client, http_client = elis_client_sync
-        http_client.fetch_all.return_value = mock_generator(dummy_workspace)
+        http_client.fetch_resources.return_value = iter((dummy_workspace,))
 
-        workspaces = client.list_all_workspaces()
+        workspaces = client.list_workspaces()
 
         for w in workspaces:
             assert w == Workspace(**dummy_workspace)
 
-        http_client.fetch_all.assert_called_with(Resource.Workspace, ())
+        http_client.fetch_resources.assert_called_with(Resource.Workspace, ())
 
     def test_retrieve_workspace(self, elis_client_sync, dummy_workspace):
         client, http_client = elis_client_sync
-        http_client.fetch_one.return_value = dummy_workspace
+        http_client.fetch_resource.return_value = dummy_workspace
 
         oid = dummy_workspace["id"]
         workspace = client.retrieve_workspace(oid)
 
         assert workspace == Workspace(**dummy_workspace)
 
-        http_client.fetch_one.assert_called_with(Resource.Workspace, oid)
+        http_client.fetch_resource.assert_called_with(Resource.Workspace, oid)
 
     def test_create_new_workspace(self, elis_client_sync, dummy_workspace):
         client, http_client = elis_client_sync

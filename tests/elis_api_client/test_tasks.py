@@ -68,36 +68,36 @@ class TestTasks:
 class TestTasksSync:
     def test_retrieve_task(self, elis_client_sync, dummy_task):
         client, http_client = elis_client_sync
-        http_client.fetch_one.return_value = dummy_task
+        http_client.fetch_resource.return_value = dummy_task
 
         uid = dummy_task["id"]
         task = client.retrieve_task(uid)
 
         assert task == Task(**dummy_task)
 
-        http_client.fetch_one.assert_called_with(
+        http_client.fetch_resource.assert_called_with(
             Resource.Task, uid, request_params={"no_redirect": "True"}
         )
 
     def test_poll_task_basic(self, elis_client_sync, dummy_task):
         client, http_client = elis_client_sync
-        http_client.fetch_one.return_value = dummy_task
+        http_client.fetch_resource.return_value = dummy_task
 
         uid = dummy_task["id"]
         task = client.poll_task(uid, lambda a: a.status == TaskStatus.SUCCEEDED)
 
         assert task == Task(**dummy_task)
 
-        http_client.fetch_one.assert_called_with(
+        http_client.fetch_resource.assert_called_with(
             Resource.Task, uid, request_params={"no_redirect": "True"}
         )
 
     def test_poll_task(self, elis_client_sync, dummy_task):
         client, http_client = elis_client_sync
         running_task = {**dummy_task, "status": TaskStatus.RUNNING}
-        http_client.fetch_one.side_effect = [running_task, dummy_task.copy()]
+        http_client.fetch_resource.side_effect = [running_task, dummy_task.copy()]
 
-        with patch("asyncio.sleep") as sleep_mock:
+        with patch("time.sleep") as sleep_mock:
             task = client.poll_task(
                 dummy_task["id"], lambda a: a.status == TaskStatus.SUCCEEDED, sleep_s=2
             )

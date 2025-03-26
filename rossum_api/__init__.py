@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-from rossum_api.api_client import APIClientError
-from rossum_api.elis_api_client import ElisAPIClient, ExportFileFormats
-from rossum_api.elis_api_client_sync import ElisAPIClientSync
+from exceptions import APIClientError
+from rossum_api.clients.external_async_client import AsyncRossumAPIClient
+from rossum_api.clients.external_sync_client import SyncRossumAPIClient
 
 __version__ = "0.24.0"
 
 __all__ = (
+    "AsyncRossumAPIClient",
+    "SyncRossumAPIClient",
     "APIClientError",
-    "ElisAPIClient",
-    "ElisAPIClientSync",
-    "ExportFileFormats",
 )

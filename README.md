@@ -1,3 +1,5 @@
+from rossum_api.dtos import UserCredentialsfrom rossum_api.dtos import UserCredentials
+
 # Rossum SDK
 
 [![Build Status](https://github.com/rossumai/rossum-sdk/actions/workflows/lint-and-test.yaml/badge.svg)](https://github.com/rossumai/rossum-sdk/actions)
@@ -47,29 +49,32 @@ You can choose between asynchronous and synchronous client. Both are exactly the
 Async version:
 
 ```python
+import os
 import asyncio
-from rossum_api import ElisAPIClient
+from rossum_api import AsyncRossumAPIClient
+from rossum_api.dtos import UserCredentials
 
 WORKSPACE = {
-    "name": "Rossum Client NG Test",
-    "organization": "https://elis.rossum.ai/api/v1/organizations/116390",
+  "name": "Rossum Client NG Test",
+  "organization": "https://elis.rossum.ai/api/v1/organizations/116390",
 }
 
+
 async def main_with_async_client():
-    client = ElisAPIClient(
-        os.environ["ELIS_USERNAME"],
-        os.environ["ELIS_PASSWORD"],
-        base_url="https://elis.rossum.ai/api/v1",
-    )
-    ws = await client.create_new_workspace(data=WORKSPACE)
-    workspace_id = ws.id
-    ws = await client.retrieve_workspace(workspace_id)
-    print("GET result:", ws)
-    print("LIST results:")
-    async for w in client.list_all_workspaces(ordering=["-id"], name=WORKSPACE["name"]):
-        print(w)
-    await client.delete_workspace(workspace_id)
-    print(f"Workspace {workspace_id} deleted.")
+  client = AsyncRossumAPIClient(
+    base_url="https://elis.rossum.ai/api/v1",
+    credentials=UserCredentials(os.environ["ELIS_USERNAME"], os.environ["ELIS_PASSWORD"]),
+  )
+  ws = await client.create_new_workspace(data=WORKSPACE)
+  workspace_id = ws.id
+  ws = await client.retrieve_workspace(workspace_id)
+  print("GET result:", ws)
+  print("LIST results:")
+  async for w in client.list_workspaces(ordering=["-id"], name=WORKSPACE["name"]):
+    print(w)
+  await client.delete_workspace(workspace_id)
+  print(f"Workspace {workspace_id} deleted.")
+
 
 asyncio.run(main_with_async_client())
 ```
@@ -77,28 +82,31 @@ asyncio.run(main_with_async_client())
 Sync version:
 
 ```python
-from rossum_api import ElisAPIClientSync
+import os
+from rossum_api import SyncRossumAPIClient
+from rossum_api.dtos import UserCredentials
 
 WORKSPACE = {
     "name": "Rossum Client NG Test",
     "organization": "https://elis.rossum.ai/api/v1/organizations/116390",
 }
 
+
 def main_with_sync_client():
-    client = ElisAPIClientSync(
-        os.environ["ELIS_USERNAME"],
-        os.environ["ELIS_PASSWORD"],
+    client = SyncRossumAPIClient(
         base_url="https://elis.rossum.ai/api/v1",
+        credentials=UserCredentials(os.environ["ELIS_USERNAME"], os.environ["ELIS_PASSWORD"]),
     )
     ws = client.create_new_workspace(data=WORKSPACE)
     workspace_id = ws.id
     ws = client.retrieve_workspace(workspace_id)
     print("GET result:", ws)
     print("LIST results:")
-    for w in client.list_all_workspaces(ordering=["-id"], name=WORKSPACE["name"]):
+    for w in client.list_workspaces(ordering=["-id"], name=WORKSPACE["name"]):
         print(w)
     client.delete_workspace(workspace_id)
     print(f"Workspace {workspace_id} deleted.")
+
 
 main_with_sync_client()
 ```

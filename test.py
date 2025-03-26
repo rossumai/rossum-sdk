@@ -2,6 +2,7 @@
 
 It could evolve in time into an E2E test.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -12,11 +13,15 @@ import typing
 
 import aiofiles
 
-from rossum_api import ElisAPIClient, ElisAPIClientSync
-from rossum_api.api_client import APIClient
+from rossum_api import AsyncRossumAPIClient, SyncRossumAPIClient
+from rossum_api.clients.internal_async_client import InternalAsyncClient
+from rossum_api.domain_logic.resources import Resource
+from rossum_api.dtos import UserCredentials
 
 if typing.TYPE_CHECKING:
-    from rossum_api.elis_api_client import ElisClientWithDefaultSerializer
+    from rossum_api.clients.external_async_client import (
+        AsyncRossumAPIClientWithDefaultDeserializer,
+    )
 
 logging.basicConfig()
 logging.getLogger().setLevel(logging.DEBUG)
@@ -54,34 +59,34 @@ SCHEMA = {
 
 
 async def main():
-    client = APIClient(
-        os.environ["ELIS_USERNAME"],
-        os.environ["ELIS_PASSWORD"],
+    client = InternalAsyncClient(
         base_url="https://elis.develop.r8.lol/api/v1",
+        username=os.environ["ELIS_USERNAME"],
+        password=os.environ["ELIS_PASSWORD"],
     )
-    workspace = await client.create("workspaces", data=WORKSPACE)
-    response = await client.fetch_one("workspaces", id_=workspace["id"])
+    workspace = await client.create(Resource.Workspace, data=WORKSPACE)
+    response = await client.fetch_one(Resource.Workspace, id_=workspace["id"])
     print("GET result:", response)
     print("LIST results:")
-    async for w in client.fetch_all("workspaces", ordering=["-id"], name=WORKSPACE["name"]):
+    async for w in client.fetch_all(Resource.Workspace, ordering=["-id"], name=WORKSPACE["name"]):
         print(w)
     response = await client.replace(
-        "workspaces",
+        Resource.Workspace,
         id_=workspace["id"],
         data={**WORKSPACE, "name": WORKSPACE["name"]},
     )
     print("PUT result:", response)
     response = await client.update(
-        "workspaces",
+        Resource.Workspace,
         id_=workspace["id"],
         data={"name": f"{WORKSPACE['name']} {random.randint(1, 100)}"},
     )
     print("PATCH result:", response)
 
     # Upload a document -- schema and queue must be created to do that
-    schema = await client.create("schemas", data=SCHEMA)
+    schema = await client.create(Resource.Schema, data=SCHEMA)
     queue = await client.create(
-        "queues",
+        Resource.Queue,
         data={
             "workspace": workspace["url"],
             "name": "Rossum Client NG Test",
@@ -91,7 +96,7 @@ async def main():
 
     async with aiofiles.open("tests/data/sample_invoice.pdf", "rb") as fp:
         response = await client.upload(
-            "queues",
+            Resource.Queue,
             id_=queue["id"],
             fp=fp,
             filename="filename.pdf",
@@ -102,7 +107,7 @@ async def main():
 
     print("EXPORT result:")
     async for chunk in client.export(
-        "queues",
+        Resource.Queue,
         id_=queue["id"],
         export_format="xml",
         page_size=200,
@@ -110,21 +115,20 @@ async def main():
     ):
         print(chunk)
 
-    response = await client.delete("workspaces", id_=workspace["id"])
+    await client.delete(Resource.Workspace, id_=workspace["id"])
     print(f"Workspace {workspace['id']} deleted.")
 
 
 async def main_with_async_client():
-    client: ElisClientWithDefaultSerializer = ElisAPIClient(
-        os.environ["ELIS_USERNAME"],
-        os.environ["ELIS_PASSWORD"],
+    client: AsyncRossumAPIClientWithDefaultDeserializer = AsyncRossumAPIClient(
+        credentials=UserCredentials(os.environ["ELIS_USERNAME"], os.environ["ELIS_PASSWORD"]),
         base_url="https://elis.develop.r8.lol/api/v1",
     )
     workspace = await client.create_new_workspace(data=WORKSPACE)
     workspace = await client.retrieve_workspace(workspace.id)
     print("GET result:", workspace)
     print("LIST results:")
-    async for w in client.list_all_workspaces(["-id"], None, name=WORKSPACE["name"]):
+    async for w in client.list_workspaces(["-id"], name=WORKSPACE["name"]):
         print(w)
 
     schema = await client.create_new_schema(SCHEMA)
@@ -149,9 +153,8 @@ async def main_with_async_client():
 
 
 def main_with_sync_client():
-    client = ElisAPIClientSync(
-        os.environ["ELIS_USERNAME"],
-        os.environ["ELIS_PASSWORD"],
+    client = SyncRossumAPIClient(
+        credentials=UserCredentials(os.environ["ELIS_USERNAME"], os.environ["ELIS_PASSWORD"]),
         base_url="https://elis.develop.r8.lol/api/v1",
     )
     ws = client.create_new_workspace(data=WORKSPACE)
@@ -159,7 +162,7 @@ def main_with_sync_client():
     ws = client.retrieve_workspace(workspace_id)
     print("GET result:", ws)
     print("LIST results:")
-    for w in client.list_all_workspaces(["-id"], None, name=WORKSPACE["name"]):
+    for w in client.list_workspaces(["-id"], name=WORKSPACE["name"]):
         print(w)
     client.delete_workspace(workspace_id)
     print(f"Workspace {workspace_id} deleted.")

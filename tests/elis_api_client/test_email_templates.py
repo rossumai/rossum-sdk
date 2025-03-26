@@ -28,13 +28,11 @@ def dummy_email_template():
 
 @pytest.mark.asyncio
 class TestEmailTemplates:
-    async def test_list_all_email_templates(
-        self, elis_client, dummy_email_template, mock_generator
-    ):
+    async def test_list_email_templates(self, elis_client, dummy_email_template, mock_generator):
         client, http_client = elis_client
         http_client.fetch_all.return_value = mock_generator(dummy_email_template)
 
-        email_templates = client.list_all_email_templates()
+        email_templates = client.list_email_templates()
 
         async for c in email_templates:
             assert c == EmailTemplate(**dummy_email_template)
@@ -72,29 +70,27 @@ class TestEmailTemplates:
 
 
 class TestEmailTemplatesSync:
-    def test_list_all_email_templates(
-        self, elis_client_sync, dummy_email_template, mock_generator
-    ):
+    def test_list_email_templates(self, elis_client_sync, dummy_email_template):
         client, http_client = elis_client_sync
-        http_client.fetch_all.return_value = mock_generator(dummy_email_template)
+        http_client.fetch_resources.return_value = iter((dummy_email_template,))
 
-        email_templates = client.list_all_email_templates()
+        email_templates = client.list_email_templates()
 
         for c in email_templates:
             assert c == EmailTemplate(**dummy_email_template)
 
-        http_client.fetch_all.assert_called_with(Resource.EmailTemplate, ())
+        http_client.fetch_resources.assert_called_with(Resource.EmailTemplate, ())
 
     def test_retrieve_email_template(self, elis_client_sync, dummy_email_template):
         client, http_client = elis_client_sync
-        http_client.fetch_one.return_value = dummy_email_template
+        http_client.fetch_resource.return_value = dummy_email_template
 
         cid = dummy_email_template["id"]
         email_template = client.retrieve_email_template(cid)
 
         assert email_template == EmailTemplate(**dummy_email_template)
 
-        http_client.fetch_one.assert_called_with(Resource.EmailTemplate, cid)
+        http_client.fetch_resource.assert_called_with(Resource.EmailTemplate, cid)
 
     def test_create_new_email_template(self, elis_client_sync, dummy_email_template):
         client, http_client = elis_client_sync

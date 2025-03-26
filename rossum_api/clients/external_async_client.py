@@ -7,9 +7,28 @@ from enum import Enum
 
 import aiofiles
 
-from rossum_api.api_client import APIClient
+from rossum_api.clients.internal_async_client import InternalAsyncClient
+from rossum_api.domain_logic.annotations import (
+    ExportFileFormats,
+    is_annotation_imported,
+    validate_list_annotations_params,
+)
+from rossum_api.domain_logic.documents import build_create_document_params
 from rossum_api.domain_logic.resources import Resource
-from rossum_api.domain_logic.urls import DEFAULT_BASE_URL
+from rossum_api.domain_logic.search import build_search_params, validate_search_params
+from rossum_api.domain_logic.tasks import is_task_succeeded
+from rossum_api.domain_logic.urls import (
+    DEFAULT_BASE_URL,
+    build_resource_cancel_url,
+    build_resource_confirm_url,
+    build_resource_content_operations_url,
+    build_resource_content_url,
+    build_resource_delete_url,
+    build_resource_search_url,
+    build_resource_start_url,
+    parse_resource_id_from_url,
+)
+from rossum_api.dtos import Token, UserCredentials
 from rossum_api.models import deserialize_default
 from rossum_api.models.annotation import Annotation
 from rossum_api.models.connector import Connector
@@ -26,6 +45,7 @@ from rossum_api.models.task import Task, TaskStatus
 from rossum_api.models.upload import Upload
 from rossum_api.models.user import User
 from rossum_api.models.workspace import Workspace
+from rossum_api.utils import ObjectWithStatus
 
 if typing.TYPE_CHECKING:
     import pathlib
@@ -45,7 +65,7 @@ if typing.TYPE_CHECKING:
 
     from rossum_api.models import Deserializer, ResponsePostProcessor
 
-AnnotationType = typing.TypeVar("AnnotationType")
+AnnotationType = typing.TypeVar("AnnotationType", bound=ObjectWithStatus)
 ConnectorType = typing.TypeVar("ConnectorType")
 DocumentType = typing.TypeVar("DocumentType")
 EmailTemplateType = typing.TypeVar("EmailTemplateType")
@@ -57,23 +77,13 @@ InboxType = typing.TypeVar("InboxType")
 OrganizationType = typing.TypeVar("OrganizationType")
 QueueType = typing.TypeVar("QueueType")
 SchemaType = typing.TypeVar("SchemaType")
-TaskType = typing.TypeVar("TaskType")
+TaskType = typing.TypeVar("TaskType", bound=ObjectWithStatus)
 UploadType = typing.TypeVar("UploadType")
 UserType = typing.TypeVar("UserType")
 WorkspaceType = typing.TypeVar("WorkspaceType")
 
 
-class ExportFileFormats(Enum):
-    CSV = "csv"
-    XML = "xml"
-    XLSX = "xlsx"
-
-
-class Sideload:
-    pass
-
-
-class ElisAPIClient(
+class AsyncRossumAPIClient(
     typing.Generic[
         AnnotationType,
         ConnectorType,
@@ -95,12 +105,15 @@ class ElisAPIClient(
 ):
     def __init__(
         self,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        token: Optional[str] = None,
-        base_url: str = DEFAULT_BASE_URL,
-        http_client: Optional[APIClient] = None,
+        base_url: str,
+        credentials: UserCredentials | Token,
+        *,
         deserializer: Optional[Deserializer] = None,
+        timeout: Optional[float] = None,
+        n_retries: int = 3,
+        retry_backoff_factor: float = 1.0,
+        retry_max_jitter: float = 1.0,
+        max_in_flight_requests: int = 4,
         response_post_processor: Optional[ResponsePostProcessor] = None,
     ):
         """
@@ -114,8 +127,26 @@ class ElisAPIClient(
         response_post_processor
             pass a custom response post-processing callable. Applied only if `http_client` is not provided.
         """
-        self._http_client = http_client or APIClient(
-            username, password, token, base_url, response_post_processor=response_post_processor
+        token = None
+        username = None
+        password = None
+        if isinstance(credentials, UserCredentials):
+            username = credentials.username
+            password = credentials.password
+        else:
+            token = credentials.token
+
+        self._http_client = InternalAsyncClient(
+            base_url,
+            username=username,
+            password=password,
+            token=token,
+            timeout=timeout,
+            n_retries=n_retries,
+            retry_backoff_factor=retry_backoff_factor,
+            retry_max_jitter=retry_max_jitter,
+            max_in_flight_requests=max_in_flight_requests,
+            response_post_processor=response_post_processor,
         )
         self._deserializer = deserializer or deserialize_default
 
@@ -126,7 +157,7 @@ class ElisAPIClient(
 
         return self._deserializer(Resource.Queue, queue)
 
-    async def list_all_queues(
+    async def list_queues(
         self, ordering: Sequence[str] = (), **filters: Any
     ) -> AsyncIterator[QueueType]:
         """https://elis.rossum.ai/api/docs/#list-all-queues."""
@@ -186,7 +217,7 @@ class ElisAPIClient(
                 Resource.Queue, queue_id, fp, filename, values, metadata
             )
             (result,) = results["results"]  # We're uploading 1 file in 1 request, we can unpack
-            return int(result["annotation"].split("/")[-1])
+            return parse_resource_id_from_url(result["annotation"])
 
     # ##### UPLOAD #####
     async def upload_document(
@@ -245,7 +276,7 @@ class ElisAPIClient(
                 files["metadata"] = ("", json.dumps(metadata).encode("utf-8"), "application/json")
 
             task_url = await self.request_json("POST", url, files=files)
-            task_id = task_url["url"].split("/")[-1]
+            task_id = parse_resource_id_from_url(task_url["url"])
 
             return await self.retrieve_task(task_id)
 
@@ -273,12 +304,12 @@ class ElisAPIClient(
         XLSX/CSV/XML exports can be huge, therefore byte streaming is used to keep memory consumption low.
         """
         async for chunk in self._http_client.export(
-            Resource.Queue, queue_id, str(export_format), **filters
+            Resource.Queue, queue_id, export_format.value, **filters
         ):
             yield typing.cast(bytes, chunk)
 
     # ##### ORGANIZATIONS #####
-    async def list_all_organizations(
+    async def list_organizations(
         self, ordering: Sequence[str] = (), **filters: Any
     ) -> AsyncIterator[OrganizationType]:
         """https://elis.rossum.ai/api/docs/#list-all-organizations."""
@@ -294,11 +325,11 @@ class ElisAPIClient(
     async def retrieve_own_organization(self) -> OrganizationType:
         """Retrieve organization of currently logged in user."""
         user: Dict[Any, Any] = await self._http_client.fetch_one(Resource.Auth, "user")
-        organization_id = user["organization"].split("/")[-1]
+        organization_id = parse_resource_id_from_url(user["organization"])
         return await self.retrieve_organization(organization_id)
 
     # ##### SCHEMAS #####
-    async def list_all_schemas(
+    async def list_schemas(
         self, ordering: Sequence[str] = (), **filters: Any
     ) -> AsyncIterator[SchemaType]:
         """https://elis.rossum.ai/api/docs/#list-all-schemas."""
@@ -322,7 +353,7 @@ class ElisAPIClient(
         return await self._http_client.delete(Resource.Schema, schema_id)
 
     # ##### USERS #####
-    async def list_all_users(
+    async def list_users(
         self, ordering: Sequence[str] = (), **filters: Any
     ) -> AsyncIterator[UserType]:
         """https://elis.rossum.ai/api/docs/#list-all-users."""
@@ -350,7 +381,7 @@ class ElisAPIClient(
         return {}
 
     # ##### ANNOTATIONS #####
-    async def list_all_annotations(
+    async def list_annotations(
         self,
         ordering: Sequence[str] = (),
         sideloads: Sequence[str] = (),
@@ -358,10 +389,7 @@ class ElisAPIClient(
         **filters: Any,
     ) -> AsyncIterator[AnnotationType]:
         """https://elis.rossum.ai/api/docs/#list-all-annotations."""
-        if sideloads and "content" in sideloads and not content_schema_ids:
-            raise ValueError(
-                'When content sideloading is requested, "content_schema_ids" must be provided'
-            )
+        validate_list_annotations_params(sideloads, content_schema_ids)
         async for a in self._http_client.fetch_all(
             Resource.Annotation, ordering, sideloads, content_schema_ids, **filters
         ):
@@ -376,19 +404,14 @@ class ElisAPIClient(
         **kwargs: Any,
     ) -> AsyncIterator[AnnotationType]:
         """https://elis.rossum.ai/api/docs/#search-for-annotations."""
-        if not query and not query_string:
-            raise ValueError("Either query or query_string must be provided")
-        json_payload = {}
-        if query:
-            json_payload["query"] = query
-        if query_string:
-            json_payload["query_string"] = query_string
+        validate_search_params(query, query_string)
+        search_params = build_search_params(query, query_string)
 
         async for a in self._http_client.fetch_all_by_url(
-            f"{Resource.Annotation.value}/search",
+            build_resource_search_url(Resource.Annotation),
             ordering,
             sideloads,
-            json=json_payload,
+            json=search_params,
             method="POST",
             **kwargs,
         ):
@@ -431,11 +454,7 @@ class ElisAPIClient(
         self, annotation_id: int, **poll_kwargs: Any
     ) -> AnnotationType:
         """A shortcut for waiting until annotation is imported."""
-        # Mypy complains that TaskType has no "status" attribute, let's ignore that -> assume user's custom deserializer
-        # matches that.
-        return await self.poll_annotation(
-            annotation_id, lambda a: a.status not in ("importing", "created"), **poll_kwargs  # type: ignore
-        )
+        return await self.poll_annotation(annotation_id, is_annotation_imported, **poll_kwargs)
 
     async def poll_task(
         self, task_id: int, predicate: Callable[[TaskType], bool], sleep_s: int = 3
@@ -453,9 +472,7 @@ class ElisAPIClient(
 
     async def poll_task_until_succeeded(self, task_id: int, sleep_s: int = 3) -> TaskType:
         """Poll on Task until it is succeeded."""
-        # Mypy complains that TaskType has no "status" attribute, let's ignore that -> assume user's custom deserializer
-        # matches that.
-        return await self.poll_task(task_id, lambda a: a.status == TaskStatus.SUCCEEDED, sleep_s)  # type: ignore
+        return await self.poll_task(task_id, is_task_succeeded, sleep_s)
 
     async def retrieve_task(self, task_id: int) -> TaskType:
         """Implements https://elis.rossum.ai/api/docs/#retrieve-task."""
@@ -475,7 +492,7 @@ class ElisAPIClient(
     async def start_annotation(self, annotation_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#start-annotation"""
         await self._http_client.request_json(
-            "POST", f"{Resource.Annotation.value}/{annotation_id}/start"
+            "POST", build_resource_start_url(Resource.Annotation, annotation_id)
         )
 
     async def update_annotation(self, annotation_id: int, data: Dict[str, Any]) -> AnnotationType:
@@ -498,14 +515,14 @@ class ElisAPIClient(
         """https://elis.rossum.ai/api/docs/#bulk-update-annotation-data"""
         await self._http_client.request_json(
             "POST",
-            f"{Resource.Annotation.value}/{annotation_id}/content/operations",
+            build_resource_content_operations_url(Resource.Annotation, annotation_id),
             json={"operations": operations},
         )
 
     async def confirm_annotation(self, annotation_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#confirm-annotation"""
         await self._http_client.request_json(
-            "POST", f"{Resource.Annotation.value}/{annotation_id}/confirm"
+            "POST", build_resource_confirm_url(Resource.Annotation, annotation_id)
         )
 
     async def create_new_annotation(self, data: dict[str, Any]) -> AnnotationType:
@@ -517,13 +534,13 @@ class ElisAPIClient(
     async def delete_annotation(self, annotation_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#switch-to-deleted"""
         await self._http_client.request(
-            "POST", url=f"{Resource.Annotation.value}/{annotation_id}/delete"
+            "POST", url=build_resource_delete_url(Resource.Annotation, annotation_id)
         )
 
     async def cancel_annotation(self, annotation_id: int) -> None:
         """https://elis.rossum.ai/api/docs/#cancel-annotation"""
         await self._http_client.request(
-            "POST", url=f"{Resource.Annotation.value}/{annotation_id}/cancel"
+            "POST", url=build_resource_cancel_url(Resource.Annotation, annotation_id)
         )
 
     # ##### DOCUMENTS #####
@@ -538,7 +555,7 @@ class ElisAPIClient(
     async def retrieve_document_content(self, document_id: int) -> bytes:
         """https://elis.rossum.ai/api/docs/#document-content"""
         document_content = await self._http_client.request(
-            "GET", url=f"{Resource.Document.value}/{document_id}/content"
+            "GET", url=build_resource_content_url(Resource.Document, document_id)
         )
         return document_content.content
 
@@ -550,13 +567,7 @@ class ElisAPIClient(
         parent: Optional[str] = None,
     ) -> DocumentType:
         """https://elis.rossum.ai/api/docs/#create-document"""
-        metadata = metadata or {}
-        files: httpx._types.RequestFiles = {
-            "content": (file_name, file_data),
-            "metadata": ("", json.dumps(metadata).encode("utf-8")),
-        }
-        if parent:
-            files["parent"] = ("", parent)
+        files = build_create_document_params(file_name, file_data, metadata, parent)
 
         document = await self._http_client.request_json(
             "POST", url=Resource.Document.value, files=files
@@ -565,7 +576,7 @@ class ElisAPIClient(
         return self._deserializer(Resource.Document, document)
 
     # ##### WORKSPACES #####
-    async def list_all_workspaces(
+    async def list_workspaces(
         self, ordering: Sequence[str] = (), **filters: Any
     ) -> AsyncIterator[WorkspaceType]:
         """https://elis.rossum.ai/api/docs/#list-all-workspaces."""
@@ -595,7 +606,7 @@ class ElisAPIClient(
 
         return self._deserializer(Resource.Engine, engine)
 
-    async def list_all_engines(
+    async def list_engines(
         self, ordering: Sequence[str] = (), sideloads: Sequence[str] = (), **filters: Any
     ) -> AsyncIterator[EngineType]:
         """https://elis.rossum.ai/api/docs/internal/#list-all-engines."""
@@ -626,9 +637,9 @@ class ElisAPIClient(
         return self._deserializer(Resource.Inbox, inbox)
 
     # ##### EMAIL TEMPLATES #####
-    async def list_all_email_templates(
+    async def list_email_templates(
         self, ordering: Sequence[str] = (), **filters: Any
-    ) -> AsyncIterator[ConnectorType]:
+    ) -> AsyncIterator[EmailTemplateType]:
         """https://elis.rossum.ai/api/docs/#list-all-email-templates."""
         async for c in self._http_client.fetch_all(Resource.EmailTemplate, ordering, **filters):
             yield self._deserializer(Resource.EmailTemplate, c)
@@ -648,7 +659,7 @@ class ElisAPIClient(
         return self._deserializer(Resource.EmailTemplate, email_template)
 
     # ##### CONNECTORS #####
-    async def list_all_connectors(
+    async def list_connectors(
         self, ordering: Sequence[str] = (), **filters: Any
     ) -> AsyncIterator[ConnectorType]:
         """https://elis.rossum.ai/api/docs/#list-all-connectors."""
@@ -668,7 +679,7 @@ class ElisAPIClient(
         return self._deserializer(Resource.Connector, connector)
 
     # ##### HOOKS #####
-    async def list_all_hooks(
+    async def list_hooks(
         self, ordering: Sequence[str] = (), **filters: Any
     ) -> AsyncIterator[HookType]:
         """https://elis.rossum.ai/api/docs/#list-all-hooks."""
@@ -698,7 +709,7 @@ class ElisAPIClient(
         return await self._http_client.delete(Resource.Hook, hook_id)
 
     # ##### USER ROLES #####
-    async def list_all_user_roles(
+    async def list_user_roles(
         self, ordering: Sequence[str] = (), **filters: Any
     ) -> AsyncIterator[GroupType]:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles."""
@@ -751,8 +762,8 @@ class ElisAPIClient(
             resource[sideload] = sideloaded_json
 
 
-# Type alias for an ElisAPIClient that uses the default deserializer
-ElisClientWithDefaultSerializer = ElisAPIClient[
+# Type alias for an AsyncRossumAPIClient that uses the default deserializer
+AsyncRossumAPIClientWithDefaultDeserializer = AsyncRossumAPIClient[
     Annotation,
     Connector,
     Document,

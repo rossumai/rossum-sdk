@@ -1,24 +1,28 @@
 from __future__ import annotations
 
 import asyncio
-import functools
-import json
 import logging
 import typing
 
 import httpx
 import tenacity
 
+from exceptions import APIClientError
+from rossum_api.domain_logic.annotations import get_http_method_for_annotation_export
+from rossum_api.domain_logic.pagination import build_pagination_params
+from rossum_api.domain_logic.retry import ForceRetry, should_retry
 from rossum_api.domain_logic.sideloads import build_sideload_params, embed_sideloads
+from rossum_api.domain_logic.upload import build_upload_files
 from rossum_api.domain_logic.urls import (
     DEFAULT_BASE_URL,
     build_export_url,
     build_full_login_url,
     build_upload_url,
 )
+from rossum_api.utils import enforce_domain
 
 if typing.TYPE_CHECKING:
-    from typing import Any, AsyncIterator, Dict, List, Optional, Sequence, Tuple, Union
+    from typing import Any, AsyncIterator, Dict, List, Optional, Sequence, Tuple, Type, Union
 
     from aiofiles.threadpool.binary import AsyncBufferedReader
 
@@ -30,74 +34,7 @@ RETRIED_HTTP_CODES = (408, 429, 500, 502, 503, 504)
 logger = logging.getLogger(__name__)
 
 
-class APIClientError(Exception):
-    def __init__(self, method, url, status_code, error):
-        self.method = method
-        self.url = url
-        self.status_code = status_code
-        self.error = error
-
-    def __str__(self):
-        return f"[{self.method}] {self.url} - HTTP {self.status_code} - {self.error}"
-
-
-def authenticate_if_needed(method):
-    """Decorate a method to perform authentication if an APIClient method fails on 401.
-
-    It is used both when starting the client when there is no token and when an existing token
-    expires.
-    """
-
-    @functools.wraps(method)
-    async def authenticate_if_needed(self: APIClient, *args, **kwargs):
-        # Authenticate if there is no token, no need to fire the request only to get 401 and retry
-        if self.token is None:
-            await self._authenticate()
-        try:
-            return await method(self, *args, **kwargs)
-        except APIClientError as e:
-            if e.status_code != 401:
-                raise
-            if not (self.username and self.password):  # no way to refresh token
-                raise
-            logger.debug("Token expired, authenticating user %s...", self.username)
-            await self._authenticate()
-            return await method(self, *args, **kwargs)
-
-    return authenticate_if_needed
-
-
-def authenticate_generator_if_needed(method):
-    """Decorate an async generator method to perform authentication if an APIClient method fails
-    on 401.
-
-    It is used both when starting the client when there is no token and when an existing token
-    expires.
-
-    It shares most of the code with authenticate_if_needed but we haven't found a way to create
-    an async decorator that works on both coroutines and async generators.
-    """
-
-    @functools.wraps(method)
-    async def authenticate_if_needed(self: APIClient, *args, **kwargs):
-        # Authenticate if there is no token, no need to fire the request only to get 401 and retry
-        if self.token is None:
-            await self._authenticate()
-        try:
-            async for chunk in method(self, *args, **kwargs):
-                yield chunk
-        except APIClientError as e:
-            if e.status_code != 401:
-                raise
-            logger.debug("Token expired, authenticating user %s...", self.username)
-            await self._authenticate()
-            async for chunk in method(self, *args, **kwargs):
-                yield chunk
-
-    return authenticate_if_needed
-
-
-class APIClient:
+class InternalAsyncClient:
     """Perform CRUD operations over resources provided by Elis API.
 
     Requests will be retried up to `n_retries` times with exponential backoff.
@@ -107,10 +44,11 @@ class APIClient:
 
     def __init__(
         self,
+        base_url: str = DEFAULT_BASE_URL,
         username: Optional[str] = None,
         password: Optional[str] = None,
         token: Optional[str] = None,
-        base_url: str = DEFAULT_BASE_URL,
+        *,
         timeout: Optional[float] = None,
         n_retries: int = 3,
         retry_backoff_factor: float = 1.0,
@@ -232,8 +170,7 @@ class APIClient:
             mapping from resource field to value used to filter records
         """
         query_params = {
-            "page_size": 100,
-            "ordering": ",".join(ordering),
+            **build_pagination_params(ordering),
             **build_sideload_params(sideloads, content_schema_ids),
             **filters,
         }
@@ -313,15 +250,9 @@ class APIClient:
                 may be used to initialize values of the object created from the uploaded file,
                 semantics is different for each resource
         """
-        files = {"content": (filename, await fp.read(), "application/octet-stream")}
-
-        # Filename of values and metadata must be "", otherwise Elis API returns HTTP 400 with body
-        # "Value must be valid JSON."
-        if values is not None:
-            files["values"] = ("", json.dumps(values).encode("utf-8"), "application/json")
-        if metadata is not None:
-            files["metadata"] = ("", json.dumps(metadata).encode("utf-8"), "application/json")
-        return await self.request_json("POST", build_upload_url(resource, id_), files=files)
+        url = build_upload_url(resource, id_)
+        files = build_upload_files(await fp.read(), filename, values, metadata)
+        return await self.request_json("POST", url, files=files)
 
     async def export(
         self,
@@ -339,7 +270,7 @@ class APIClient:
             query_params["columns"] = ",".join(columns)
         url = build_export_url(resource, id_)
         # to_status parameter is valid only in POST requests, we can use GET in all other cases
-        method = "POST" if "to_status" in filters else "GET"
+        method = get_http_method_for_annotation_export(**filters)
         if export_format == "json":
             # JSON export is paginated just like a regular fetch_all, it abuses **filters kwargs of
             # fetch_all_by_url to pass export-specific query params
@@ -386,26 +317,17 @@ class APIClient:
                 await self._raise_for_status(response, "POST")
         self.token = response.json()["key"]
 
-    def _retrying(self):
+    def _retrying(self) -> tenacity.AsyncRetrying:
         """Build Tenacity retrying according to desired settings."""
-
-        def should_retry_request(exc: BaseException) -> bool:
-            if isinstance(exc, httpx.RequestError):
-                return True
-            if isinstance(exc, httpx.HTTPStatusError):
-                return exc.response.status_code in RETRIED_HTTP_CODES
-            return False
-
         return tenacity.AsyncRetrying(
             wait=tenacity.wait_exponential_jitter(
                 initial=self.retry_backoff_factor, jitter=self.retry_max_jitter
             ),
-            retry=tenacity.retry_if_exception(should_retry_request),
+            retry=tenacity.retry_if_exception(should_retry),
             stop=tenacity.stop_after_attempt(self.n_retries),
             reraise=True,
         )
 
-    @authenticate_if_needed
     async def _request(self, method: str, url: str, *args, **kwargs) -> httpx.Response:
         """Performs the actual HTTP call and does error handling.
 
@@ -414,34 +336,44 @@ class APIClient:
         url
             base URL is prepended with base_url if needed
         """
-        # Do not force the calling site to always prepend the base URL
-        if not url.startswith("https://") and not url.startswith("http://"):
-            url = f"{self.base_url}/{url}"
-        headers = kwargs.pop("headers", {})
-        headers["Authorization"] = f"token {self.token}"
+        if not self.token:
+            await self._authenticate()
+        url = enforce_domain(url, self.base_url)
 
         async for attempt in self._retrying():
             with attempt:
-                response = await self.client.request(method, url, headers=headers, *args, **kwargs)
+                response = await self.client.request(
+                    method, url, headers=self._headers, *args, **kwargs
+                )
                 if self.response_post_processor is not None:
                     self.response_post_processor(response)
+                if response.status_code == 401 and self.username and self.password:
+                    await self._authenticate()
+                    if attempt.retry_state.attempt_number == 1:
+                        raise ForceRetry()
                 await self._raise_for_status(response, method)
-        return response
+                return response
 
-    @authenticate_generator_if_needed
     async def _stream(self, method: str, url: str, *args, **kwargs) -> AsyncIterator[bytes]:
         """Performs a streaming HTTP call."""
-        # Do not force the calling site to alway prepend the base URL
-        if not url.startswith("https://") and not url.startswith("http://"):
-            url = f"{self.base_url}/{url}"
-        headers = kwargs.pop("headers", {})
-        headers["Authorization"] = f"token {self.token}"
-        async with self.client.stream(method, url, headers=headers, *args, **kwargs) as response:
-            if self.response_post_processor is not None:
-                self.response_post_processor(response)
-            await self._raise_for_status(response, method)
-            async for chunk in response.aiter_bytes():
-                yield chunk
+        if not self.token:
+            await self._authenticate()
+        url = enforce_domain(url, self.base_url)
+
+        async for attempt in self._retrying():
+            with attempt:
+                async with self.client.stream(
+                    method, url, headers=self._headers, *args, **kwargs
+                ) as response:
+                    if self.response_post_processor is not None:
+                        self.response_post_processor(response)
+                    if response.status_code == 401 and self.username and self.password:
+                        await self._authenticate()
+                        if attempt.retry_state.attempt_number == 1:
+                            raise ForceRetry()
+                    await self._raise_for_status(response, method)
+                    async for chunk in response.aiter_bytes():
+                        yield chunk
 
     async def _raise_for_status(self, response: httpx.Response, method: str) -> None:
         """Raise an exception in case of HTTP error.

@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
 
+from rossum_api.domain_logic.annotations import ExportFileFormats
 from rossum_api.domain_logic.resources import Resource
 from rossum_api.models.annotation import Annotation
 from rossum_api.models.queue import Queue
@@ -42,11 +43,11 @@ def dummy_annotation():
 
 @pytest.mark.asyncio
 class TestQueues:
-    async def test_list_all_queues(self, elis_client, dummy_queue, mock_generator):
+    async def test_list_queues(self, elis_client, dummy_queue, mock_generator):
         client, http_client = elis_client
         http_client.fetch_all.return_value = mock_generator(dummy_queue)
 
-        queues = client.list_all_queues()
+        queues = client.list_queues()
 
         async for q in queues:
             assert q == Queue(**dummy_queue)
@@ -199,7 +200,7 @@ class TestQueues:
         http_client.export.return_value = mock_file_read("tests/data/annotation_export.xml")
 
         qid = 123
-        export_format = "xml"
+        export_format = ExportFileFormats.XML
 
         result = b""
         async for a in client.export_annotations_to_file(
@@ -207,34 +208,34 @@ class TestQueues:
         ):
             result += a
 
-        http_client.export.assert_called_with(Resource.Queue, qid, export_format)
+        http_client.export.assert_called_with(Resource.Queue, qid, export_format.value)
 
         with open("tests/data/annotation_export.xml", "rb") as fp:
             assert result == fp.read()
 
 
 class TestQueuesSync:
-    def test_list_all_queues(self, elis_client_sync, dummy_queue, mock_generator):
+    def test_list_queues(self, elis_client_sync, dummy_queue):
         client, http_client = elis_client_sync
-        http_client.fetch_all.return_value = mock_generator(dummy_queue)
+        http_client.fetch_resources.return_value = iter((dummy_queue,))
 
-        queues = client.list_all_queues()
+        queues = client.list_queues()
 
         for q in queues:
             assert q == Queue(**dummy_queue)
 
-        http_client.fetch_all.assert_called_with(Resource.Queue, ())
+        http_client.fetch_resources.assert_called_with(Resource.Queue, ())
 
     def test_retrieve_queue(self, elis_client_sync, dummy_queue):
         client, http_client = elis_client_sync
-        http_client.fetch_one.return_value = dummy_queue
+        http_client.fetch_resource.return_value = dummy_queue
 
         qid = dummy_queue["id"]
         queue = client.retrieve_queue(qid)
 
         assert queue == Queue(**dummy_queue)
 
-        http_client.fetch_one.assert_called_with(Resource.Queue, qid)
+        http_client.fetch_resource.assert_called_with(Resource.Queue, qid)
 
     def test_create_new_queue(self, elis_client_sync, dummy_queue):
         client, http_client = elis_client_sync
@@ -272,22 +273,16 @@ class TestQueuesSync:
                 ]
             },
         ]
-
-        async def upload(resource, id_, fp, filename, *args, **kwargs):
-            # asyncio.gather returns results in same order as the submitted tasks, however, it's
-            # not guaranteed which request will fire first, we need to return correct result for
-            # each file so the order of annotation_ids actually match. We cannot use simple
-            # http_client.upload.side_effect = [list of results]
-            return results[1] if "🎁" in filename else results[0]
-
-        http_client.upload.side_effect = upload
+        http_client.upload.side_effect = results
 
         open_mock_first = MagicMock()
+        open_mock_first.read.return_value = b"first content"
         open_mock_second = MagicMock()
+        open_mock_second.read.return_value = b"second content"
         fp_mock = MagicMock()
-        fp_mock.__aenter__.side_effect = [open_mock_first, open_mock_second]
+        fp_mock.__enter__.side_effect = [open_mock_first, open_mock_second]
 
-        with patch("aiofiles.open", return_value=fp_mock):
+        with patch("builtins.open", return_value=fp_mock):
             files = [
                 ("tests/data/sample_invoice.pdf", "document.pdf"),
                 ("tests/data/sample_invoice.pdf", "document 🎁.pdf"),
@@ -298,8 +293,22 @@ class TestQueuesSync:
 
         assert annotation_ids == [111, 222]
         calls = [
-            call(Resource.Queue, 123, open_mock_first, "document.pdf", {"a": 1}, {"b": 2}),
-            call(Resource.Queue, 123, open_mock_second, "document 🎁.pdf", {"a": 1}, {"b": 2}),
+            call(
+                "queues/123/upload",
+                {
+                    "content": ("document.pdf", b"first content", "application/octet-stream"),
+                    "values": ("", b'{"a": 1}', "application/json"),
+                    "metadata": ("", b'{"b": 2}', "application/json"),
+                },
+            ),
+            call(
+                "queues/123/upload",
+                {
+                    "content": ("document 🎁.pdf", b"second content", "application/octet-stream"),
+                    "values": ("", b'{"a": 1}', "application/json"),
+                    "metadata": ("", b'{"b": 2}', "application/json"),
+                },
+            ),
         ]
 
         http_client.upload.assert_has_calls(calls, any_order=True)
@@ -313,9 +322,9 @@ class TestQueuesSync:
 
         http_client.delete.assert_called_with(Resource.Queue, qid)
 
-    def test_export_annotations_to_json(self, elis_client_sync, dummy_annotation, mock_generator):
+    def test_export_annotations_to_json(self, elis_client_sync, dummy_annotation):
         client, http_client = elis_client_sync
-        http_client.export.return_value = mock_generator(dummy_annotation)
+        http_client.export.return_value = iter((dummy_annotation,))
 
         qid = 123
         export_format = "json"
@@ -323,20 +332,20 @@ class TestQueuesSync:
         for a in client.export_annotations_to_json(queue_id=qid):
             assert a == Annotation(**dummy_annotation)
 
-        http_client.export.assert_called_with(Resource.Queue, qid, export_format)
+        http_client.export.assert_called_with(Resource.Queue, qid, export_format, "GET")
 
-    def test_export_annotations_to_file(self, elis_client_sync, mock_file_read):
+    def test_export_annotations_to_file(self, elis_client_sync, mock_file_read_sync):
         client, http_client = elis_client_sync
-        http_client.export.return_value = mock_file_read("tests/data/annotation_export.xml")
+        http_client.export.return_value = mock_file_read_sync("tests/data/annotation_export.xml")
 
         qid = 123
-        export_format = "xml"
+        export_format = ExportFileFormats.XML
 
         result = b""
         for a in client.export_annotations_to_file(queue_id=qid, export_format=export_format):
             result += a
 
-        http_client.export.assert_called_with(Resource.Queue, qid, export_format)
+        http_client.export.assert_called_with(Resource.Queue, qid, export_format.value, "GET")
 
         with open("tests/data/annotation_export.xml", "rb") as fp:
             assert result == fp.read()

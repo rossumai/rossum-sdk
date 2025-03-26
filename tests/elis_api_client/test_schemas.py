@@ -37,11 +37,11 @@ def dummy_schema():
 
 @pytest.mark.asyncio
 class TestSchemas:
-    async def test_list_all_schemas(self, elis_client, dummy_schema, mock_generator):
+    async def test_list_schemas(self, elis_client, dummy_schema, mock_generator):
         client, http_client = elis_client
         http_client.fetch_all.return_value = mock_generator(dummy_schema)
 
-        schemas = client.list_all_schemas()
+        schemas = client.list_schemas()
 
         async for s in schemas:
             assert s == Schema(**dummy_schema)
@@ -81,27 +81,27 @@ class TestSchemas:
 
 
 class TestSchemasSync:
-    def test_list_all_schemas(self, elis_client_sync, dummy_schema, mock_generator):
+    def test_list_schemas(self, elis_client_sync, dummy_schema):
         client, http_client = elis_client_sync
-        http_client.fetch_all.return_value = mock_generator(dummy_schema)
+        http_client.fetch_resources.return_value = iter((dummy_schema,))
 
-        schemas = client.list_all_schemas()
+        schemas = client.list_schemas()
 
         for s in schemas:
             assert s == Schema(**dummy_schema)
 
-        http_client.fetch_all.assert_called_with(Resource.Schema, ())
+        http_client.fetch_resources.assert_called_with(Resource.Schema, ())
 
     def test_retrieve_schema(self, elis_client_sync, dummy_schema):
         client, http_client = elis_client_sync
-        http_client.fetch_one.return_value = dummy_schema
+        http_client.fetch_resource.return_value = dummy_schema
 
         sid = dummy_schema["id"]
         schema = client.retrieve_schema(sid)
 
         assert schema == Schema(**dummy_schema)
 
-        http_client.fetch_one.assert_called_with(Resource.Schema, sid)
+        http_client.fetch_resource.assert_called_with(Resource.Schema, sid)
 
     def test_create_new_schema(self, elis_client_sync, dummy_schema):
         client, http_client = elis_client_sync

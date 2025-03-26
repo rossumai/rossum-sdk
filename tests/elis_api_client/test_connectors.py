@@ -24,11 +24,11 @@ def dummy_connector():
 
 @pytest.mark.asyncio
 class TestConnectors:
-    async def test_list_all_connectors(self, elis_client, dummy_connector, mock_generator):
+    async def test_list_connectors(self, elis_client, dummy_connector, mock_generator):
         client, http_client = elis_client
         http_client.fetch_all.return_value = mock_generator(dummy_connector)
 
-        connectors = client.list_all_connectors()
+        connectors = client.list_connectors()
 
         async for c in connectors:
             assert c == Connector(**dummy_connector)
@@ -65,27 +65,27 @@ class TestConnectors:
 
 
 class TestConnectorsSync:
-    def test_list_all_connectors(self, elis_client_sync, dummy_connector, mock_generator):
+    def test_list_connectors(self, elis_client_sync, dummy_connector):
         client, http_client = elis_client_sync
-        http_client.fetch_all.return_value = mock_generator(dummy_connector)
+        http_client.fetch_resources.return_value = iter((dummy_connector,))
 
-        connectors = client.list_all_connectors()
+        connectors = client.list_connectors()
 
         for c in connectors:
             assert c == Connector(**dummy_connector)
 
-        http_client.fetch_all.assert_called_with(Resource.Connector, ())
+        http_client.fetch_resources.assert_called_with(Resource.Connector, ())
 
     def test_retrieve_connector(self, elis_client_sync, dummy_connector):
         client, http_client = elis_client_sync
-        http_client.fetch_one.return_value = dummy_connector
+        http_client.fetch_resource.return_value = dummy_connector
 
         cid = dummy_connector["id"]
         connector = client.retrieve_connector(cid)
 
         assert connector == Connector(**dummy_connector)
 
-        http_client.fetch_one.assert_called_with(Resource.Connector, cid)
+        http_client.fetch_resource.assert_called_with(Resource.Connector, cid)
 
     def test_create_new_connector(self, elis_client_sync, dummy_connector):
         client, http_client = elis_client_sync

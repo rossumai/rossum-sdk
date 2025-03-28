@@ -6,11 +6,20 @@ import httpx
 import tenacity
 
 from exceptions import APIClientError
+from rossum_api.domain_logic.annotations import (
+    build_export_query_params,
+    get_http_method_for_annotation_export,
+)
 from rossum_api.domain_logic.pagination import build_pagination_params
 from rossum_api.domain_logic.resources import Resource
 from rossum_api.domain_logic.retry import ForceRetry, should_retry
 from rossum_api.domain_logic.sideloads import build_sideload_params, embed_sideloads
-from rossum_api.domain_logic.urls import parse_resource_id_from_url
+from rossum_api.domain_logic.urls import (
+    build_export_url,
+    build_full_login_url,
+    build_url,
+    parse_resource_id_from_url,
+)
 from rossum_api.dtos import Token, UserCredentials
 from rossum_api.utils import enforce_domain
 
@@ -46,7 +55,7 @@ class InternalSyncClient:
 
     def _authenticate(self) -> None:
         response = self.client.post(
-            f"{self.base_url}/auth/login",
+            build_full_login_url(self.base_url),
             data={"username": self.username, "password": self.password},
         )
         if self.response_post_processor is not None:
@@ -64,18 +73,18 @@ class InternalSyncClient:
 
     def replace(self, resource: Resource, id_: int, data: dict[str, Any]) -> dict[str, Any]:
         """Modify an entire existing object."""
-        return self.request_json("PUT", f"{resource.value}/{id_}", json=data)
+        return self.request_json("PUT", build_url(resource, id_), json=data)
 
     def update(self, resource: Resource, id_: int, data: dict[str, Any]) -> dict[str, Any]:
         """Modify particular fields of an existing object."""
-        return self.request_json("PATCH", f"{resource.value}/{id_}", json=data)
+        return self.request_json("PATCH", build_url(resource, id_), json=data)
 
     def delete(self, resource: Resource, id_: int) -> None:
         """Delete a particular object.
 
         Use with caution: For some objects, it triggers a cascade delete of related objects.
         """
-        self._request("DELETE", f"{resource.value}/{id_}")
+        self._request("DELETE", build_url(resource, id_))
 
     def upload(
         self,
@@ -85,40 +94,26 @@ class InternalSyncClient:
         """Upload a file to a resource that supports this."""
         return self.request_json("POST", url, files=files)
 
-    @staticmethod
-    def _build_export_query_params(
-        export_format: str,
-        columns: Sequence[str] = (),
-        **filters: Any,
-    ):
-        query_params = {"format": export_format}
-        filters = filters or {}
-        if filters:
-            query_params = {**query_params, **filters}
-        if columns:
-            query_params["columns"] = ",".join(columns)
-        return query_params
-
     def export(
         self,
         resource: Resource,
         id_: int,
         export_format: str,
-        http_method: Any,
         columns: Sequence[str] = (),
         **filters: Any,
     ) -> Iterator[Union[dict[str, Any], bytes]]:
-        query_params = self._build_export_query_params(export_format, columns, **filters)
-        url = f"{resource.value}/{id_}/export"
+        query_params = build_export_query_params(export_format, columns, **filters)
+        url = build_export_url(resource, id_)
+        method = get_http_method_for_annotation_export(**filters)
 
         if export_format == "json":
             # JSON export is paginated just like a regular fetch_all, it abuses **filters kwargs of
             # fetch_all_by_url to pass export-specific query params
-            yield from self.fetch_all_by_url(url, method=http_method, **query_params)  # type: ignore
+            yield from self.fetch_all_by_url(url, method=method, **query_params)  # type: ignore
         else:
             # In CSV/XML/XLSX case, all annotations are returned, i.e. the response can be large,
             # chunks of bytes are yielded from HTTP stream to keep memory consumption low.
-            yield from self._stream(http_method, url, params=query_params)
+            yield from self._stream(method, url, params=query_params)
 
     def _stream(self, method: str, url: str, *args, **kwargs) -> Iterator[bytes]:
         """Performs a streaming HTTP call."""
@@ -156,7 +151,7 @@ class InternalSyncClient:
         See https://elis.rossum.ai/api/docs/#task.
         If redirects are desired, our raise_for_status wrapper must account for that.
         """
-        return self.request_json("GET", f"{resource.value}/{id_}", params=request_params)
+        return self.request_json("GET", build_url(resource, id_), params=request_params)
 
     def fetch_resources(
         self,

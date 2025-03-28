@@ -332,7 +332,7 @@ class TestQueuesSync:
         for a in client.export_annotations_to_json(queue_id=qid):
             assert a == Annotation(**dummy_annotation)
 
-        http_client.export.assert_called_with(Resource.Queue, qid, export_format, "GET")
+        http_client.export.assert_called_with(Resource.Queue, qid, export_format)
 
     def test_export_annotations_to_file(self, elis_client_sync, mock_file_read_sync):
         client, http_client = elis_client_sync
@@ -345,7 +345,7 @@ class TestQueuesSync:
         for a in client.export_annotations_to_file(queue_id=qid, export_format=export_format):
             result += a
 
-        http_client.export.assert_called_with(Resource.Queue, qid, export_format.value, "GET")
+        http_client.export.assert_called_with(Resource.Queue, qid, export_format.value)
 
         with open("tests/data/annotation_export.xml", "rb") as fp:
             assert result == fp.read()

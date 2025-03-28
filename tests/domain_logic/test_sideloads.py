@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import copy
 
-from conftest import ANNOTATIONS, AUTOMATION_BLOCKERS, CONTENT
-
 from rossum_api.domain_logic.sideloads import build_sideload_params, embed_sideloads
+from tests.conftest import ANNOTATIONS, AUTOMATION_BLOCKERS, CONTENT
 
 RESPONSE_DATA = {
     "pagination": {"total": 3, "total_pages": 1, "next": None, "previous": None},

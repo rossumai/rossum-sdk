@@ -37,11 +37,15 @@ class InternalSyncClient:
         *,
         timeout: Optional[float] = None,
         n_retries: int = 3,
+        retry_backoff_factor: float = 1.0,
+        retry_max_jitter: float = 1.0,
         response_post_processor: Optional[ResponsePostProcessor] = None,
     ):
         self.base_url = base_url
         self.client = httpx.Client(timeout=timeout)
         self.n_retries = n_retries
+        self.retry_backoff_factor = retry_backoff_factor
+        self.retry_max_jitter = retry_max_jitter
         self.response_post_processor = response_post_processor
 
         self.token = None
@@ -54,13 +58,22 @@ class InternalSyncClient:
             self.token = credentials.token
 
     def _authenticate(self) -> None:
-        response = self.client.post(
-            build_full_login_url(self.base_url),
-            data={"username": self.username, "password": self.password},
-        )
-        if self.response_post_processor is not None:
-            self.response_post_processor(response)
-        self._raise_for_status(response)
+        for attempt in tenacity.Retrying(
+            wait=tenacity.wait_exponential_jitter(
+                initial=self.retry_backoff_factor, jitter=self.retry_max_jitter
+            ),
+            retry=tenacity.retry_if_exception_type((httpx.RequestError, APIClientError)),
+            stop=tenacity.stop_after_attempt(self.n_retries),
+            reraise=True,
+        ):
+            with attempt:
+                response = self.client.post(
+                    build_full_login_url(self.base_url),
+                    data={"username": self.username, "password": self.password},
+                )
+                if self.response_post_processor is not None:
+                    self.response_post_processor(response)
+                self._raise_for_status(response)
         self.token = response.json()["key"]
 
     @property
@@ -109,7 +122,7 @@ class InternalSyncClient:
         if export_format == "json":
             # JSON export is paginated just like a regular fetch_all, it abuses **filters kwargs of
             # fetch_all_by_url to pass export-specific query params
-            yield from self.fetch_all_by_url(url, method=method, **query_params)  # type: ignore
+            yield from self.fetch_resources_by_url(url, method=method, **query_params)  # type: ignore
         else:
             # In CSV/XML/XLSX case, all annotations are returned, i.e. the response can be large,
             # chunks of bytes are yielded from HTTP stream to keep memory consumption low.
@@ -121,12 +134,15 @@ class InternalSyncClient:
             self._authenticate()
 
         # Do not force the calling site to always prepend the base URL
-        enforce_domain(url, self.base_url)
+        url = enforce_domain(url, self.base_url)
 
         retrying = tenacity.Retrying(
-            wait=tenacity.wait_exponential_jitter(),
+            wait=tenacity.wait_exponential_jitter(
+                initial=self.retry_backoff_factor, jitter=self.retry_max_jitter
+            ),
             retry=tenacity.retry_if_exception(should_retry),
             stop=tenacity.stop_after_attempt(self.n_retries),
+            reraise=True,
         )
         for attempt in retrying:
             with attempt, self.client.stream(
@@ -139,8 +155,8 @@ class InternalSyncClient:
                     if attempt.retry_state.attempt_number == 1:
                         raise ForceRetry()
                 self._raise_for_status(response)
-                return response.iter_bytes()
-        assert False, "Code unreachable"
+                for chunk in response.iter_bytes():
+                    yield chunk
 
     def fetch_resource(
         self, resource: Resource, id_: Union[int, str], request_params: dict[str, Any] = None
@@ -161,6 +177,7 @@ class InternalSyncClient:
         content_schema_ids: Sequence[str] = (),
         method: str = "GET",
         json: Optional[dict] = None,
+        max_pages: Optional[int] = None,
         **filters,
     ) -> Iterator[dict[str, Any]]:
         """Retrieve a list of objects in a specific resource."""
@@ -171,6 +188,7 @@ class InternalSyncClient:
             content_schema_ids,
             method,
             json,
+            max_pages,
             **filters,
         )
 
@@ -182,24 +200,26 @@ class InternalSyncClient:
         content_schema_ids: Sequence[str] = (),
         method: str = "GET",
         json: Optional[dict] = None,
+        max_pages: Optional[int] = None,
         **filters,
     ) -> Iterator[dict[str, Any]]:
         query_params = build_pagination_params(ordering)
         query_params.update(build_sideload_params(sideloads, content_schema_ids))
         query_params.update(**filters)
 
-        return self._fetch_paginated_results(url, method, query_params, sideloads, json)
+        return self._fetch_paginated_results(url, method, query_params, sideloads, json, max_pages)
 
-    def _fetch_paginated_results(self, url, method, query_params, sideloads, json):
+    def _fetch_paginated_results(self, url, method, query_params, sideloads, json, max_pages):
         first_page_results, total_pages = self._fetch_page(
-            url, method, query_params | {"page": 0}, sideloads, json=json
+            url, method, query_params, sideloads, json=json
         )
 
         yield from first_page_results
+        last_page = min(total_pages, max_pages or total_pages)
 
-        for page_number in range(2, total_pages + 1):
+        for page_number in range(2, last_page + 1):
             results, _ = self._fetch_page(
-                url, method, query_params | {"page": page_number}, sideloads, json=json
+                url, method, {**query_params, "page": page_number}, sideloads, json=json
             )
             yield from results
 
@@ -237,15 +257,18 @@ class InternalSyncClient:
         url = enforce_domain(url, self.base_url)
 
         for attempt in tenacity.Retrying(
-            wait=tenacity.wait_exponential_jitter(),
+            wait=tenacity.wait_exponential_jitter(
+                initial=self.retry_backoff_factor, jitter=self.retry_max_jitter
+            ),
             retry=tenacity.retry_if_exception(should_retry),
             stop=tenacity.stop_after_attempt(self.n_retries),
+            reraise=True,
         ):
             with attempt:
                 response = self.client.request(method, url, headers=self._headers, *args, **kwargs)
                 if self.response_post_processor is not None:
                     self.response_post_processor(response)
-                if response.status_code == 401:
+                if response.status_code == 401 and self.username and self.password:
                     self._authenticate()
                     if attempt.retry_state.attempt_number == 1:
                         raise ForceRetry()

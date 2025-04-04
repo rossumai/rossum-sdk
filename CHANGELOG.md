@@ -1,6 +1,29 @@
 # CHANGELOG
 
 
+## v1.0.1 (2025-04-04)
+
+### Bug Fixes
+
+- Fix bugs in internal sync client
+  ([`5e57018`](https://github.com/rossumai/rossum-sdk/commit/5e57018b5f2a99b3f37cfe5045d2a2b538432471))
+
+- Use helpers from domain logic in clients - Add retry parameters to the constructor of the internal
+  sync client - Add retries to the authentication method - Fix wrong method name in the export
+  method - Fix the _stream method - Add a max_pages parameter to the fetch_resources method - Raise
+  correct exceptions from the _request method - Add tests for the internal sync client
+
+### Refactoring
+
+- Rename module with tests of internal async client
+  ([`1334338`](https://github.com/rossumai/rossum-sdk/commit/1334338ab372d2e7313fcf12961cb442892007e0))
+
+And extract ot conftest things that will be common for both internal clients.
+
+- Use helpers from domain logic in clients
+  ([`24e0657`](https://github.com/rossumai/rossum-sdk/commit/24e0657a131aa3629596b582e41dcca04580197f))
+
+
 ## v1.0.0 (2025-03-26)
 
 ### Features

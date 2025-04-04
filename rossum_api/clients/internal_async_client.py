@@ -8,7 +8,10 @@ import httpx
 import tenacity
 
 from exceptions import APIClientError
-from rossum_api.domain_logic.annotations import get_http_method_for_annotation_export
+from rossum_api.domain_logic.annotations import (
+    build_export_query_params,
+    get_http_method_for_annotation_export,
+)
 from rossum_api.domain_logic.pagination import build_pagination_params
 from rossum_api.domain_logic.retry import ForceRetry, should_retry
 from rossum_api.domain_logic.sideloads import build_sideload_params, embed_sideloads
@@ -18,11 +21,12 @@ from rossum_api.domain_logic.urls import (
     build_export_url,
     build_full_login_url,
     build_upload_url,
+    build_url,
 )
 from rossum_api.utils import enforce_domain
 
 if typing.TYPE_CHECKING:
-    from typing import Any, AsyncIterator, Dict, List, Optional, Sequence, Tuple, Type, Union
+    from typing import Any, AsyncIterator, Dict, List, Optional, Sequence, Tuple, Union
 
     from aiofiles.threadpool.binary import AsyncBufferedReader
 
@@ -85,7 +89,7 @@ class InternalAsyncClient:
         See https://elis.rossum.ai/api/docs/#task.
         If redirects are desired, our raise_for_status wrapper must account for that.
         """
-        return await self.request_json("GET", f"{resource.value}/{id_}", params=request_params)
+        return await self.request_json("GET", build_url(resource, id_), params=request_params)
 
     async def fetch_all(
         self,
@@ -216,18 +220,18 @@ class InternalAsyncClient:
 
     async def replace(self, resource: Resource, id_: int, data: Dict[str, Any]) -> Dict[str, Any]:
         "Modify an entire existing object."
-        return await self.request_json("PUT", f"{resource.value}/{id_}", json=data)
+        return await self.request_json("PUT", build_url(resource, id_), json=data)
 
     async def update(self, resource: Resource, id_: int, data: Dict[str, Any]) -> Dict[str, Any]:
         "Modify particular fields of an existing object."
-        return await self.request_json("PATCH", f"{resource.value}/{id_}", json=data)
+        return await self.request_json("PATCH", build_url(resource, id_), json=data)
 
     async def delete(self, resource: Resource, id_: int) -> None:
         """Delete a particular object.
 
         Use with caution: For some objects, it triggers a cascade delete of related objects.
         """
-        await self._request("DELETE", f"{resource.value}/{id_}")
+        await self._request("DELETE", build_url(resource, id_))
 
     async def upload(
         self,
@@ -262,12 +266,7 @@ class InternalAsyncClient:
         columns: Sequence[str] = (),
         **filters: Any,
     ) -> AsyncIterator[Union[Dict[str, Any], bytes]]:
-        query_params = {"format": export_format}
-        filters = filters or {}
-        if filters:
-            query_params = {**query_params, **filters}
-        if columns:
-            query_params["columns"] = ",".join(columns)
+        query_params = build_export_query_params(export_format, columns, **filters)
         url = build_export_url(resource, id_)
         # to_status parameter is valid only in POST requests, we can use GET in all other cases
         method = get_http_method_for_annotation_export(**filters)

@@ -8,7 +8,6 @@ from pathlib import Path
 from rossum_api.clients.internal_sync_client import InternalSyncClient
 from rossum_api.domain_logic.annotations import (
     ExportFileFormats,
-    get_http_method_for_annotation_export,
     is_annotation_imported,
     validate_list_annotations_params,
 )
@@ -255,9 +254,7 @@ class SyncRossumAPIClient(
 
         JSON export is paginated and returns the result in a way similar to other list_all methods.
         """
-        for chunk in self.internal_client.export(
-            Resource.Queue, queue_id, "json", get_http_method_for_annotation_export(), **filters
-        ):
+        for chunk in self.internal_client.export(Resource.Queue, queue_id, "json", **filters):
             # JSON export can be translated directly to Annotation object
             yield self._deserializer(Resource.Annotation, typing.cast(dict, chunk))
 
@@ -272,7 +269,6 @@ class SyncRossumAPIClient(
             Resource.Queue,
             queue_id,
             export_format.value,
-            get_http_method_for_annotation_export(),
             **filters,
         ):
             yield typing.cast(bytes, chunk)

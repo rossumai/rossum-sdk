@@ -13,6 +13,7 @@ class Resource(Enum):
     Auth = "auth"
     Connector = "connectors"
     Document = "documents"
+    DocumentRelation = "document_relations"
     EmailTemplate = "email_templates"
     Engine = "engines"
     EngineField = "engine_fields"

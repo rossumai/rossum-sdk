@@ -32,6 +32,7 @@ from rossum_api.models import (
     Annotation,
     Connector,
     Document,
+    DocumentRelation,
     EmailTemplate,
     Engine,
     EngineField,
@@ -58,6 +59,7 @@ if typing.TYPE_CHECKING:
 AnnotationType = typing.TypeVar("AnnotationType", bound=ObjectWithStatus)
 ConnectorType = typing.TypeVar("ConnectorType")
 DocumentType = typing.TypeVar("DocumentType")
+DocumentRelationType = typing.TypeVar("DocumentRelationType")
 EmailTemplateType = typing.TypeVar("EmailTemplateType")
 EngineType = typing.TypeVar("EngineType")
 EngineFieldType = typing.TypeVar("EngineFieldType")
@@ -78,6 +80,7 @@ class SyncRossumAPIClient(
         AnnotationType,
         ConnectorType,
         DocumentType,
+        DocumentRelationType,
         EmailTemplateType,
         EngineType,
         EngineFieldType,
@@ -549,6 +552,55 @@ class SyncRossumAPIClient(
         )
         return self._deserializer(Resource.Document, document)
 
+    # ##### DOCUMENT RELATIONS #####
+
+    def list_document_relations(
+        self, ordering: Sequence[str] = (), **filters: Any
+    ) -> Iterator[DocumentRelationType]:
+        """https://elis.rossum.ai/api/docs/#list-all-document-relations"""
+        for dr in self.internal_client.fetch_resources(
+            Resource.DocumentRelation, ordering, **filters
+        ):
+            yield self._deserializer(Resource.DocumentRelation, dr)
+
+    def retrieve_document_relation(self, document_relation_id: int) -> DocumentRelationType:
+        """https://elis.rossum.ai/api/docs/#retrieve-a-document-relation"""
+        document_relation = self.internal_client.fetch_resource(
+            Resource.DocumentRelation, document_relation_id
+        )
+
+        return self._deserializer(Resource.DocumentRelation, document_relation)
+
+    def create_new_document_relation(self, data: dict[str, Any]) -> DocumentRelationType:
+        """https://elis.rossum.ai/api/docs/#create-a-new-document-relation"""
+        document_relation = self.internal_client.create(Resource.DocumentRelation, data)
+
+        return self._deserializer(Resource.DocumentRelation, document_relation)
+
+    def update_document_relation(
+        self, document_relation_id: int, data: dict[str, Any]
+    ) -> DocumentRelationType:
+        """https://elis.rossum.ai/api/docs/#update-a-document-relation"""
+        document_relation = self.internal_client.replace(
+            Resource.DocumentRelation, document_relation_id, data
+        )
+
+        return self._deserializer(Resource.DocumentRelation, document_relation)
+
+    def update_part_document_relation(
+        self, document_relation_id: int, data: dict[str, Any]
+    ) -> DocumentRelationType:
+        """https://elis.rossum.ai/api/docs/#update-part-of-a-document-relation"""
+        document_relation = self.internal_client.update(
+            Resource.DocumentRelation, document_relation_id, data
+        )
+
+        return self._deserializer(Resource.DocumentRelation, document_relation)
+
+    def delete_document_relation(self, document_relation_id: int) -> None:
+        """https://elis.rossum.ai/api/docs/#delete-a-document-relation"""
+        self.internal_client.delete(Resource.DocumentRelation, document_relation_id)
+
     # ##### WORKSPACES #####
 
     def list_workspaces(
@@ -701,6 +753,7 @@ SyncRossumAPIClientWithDefaultDeserializer = SyncRossumAPIClient[
     Annotation,
     Connector,
     Document,
+    DocumentRelation,
     EmailTemplate,
     Engine,
     EngineField,

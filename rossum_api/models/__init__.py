@@ -9,6 +9,7 @@ from rossum_api.domain_logic.resources import Resource
 from rossum_api.models.annotation import Annotation
 from rossum_api.models.connector import Connector
 from rossum_api.models.document import Document
+from rossum_api.models.document_relation import DocumentRelation
 from rossum_api.models.email_template import EmailTemplate
 from rossum_api.models.engine import Engine, EngineField
 from rossum_api.models.group import Group
@@ -36,6 +37,7 @@ RESOURCE_TO_MODEL = {
     Resource.Annotation: Annotation,
     Resource.Connector: Connector,
     Resource.Document: Document,
+    Resource.DocumentRelation: DocumentRelation,
     Resource.EmailTemplate: EmailTemplate,
     Resource.Engine: Engine,
     Resource.EngineField: EngineField,

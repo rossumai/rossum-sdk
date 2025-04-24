@@ -1,6 +1,20 @@
 # CHANGELOG
 
 
+## v2.0.0 (2025-04-24)
+
+### Features
+
+- Add document relation resource
+  ([`230bb1c`](https://github.com/rossumai/rossum-sdk/commit/230bb1c8be1f25be9a0f844a831ce2600bedcfa7))
+
+BREAKING CHANGE: Adding to Generic class can break existing setups.
+
+### Breaking Changes
+
+- Adding to Generic class can break existing setups.
+
+
 ## v1.0.1 (2025-04-04)
 
 ### Bug Fixes

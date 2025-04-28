@@ -17,12 +17,12 @@ import httpx
 import pytest
 import pytest_httpx
 
-from exceptions import APIClientError
 from rossum_api.clients.internal_sync_client import InternalSyncClient
 from rossum_api.domain_logic.resources import Resource
 from rossum_api.domain_logic.upload import build_upload_files
 from rossum_api.domain_logic.urls import DEFAULT_BASE_URL, build_full_login_url
 from rossum_api.dtos import Token, UserCredentials
+from rossum_api.exceptions import APIClientError
 from tests.conftest import ANNOTATIONS, AUTOMATION_BLOCKERS, CONTENT
 from tests.internal_clients.conftest import (
     CSV_EXPORT,

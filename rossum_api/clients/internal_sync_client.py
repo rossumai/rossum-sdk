@@ -5,7 +5,6 @@ import typing
 import httpx
 import tenacity
 
-from exceptions import APIClientError
 from rossum_api.domain_logic.annotations import (
     build_export_query_params,
     get_http_method_for_annotation_export,
@@ -21,6 +20,7 @@ from rossum_api.domain_logic.urls import (
     parse_resource_id_from_url,
 )
 from rossum_api.dtos import Token, UserCredentials
+from rossum_api.exceptions import APIClientError
 from rossum_api.utils import enforce_domain
 
 if typing.TYPE_CHECKING:

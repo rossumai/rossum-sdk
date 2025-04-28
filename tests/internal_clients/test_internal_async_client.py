@@ -19,10 +19,10 @@ import httpx
 import pytest
 import pytest_httpx
 
-from exceptions import APIClientError
 from rossum_api.clients.internal_async_client import InternalAsyncClient
 from rossum_api.domain_logic.resources import Resource
 from rossum_api.domain_logic.urls import build_full_login_url
+from rossum_api.exceptions import APIClientError
 from tests.conftest import ANNOTATIONS, AUTOMATION_BLOCKERS, CONTENT
 from tests.internal_clients.conftest import (
     CSV_EXPORT,

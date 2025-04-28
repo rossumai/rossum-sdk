@@ -1,6 +1,16 @@
 # CHANGELOG
 
 
+## v2.0.1 (2025-04-28)
+
+### Bug Fixes
+
+- Move exceptions module to rossum_api package
+  ([`548215a`](https://github.com/rossumai/rossum-sdk/commit/548215a4bf04934ba0b80eb8078da314202d92d3))
+
+It's not importable like this if user only installs the rossum-api package.
+
+
 ## v2.0.0 (2025-04-24)
 
 ### Features

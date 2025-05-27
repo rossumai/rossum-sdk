@@ -40,6 +40,22 @@ def dummy_annotation():
         "email_thread": "https://elis.rossum.ai/api/v1/email_threads/34567",
         "has_email_thread_with_replies": True,
         "has_email_thread_with_new_replies": False,
+        "modified_by": None,
+        "deleted_at": None,
+        "export_failed_at": None,
+        "purged_at": None,
+        "rejected_at": None,
+        "confirmed_by": None,
+        "deleted_by": None,
+        "exported_by": None,
+        "purged_by": None,
+        "rejected_by": None,
+        "organization": "https://elis.rossum.ai/api/v1/organizations/1",
+        "prediction": None,
+        "assignees": [],
+        "labels": [],
+        "training_enabled": True,
+        "einvoice": False,
     }
 
 

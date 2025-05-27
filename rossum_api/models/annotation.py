@@ -41,6 +41,10 @@ class Annotation:
     exported_at: Optional[str] = None
     arrived_at: Optional[str] = None
     assigned_at: Optional[str] = None
+    purged_at: Optional[str] = None
+    rejected_at: Optional[str] = None
+    deleted_at: Optional[str] = None
+    export_failed_at: Optional[str] = None
     organization: Optional[str] = None
     metadata: Dict[Any, Any] = field(default_factory=dict)
     automated: bool = False
@@ -48,3 +52,14 @@ class Annotation:
     related_emails: List[str] = field(default_factory=list)
     automatically_rejected: Optional[bool] = None
     prediction: Optional[Prediction] = None
+    assignees: List[str] = field(default_factory=list)
+    labels: List[str] = field(default_factory=list)
+    restricted_access: Optional[bool] = None
+    training_enabled: Optional[bool] = None
+    einvoice: Optional[bool] = None
+    purged_by: Optional[str] = None
+    rejected_by: Optional[str] = None
+    deleted_by: Optional[str] = None
+    exported_by: Optional[str] = None
+    confirmed_by: Optional[str] = None
+    modified_by: Optional[str] = None

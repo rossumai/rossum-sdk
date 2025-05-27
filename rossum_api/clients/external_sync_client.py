@@ -12,11 +12,13 @@ from rossum_api.domain_logic.annotations import (
     validate_list_annotations_params,
 )
 from rossum_api.domain_logic.documents import build_create_document_params
+from rossum_api.domain_logic.emails import build_email_import_files
 from rossum_api.domain_logic.resources import Resource
 from rossum_api.domain_logic.search import build_search_params, validate_search_params
 from rossum_api.domain_logic.tasks import is_task_succeeded
 from rossum_api.domain_logic.upload import build_upload_files
 from rossum_api.domain_logic.urls import (
+    EMAIL_IMPORT_URL,
     build_resource_cancel_url,
     build_resource_confirm_url,
     build_resource_content_operations_url,
@@ -33,6 +35,7 @@ from rossum_api.models import (
     Connector,
     Document,
     DocumentRelation,
+    Email,
     EmailTemplate,
     Engine,
     EngineField,
@@ -47,7 +50,7 @@ from rossum_api.models import (
     Workspace,
     deserialize_default,
 )
-from rossum_api.models.task import Task, TaskStatus
+from rossum_api.models.task import Task
 from rossum_api.utils import ObjectWithStatus
 
 if typing.TYPE_CHECKING:
@@ -66,6 +69,7 @@ EngineFieldType = typing.TypeVar("EngineFieldType")
 GroupType = typing.TypeVar("GroupType")
 HookType = typing.TypeVar("HookType")
 InboxType = typing.TypeVar("InboxType")
+EmailType = typing.TypeVar("EmailType")
 OrganizationType = typing.TypeVar("OrganizationType")
 QueueType = typing.TypeVar("QueueType")
 SchemaType = typing.TypeVar("SchemaType")
@@ -87,6 +91,7 @@ class SyncRossumAPIClient(
         GroupType,
         HookType,
         InboxType,
+        EmailType,
         OrganizationType,
         QueueType,
         SchemaType,
@@ -662,6 +667,27 @@ class SyncRossumAPIClient(
         inbox = self.internal_client.create(Resource.Inbox, data)
         return self._deserializer(Resource.Inbox, inbox)
 
+    # ##### EMAILS #####
+    def retrieve_email(self, email_id: int) -> EmailType:
+        """https://elis.rossum.ai/api/docs/#retrieve-an-email."""
+        email = self.internal_client.fetch_resource(Resource.Email, email_id)
+
+        return self._deserializer(Resource.Email, email)
+
+    def import_email(
+        self, raw_message: bytes, recipient: str, mime_type: str | None = None
+    ) -> str:
+        """https://elis.rossum.ai/api/docs/#import-email.
+
+        Returns task URL.
+        """
+        response = self.internal_client.request_json(
+            "POST",
+            url=EMAIL_IMPORT_URL,
+            files=build_email_import_files(raw_message, recipient, mime_type),
+        )
+        return response["url"]
+
     # ##### EMAIL TEMPLATES #####
 
     def list_email_templates(
@@ -760,6 +786,7 @@ SyncRossumAPIClientWithDefaultDeserializer = SyncRossumAPIClient[
     Group,
     Hook,
     Inbox,
+    Email,
     Organization,
     Queue,
     Schema,

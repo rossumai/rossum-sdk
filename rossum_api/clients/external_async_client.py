@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 import json
 import typing
-from enum import Enum
 
 import aiofiles
 
@@ -14,11 +13,12 @@ from rossum_api.domain_logic.annotations import (
     validate_list_annotations_params,
 )
 from rossum_api.domain_logic.documents import build_create_document_params
+from rossum_api.domain_logic.emails import build_email_import_files
 from rossum_api.domain_logic.resources import Resource
 from rossum_api.domain_logic.search import build_search_params, validate_search_params
 from rossum_api.domain_logic.tasks import is_task_succeeded
 from rossum_api.domain_logic.urls import (
-    DEFAULT_BASE_URL,
+    EMAIL_IMPORT_URL,
     build_resource_cancel_url,
     build_resource_confirm_url,
     build_resource_content_operations_url,
@@ -29,7 +29,7 @@ from rossum_api.domain_logic.urls import (
     parse_resource_id_from_url,
 )
 from rossum_api.dtos import Token, UserCredentials
-from rossum_api.models import DocumentRelation, deserialize_default
+from rossum_api.models import DocumentRelation, Email, deserialize_default
 from rossum_api.models.annotation import Annotation
 from rossum_api.models.connector import Connector
 from rossum_api.models.document import Document
@@ -41,7 +41,7 @@ from rossum_api.models.inbox import Inbox
 from rossum_api.models.organization import Organization
 from rossum_api.models.queue import Queue
 from rossum_api.models.schema import Schema
-from rossum_api.models.task import Task, TaskStatus
+from rossum_api.models.task import Task
 from rossum_api.models.upload import Upload
 from rossum_api.models.user import User
 from rossum_api.models.workspace import Workspace
@@ -75,6 +75,7 @@ EngineFieldType = typing.TypeVar("EngineFieldType")
 GroupType = typing.TypeVar("GroupType")
 HookType = typing.TypeVar("HookType")
 InboxType = typing.TypeVar("InboxType")
+EmailType = typing.TypeVar("EmailType")
 OrganizationType = typing.TypeVar("OrganizationType")
 QueueType = typing.TypeVar("QueueType")
 SchemaType = typing.TypeVar("SchemaType")
@@ -96,6 +97,7 @@ class AsyncRossumAPIClient(
         GroupType,
         HookType,
         InboxType,
+        EmailType,
         OrganizationType,
         QueueType,
         SchemaType,
@@ -686,6 +688,27 @@ class AsyncRossumAPIClient(
 
         return self._deserializer(Resource.Inbox, inbox)
 
+    # ##### EMAILS #####
+    async def retrieve_email(self, email_id: int) -> EmailType:
+        """https://elis.rossum.ai/api/docs/#retrieve-an-email."""
+        email = await self._http_client.fetch_one(Resource.Email, email_id)
+
+        return self._deserializer(Resource.Email, email)
+
+    async def import_email(
+        self, raw_message: bytes, recipient: str, mime_type: str | None = None
+    ) -> str:
+        """https://elis.rossum.ai/api/docs/#import-email.
+
+        Returns task URL.
+        """
+        response = await self._http_client.request_json(
+            "POST",
+            url=EMAIL_IMPORT_URL,
+            files=build_email_import_files(raw_message, recipient, mime_type),
+        )
+        return response["url"]
+
     # ##### EMAIL TEMPLATES #####
     async def list_email_templates(
         self, ordering: Sequence[str] = (), **filters: Any
@@ -824,6 +847,7 @@ AsyncRossumAPIClientWithDefaultDeserializer = AsyncRossumAPIClient[
     Group,
     Hook,
     Inbox,
+    Email,
     Organization,
     Queue,
     Schema,

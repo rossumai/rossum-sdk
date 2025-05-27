@@ -10,6 +10,7 @@ from rossum_api.models.annotation import Annotation
 from rossum_api.models.connector import Connector
 from rossum_api.models.document import Document
 from rossum_api.models.document_relation import DocumentRelation
+from rossum_api.models.email import Email
 from rossum_api.models.email_template import EmailTemplate
 from rossum_api.models.engine import Engine, EngineField
 from rossum_api.models.group import Group
@@ -44,6 +45,7 @@ RESOURCE_TO_MODEL = {
     Resource.Group: Group,
     Resource.Hook: Hook,
     Resource.Inbox: Inbox,
+    Resource.Email: Email,
     Resource.Organization: Organization,
     Resource.Queue: Queue,
     Resource.Schema: Schema,
@@ -54,10 +56,23 @@ RESOURCE_TO_MODEL = {
 }
 
 
+def _convert_key(key: str) -> str:
+    """Convert reserved words to valid ones by adding _ to the end.
+
+    Used in Email dataclass.
+    """
+    if key == "from_":
+        return "from"
+
+    return key
+
+
 def deserialize_default(resource: Resource, payload: JsonDict) -> Any:
     """Deserialize payload into dataclasses using dacite.
 
     Dacite from_dict has some limitations and not all types will work easily,
     for example datetime."""
     model_class = RESOURCE_TO_MODEL[resource]
-    return dacite.from_dict(model_class, payload, config=dacite.Config(cast=[Enum]))
+    return dacite.from_dict(
+        model_class, payload, config=dacite.Config(cast=[Enum], convert_key=_convert_key)
+    )

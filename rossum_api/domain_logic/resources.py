@@ -20,6 +20,7 @@ class Resource(Enum):
     Group = "groups"
     Hook = "hooks"
     Inbox = "inboxes"
+    Email = "emails"
     Organization = "organizations"
     Queue = "queues"
     Schema = "schemas"

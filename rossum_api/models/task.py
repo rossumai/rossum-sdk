@@ -8,6 +8,7 @@ from typing import Any, Dict, Optional
 class TaskType(str, Enum):
     DOCUMENTS_DOWNLOAD = "documents_download"
     UPLOAD_CREATED = "upload_created"
+    EMAIL_IMPORTED = "email_imported"
 
 
 class TaskStatus(str, Enum):

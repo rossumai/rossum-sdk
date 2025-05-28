@@ -8,6 +8,7 @@ from typing import Any, Dict, Optional
 class TaskType(str, Enum):
     DOCUMENTS_DOWNLOAD = "documents_download"
     UPLOAD_CREATED = "upload_created"
+    EMAIL_IMPORTED = "email_imported"
 
 
 class TaskStatus(str, Enum):
@@ -25,7 +26,7 @@ class Task:
     type: TaskType
     status: TaskStatus
     expires_at: str
-    content: Dict[str, Any]
+    content: Optional[Dict[str, Any]] = None
     detail: Optional[str] = None
     code: Optional[str] = None
     result_url: Optional[str] = None

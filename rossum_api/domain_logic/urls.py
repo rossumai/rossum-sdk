@@ -8,6 +8,8 @@ if TYPE_CHECKING:
 
 DEFAULT_BASE_URL = "https://elis.rossum.ai/api/v1"
 
+EMAIL_IMPORT_URL = "emails/import"
+
 
 def parse_resource_id_from_url(url: str) -> int:
     # Annotation content resource is special, we need to strip /content suffix

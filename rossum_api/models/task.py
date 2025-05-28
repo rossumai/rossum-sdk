@@ -26,7 +26,7 @@ class Task:
     type: TaskType
     status: TaskStatus
     expires_at: str
-    content: Dict[str, Any]
+    content: Optional[Dict[str, Any]] = None
     detail: Optional[str] = None
     code: Optional[str] = None
     result_url: Optional[str] = None

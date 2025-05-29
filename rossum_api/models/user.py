@@ -24,3 +24,4 @@ class User:
     metadata: dict = field(default_factory=dict)
     oidc_id: Optional[str] = None
     auth_type: str = "password"
+    deleted: bool = False

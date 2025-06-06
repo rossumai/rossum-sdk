@@ -7,6 +7,7 @@ from typing import List, Optional
 
 class DocumentRelationType(str, Enum):
     EXPORT = "export"
+    EINVOICE = "einvoice"
 
 
 @dataclass

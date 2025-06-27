@@ -25,7 +25,7 @@ format: .venv
 .PHONY: format
 
 test: .venv
-	pytest tests
+	$(VENV_PATH)/bin/pytest tests
 .PHONY: test
 
 lint: .venv

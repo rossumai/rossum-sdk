@@ -302,9 +302,7 @@ class InternalSyncClient:
         fetched_sideloads = []
         for sideload in sideloads:
             sideload_url = resource[sideload]
-            fetched_sideloads.append(
-                self.fetch_resource(Resource(sideload), parse_resource_id_from_url(sideload_url))
-            )
+            fetched_sideloads.append(self.request_json("GET", url=sideload_url))
 
         for sideload, fetched_sideload in zip(sideloads, fetched_sideloads):
             if sideload == "content":  # Content (i.e. list of sections is wrapped in a dict)

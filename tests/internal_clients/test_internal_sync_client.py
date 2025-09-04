@@ -256,6 +256,19 @@ def test_fetch_resources_sideload(client, httpx_mock):
     assert annotations == expected_annotations
 
 
+def test_sideload(client, httpx_mock):
+    httpx_mock.add_response(
+        method="GET",
+        url=ANNOTATIONS[1]["content"],
+        json={"content": [CONTENT[0], CONTENT[2]]},
+    )
+
+    annotation = ANNOTATIONS[1].copy()
+    client.sideload(annotation, sideloads=["content"])
+
+    assert annotation["content"] == [CONTENT[0], CONTENT[2]]
+
+
 def test_create(client, httpx_mock):
     data = {
         "name": "Test Workspace",

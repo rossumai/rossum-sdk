@@ -78,7 +78,7 @@ class InternalSyncClient:
 
     @property
     def _headers(self):
-        return {"Authorization": f"token {self.token}"}
+        return {"Authorization": f"Bearer {self.token}"}
 
     def create(self, resource: Resource, data: dict[str, Any]) -> dict[str, Any]:
         """Create a new object."""

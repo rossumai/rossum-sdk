@@ -78,7 +78,7 @@ class InternalAsyncClient:
 
     @property
     def _headers(self):
-        return {"Authorization": f"token {self.token}"}
+        return {"Authorization": f"Bearer {self.token}"}
 
     async def fetch_one(
         self, resource: Resource, id_: Union[int, str], request_params: Dict[str, Any] = None

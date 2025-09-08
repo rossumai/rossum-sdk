@@ -95,7 +95,7 @@ async def test_init_token(httpx_mock):
     )
     await client.fetch_one(Resource.User, 1)
     assert len(httpx_mock.get_requests()) == 1
-    assert httpx_mock.get_requests()[0].headers["Authorization"] == f"token {FAKE_TOKEN}"
+    assert httpx_mock.get_requests()[0].headers["Authorization"] == f"Bearer {FAKE_TOKEN}"
 
 
 @pytest.mark.asyncio
@@ -124,14 +124,14 @@ async def test_reauth_success(login_mock, httpx_mock):
         method="GET",
         url="https://elis.rossum.ai/api/v1/users/1",
         status_code=401,
-        match_headers={"Authorization": f"token {FAKE_TOKEN}"},
+        match_headers={"Authorization": f"Bearer {FAKE_TOKEN}"},
         content=b"unauth!",
     )
 
     httpx_mock.add_response(
         method="GET",
         url="https://elis.rossum.ai/api/v1/users/1",
-        match_headers={"Authorization": f"token {NEW_TOKEN}"},
+        match_headers={"Authorization": f"Bearer {NEW_TOKEN}"},
         json=USER,
     )
 
@@ -514,13 +514,13 @@ async def test_authenticate_if_needed_token_expired(client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
         url="https://elis.rossum.ai/api/v1/workspaces/7694",
-        headers={"Authorization": "token fake-token"},
+        headers={"Authorization": "Bearer fake-token"},
         status_code=401,
     )
     httpx_mock.add_response(
         method="GET",
         url="https://elis.rossum.ai/api/v1/workspaces/7694",
-        match_headers={"Authorization": "token new-token"},
+        match_headers={"Authorization": "Bearer new-token"},
         json=WORKSPACES[0],
     )
 
@@ -537,13 +537,13 @@ async def test_authenticate_generator_if_needed_token_expired(client, httpx_mock
     httpx_mock.add_response(
         method="GET",
         url="https://elis.rossum.ai/api/v1/queues/123/export?format=csv",
-        headers={"Authorization": "token fake-token"},
+        headers={"Authorization": "Bearer fake-token"},
         status_code=401,
     )
     httpx_mock.add_response(
         method="GET",
         url="https://elis.rossum.ai/api/v1/queues/123/export?format=csv",
-        match_headers={"Authorization": "token new-token"},
+        match_headers={"Authorization": "Bearer new-token"},
         stream=pytest_httpx.IteratorStream([CSV_EXPORT[:20], CSV_EXPORT[20:]]),
     )
 
@@ -561,7 +561,7 @@ async def test_authenticate_if_needed_no_token(httpx_mock):
     httpx_mock.add_response(
         method="GET",
         url="https://elis.rossum.ai/api/v1/workspaces/7694",
-        match_headers={"Authorization": "token new-token"},
+        match_headers={"Authorization": "Bearer new-token"},
         json=WORKSPACES[0],
     )
 
@@ -580,7 +580,7 @@ async def test_authenticate_generator_if_needed_no_token(client, httpx_mock):
     httpx_mock.add_response(
         method="GET",
         url="https://elis.rossum.ai/api/v1/queues/123/export?format=csv",
-        match_headers={"Authorization": "token new-token"},
+        match_headers={"Authorization": "Bearer new-token"},
         stream=pytest_httpx.IteratorStream([CSV_EXPORT[:20], CSV_EXPORT[20:]]),
     )
 

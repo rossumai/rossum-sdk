@@ -773,6 +773,9 @@ class SyncRossumAPIClient(
         for g in self.internal_client.fetch_resources(Resource.Group, ordering, **filters):
             yield self._deserializer(Resource.Group, g)
 
+    def authenticate(self) -> None:
+        self.internal_client._authenticate()
+
 
 # Type alias for an SyncRossumAPIClient that uses the default deserializer
 SyncRossumAPIClientWithDefaultDeserializer = SyncRossumAPIClient[

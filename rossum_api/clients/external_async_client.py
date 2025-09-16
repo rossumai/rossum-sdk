@@ -819,6 +819,9 @@ class AsyncRossumAPIClient(
         """
         return await self._http_client.get_token(refresh)
 
+    async def authenticate(self) -> None:
+        await self._http_client._authenticate()
+
     async def _sideload(self, resource: Dict[str, Any], sideloads: Sequence[str]) -> None:
         """The API does not support sideloading when fetching a single resource, we need to load
         it manually.

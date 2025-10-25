@@ -7,7 +7,7 @@ name = "rossum_api"
 version = "3.2.0"
 license = {text = "MIT"}
 readme = "README.md"
-requires-python = ">= 3.8"
+requires-python = ">= 3.10"
 dependencies = [
     "aiofiles",
     # The code uses the "case conversion" feature added in this version.
@@ -24,7 +24,7 @@ tests = [
   "codecov",
   "pytest",
   "pytest-asyncio",
-  "pytest-httpx<=0.22.0",  # 0.22 is the last release working with Python 3.8
+  "pytest-httpx>=0.34.0",
   "pytest-cov",
   "ruff",
   "types-aiofiles",
@@ -43,7 +43,7 @@ pythonpath = [
 
 [tool.black]
 line-length = 99
-target-version = ["py38"]
+target-version = ["py310"]
 include = '\.pyi?$'
 
 [tool.isort]

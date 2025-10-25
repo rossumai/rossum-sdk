@@ -14,6 +14,7 @@ class Engine:
     name: str
     type: str
     learning_enabled: bool
+    training_queues: list[str]
     description: str
     agenda_id: str
 

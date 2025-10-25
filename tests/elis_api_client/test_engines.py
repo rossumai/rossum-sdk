@@ -7,6 +7,7 @@ from rossum_api.models.engine import Engine, EngineField
 from rossum_api.models.queue import Queue
 
 TEST_ENGINE_ID = 123
+TRAINING_QUEUE_ID = 42
 
 
 @pytest.mark.asyncio
@@ -20,6 +21,10 @@ class TestEngine:
             "name": "test_engine",
             "type": "extractor",
             "learning_enabled": False,
+            "training_queues": [
+                f"https://elis.rossum.ai/api/v1/engines/{TEST_ENGINE_ID}",
+                f"https://elis.rossum.ai/api/v1/engines/{TRAINING_QUEUE_ID}",
+            ],
             "description": "Test engine",
             "agenda_id": "test_agenda_id",
         }

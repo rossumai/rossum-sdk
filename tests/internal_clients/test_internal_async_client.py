@@ -10,7 +10,6 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import copy
-import json
 import logging
 import unittest.mock as mock
 
@@ -55,7 +54,10 @@ async def test_authenticate(client, login_mock):
 
     # HTTP 401 is propagated via an exception
     login_mock.add_response(
-        method="POST", url="https://elis.rossum.ai/api/v1/auth/login", status_code=401
+        method="POST",
+        url="https://elis.rossum.ai/api/v1/auth/login",
+        status_code=401,
+        is_reusable=True,
     )
     with pytest.raises(APIClientError, match="401"):
         await client._authenticate()
@@ -76,7 +78,7 @@ async def test_authenticate_is_retried(client, httpx_mock):
             },
         )
 
-    httpx_mock.add_callback(custom_response)
+    httpx_mock.add_callback(custom_response, is_reusable=True)
 
     assert client.token != "our-token"
     await client._authenticate()
@@ -148,7 +150,7 @@ async def test_retry_timeout(client, httpx_mock):
 
         return httpx.Response(status_code=200, json=WORKSPACES[0])
 
-    httpx_mock.add_callback(custom_response)
+    httpx_mock.add_callback(custom_response, is_reusable=True)
     workspace = await client.fetch_one(Resource.Workspace, id_=7694)
     assert workspace == WORKSPACES[0]
 
@@ -162,7 +164,7 @@ async def test_retry_n_attempts(client, httpx_mock):
 
         return httpx.Response(status_code=200, json=WORKSPACES[0])
 
-    httpx_mock.add_callback(custom_response)
+    httpx_mock.add_callback(custom_response, is_reusable=True)
 
     with pytest.raises(httpx.ReadTimeout):
         await client.fetch_one(Resource.Workspace, id_=7694)
@@ -303,6 +305,7 @@ async def test_fetch_all_limit_in_flight_requests(client, httpx_mock):
                 },
                 "results": WORKSPACES[:1],
             },
+            is_reusable=True,
         )
         page_url = next_page_url
     httpx_mock.add_response(
@@ -317,6 +320,7 @@ async def test_fetch_all_limit_in_flight_requests(client, httpx_mock):
             },
             "results": WORKSPACES[-1:],
         },
+        is_reusable=True,
     )
 
     @contextlib.contextmanager
@@ -359,7 +363,7 @@ async def test_create(client, httpx_mock):
     httpx_mock.add_response(
         method="POST",
         url="https://elis.rossum.ai/api/v1/workspaces",
-        match_content=json.dumps(data).encode("utf-8"),
+        match_json=data,
         json=WORKSPACES[0],
     )
     workspace = await client.create(Resource.Workspace, data=data)
@@ -375,7 +379,7 @@ async def test_replace(client, httpx_mock):
     httpx_mock.add_response(
         method="PUT",
         url="https://elis.rossum.ai/api/v1/workspaces/123",
-        match_content=json.dumps(data).encode("utf-8"),
+        match_json=data,
         json=WORKSPACES[0],
     )
     workspace = await client.replace(Resource.Workspace, id_=123, data=data)
@@ -388,7 +392,7 @@ async def test_update(client, httpx_mock):
     httpx_mock.add_response(
         method="PATCH",
         url="https://elis.rossum.ai/api/v1/workspaces/123",
-        match_content=json.dumps(data).encode("utf-8"),
+        match_json=data,
         json=WORKSPACES[0],
     )
     workspace = await client.update(Resource.Workspace, id_=123, data=data)

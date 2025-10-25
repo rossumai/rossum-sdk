@@ -79,6 +79,7 @@ def login_mock(httpx_mock):
             "key": NEW_TOKEN,
             "domain": "custom-domain.app.rossum.ai",
         },
+        is_reusable=True,
     )
     return httpx_mock
 

@@ -8,7 +8,6 @@
 from __future__ import annotations
 
 import copy
-import json
 import logging
 import tempfile
 import unittest.mock as mock
@@ -56,7 +55,10 @@ def test_authenticate(client, login_mock):
 
     # HTTP 401 is propagated via an exception
     login_mock.add_response(
-        method="POST", url="https://elis.rossum.ai/api/v1/auth/login", status_code=401
+        method="POST",
+        url="https://elis.rossum.ai/api/v1/auth/login",
+        status_code=401,
+        is_reusable=True,
     )
     with pytest.raises(APIClientError, match="401"):
         client._authenticate()
@@ -125,7 +127,7 @@ def test_retry_timeout(client, httpx_mock):
 
         return httpx.Response(status_code=200, json=WORKSPACES[0])
 
-    httpx_mock.add_callback(custom_response)
+    httpx_mock.add_callback(custom_response, is_reusable=True)
     workspace = client.fetch_resource(Resource.Workspace, id_=7694)
     assert workspace == WORKSPACES[0]
 
@@ -138,7 +140,7 @@ def test_retry_n_attempts(client, httpx_mock):
 
         return httpx.Response(status_code=200, json=WORKSPACES[0])
 
-    httpx_mock.add_callback(custom_response)
+    httpx_mock.add_callback(custom_response, is_reusable=True)
 
     with pytest.raises(httpx.ReadTimeout):
         client.fetch_resource(Resource.Workspace, id_=7694)
@@ -277,7 +279,7 @@ def test_create(client, httpx_mock):
     httpx_mock.add_response(
         method="POST",
         url="https://elis.rossum.ai/api/v1/workspaces",
-        match_content=json.dumps(data).encode("utf-8"),
+        match_json=data,
         json=WORKSPACES[0],
     )
     workspace = client.create(Resource.Workspace, data=data)
@@ -292,7 +294,7 @@ def test_replace(client, httpx_mock):
     httpx_mock.add_response(
         method="PUT",
         url="https://elis.rossum.ai/api/v1/workspaces/123",
-        match_content=json.dumps(data).encode("utf-8"),
+        match_json=data,
         json=WORKSPACES[0],
     )
     workspace = client.replace(Resource.Workspace, id_=123, data=data)
@@ -304,7 +306,7 @@ def test_update(client, httpx_mock):
     httpx_mock.add_response(
         method="PATCH",
         url="https://elis.rossum.ai/api/v1/workspaces/123",
-        match_content=json.dumps(data).encode("utf-8"),
+        match_json=data,
         json=WORKSPACES[0],
     )
     workspace = client.update(Resource.Workspace, id_=123, data=data)

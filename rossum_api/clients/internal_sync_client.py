@@ -145,9 +145,12 @@ class InternalSyncClient:
             reraise=True,
         )
         for attempt in retrying:
-            with attempt, self.client.stream(
-                method, url, headers=self._headers, *args, **kwargs
-            ) as response:
+            with (
+                attempt,
+                self.client.stream(
+                    method, url, headers=self._headers, *args, **kwargs
+                ) as response,
+            ):
                 if self.response_post_processor is not None:
                     self.response_post_processor(response)
                 if response.status_code == 401:

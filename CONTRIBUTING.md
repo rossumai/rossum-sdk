@@ -24,7 +24,7 @@ Thank you for contributing!
 git@github.com:rossumai/rossum-sdk.git
 ```
 
-Make sure that you have Python 3 installed. Version 3.8 or higher is required to run style checkers on pre-commit. On macOS, we recommend using `brew` to install Python.
+Make sure that you have Python 3 installed. Version 3.10 or higher is required to run style checkers on pre-commit. On macOS, we recommend using `brew` to install Python.
 For Windows, we recommend an official python.org release.
 
 ### Create a virtual environment

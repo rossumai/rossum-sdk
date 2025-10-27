@@ -20,6 +20,7 @@ class TestEngine:
             "name": "test_engine",
             "type": "extractor",
             "learning_enabled": False,
+            "training_queues": ["https://elis.rossum.ai/api/v1/queues/42"],
             "description": "Test engine",
             "agenda_id": "test_agenda_id",
         }

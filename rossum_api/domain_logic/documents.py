@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Optional
+from typing import Any
 
 import httpx
 
@@ -9,8 +9,8 @@ import httpx
 def build_create_document_params(
     file_name: str,
     file_data: bytes,
-    metadata: Optional[dict[str, Any]],
-    parent: Optional[str],
+    metadata: dict[str, Any] | None,
+    parent: str | None,
 ) -> dict[str, Any]:
     metadata = metadata or {}
     files: httpx._types.RequestFiles = {

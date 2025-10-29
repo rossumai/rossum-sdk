@@ -1,19 +1,19 @@
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 
 def validate_search_params(
-    query: Optional[dict] = None,
-    query_string: Optional[dict] = None,
+    query: dict | None = None,
+    query_string: dict | None = None,
 ):
     if not query and not query_string:
         raise ValueError("Either query or query_string must be provided")
 
 
 def build_search_params(
-    query: Optional[dict] = None,
-    query_string: Optional[dict] = None,
+    query: dict | None = None,
+    query_string: dict | None = None,
 ) -> dict[str, Any]:
     json_payload = {}
     if query:

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Literal, Optional
+from typing import Literal
 
 EngineFieldType = Literal["string", "number", "date", "enum"]
 MultilineType = Literal["true", "false", ""]  # Preparation for "auto" option
@@ -28,6 +28,6 @@ class EngineField:
     tabular: bool
     label: str
     type: EngineFieldType
-    subtype: Optional[str]
-    pre_trained_field_id: Optional[str]
+    subtype: str | None
+    pre_trained_field_id: str | None
     multiline: MultilineType

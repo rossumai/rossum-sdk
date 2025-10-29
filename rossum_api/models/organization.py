@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List
 
 
 @dataclass
@@ -14,8 +14,8 @@ class Organization:
     organization_group: str
     is_trial: bool
     created_at: str
-    trial_expires_at: Optional[str] = None
-    expires_at: Optional[str] = None
-    oidc_provider: Optional[str] = None
+    trial_expires_at: str | None = None
+    expires_at: str | None = None
+    oidc_provider: str | None = None
     ui_settings: dict = field(default_factory=dict)
     metadata: dict = field(default_factory=dict)

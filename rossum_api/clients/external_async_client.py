@@ -55,7 +55,6 @@ if typing.TYPE_CHECKING:
         Callable,
         Dict,
         List,
-        Optional,
         Sequence,
         Tuple,
     )
@@ -111,13 +110,13 @@ class AsyncRossumAPIClient(
         base_url: str,
         credentials: UserCredentials | Token,
         *,
-        deserializer: Optional[Deserializer] = None,
-        timeout: Optional[float] = None,
+        deserializer: Deserializer | None = None,
+        timeout: float | None = None,
         n_retries: int = 3,
         retry_backoff_factor: float = 1.0,
         retry_max_jitter: float = 1.0,
         max_in_flight_requests: int = 4,
-        response_post_processor: Optional[ResponsePostProcessor] = None,
+        response_post_processor: ResponsePostProcessor | None = None,
     ):
         """
         Parameters
@@ -181,8 +180,8 @@ class AsyncRossumAPIClient(
         self,
         queue_id: int,
         files: Sequence[Tuple[str | pathlib.Path, str]],
-        values: Optional[Dict[str, Any]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        values: Dict[str, Any] | None = None,
+        metadata: Dict[str, Any] | None = None,
     ) -> List[int]:
         """https://elis.rossum.ai/api/docs/#import-a-document.
 
@@ -227,8 +226,8 @@ class AsyncRossumAPIClient(
         self,
         queue_id: int,
         files: Sequence[Tuple[str | pathlib.Path, str]],
-        values: Optional[Dict[str, Any]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        values: Dict[str, Any] | None = None,
+        metadata: Dict[str, Any] | None = None,
     ) -> List[TaskType]:
         """https://elis.rossum.ai/api/docs/#create-upload.
 
@@ -262,8 +261,8 @@ class AsyncRossumAPIClient(
         file: str | pathlib.Path,
         queue_id: int,
         filename: str,
-        values: Optional[Dict[str, Any]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        values: Dict[str, Any] | None = None,
+        metadata: Dict[str, Any] | None = None,
     ) -> TaskType:
         """Helper method that uploads the files and gets back Task response for each.
 
@@ -400,8 +399,8 @@ class AsyncRossumAPIClient(
 
     async def search_for_annotations(
         self,
-        query: Optional[dict] = None,
-        query_string: Optional[dict] = None,
+        query: dict | None = None,
+        query_string: dict | None = None,
         ordering: Sequence[str] = (),
         sideloads: Sequence[str] = (),
         **kwargs: Any,
@@ -566,8 +565,8 @@ class AsyncRossumAPIClient(
         self,
         file_name: str,
         file_data: bytes,
-        metadata: Optional[Dict[str, Any]] = None,
-        parent: Optional[str] = None,
+        metadata: Dict[str, Any] | None = None,
+        parent: str | None = None,
     ) -> DocumentType:
         """https://elis.rossum.ai/api/docs/#create-document"""
         files = build_create_document_params(file_name, file_data, metadata, parent)

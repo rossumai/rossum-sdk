@@ -4,14 +4,14 @@ import json
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any
 
 
 def build_upload_files(
     file_content: bytes,
     filename: str,
-    values: Optional[dict[str, Any]] = None,
-    metadata: Optional[dict[str, Any]] = None,
+    values: dict[str, Any] | None = None,
+    metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Build request files for the upload endpoint."""
     files = {"content": (filename, file_content, "application/octet-stream")}

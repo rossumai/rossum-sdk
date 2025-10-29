@@ -54,7 +54,7 @@ from rossum_api.models.task import Task
 from rossum_api.utils import ObjectWithStatus
 
 if typing.TYPE_CHECKING:
-    from typing import Any, Callable, Iterator, Optional, Sequence, Tuple
+    from typing import Any, Callable, Iterator, Sequence, Tuple
 
     from rossum_api.models import Deserializer, ResponsePostProcessor
 
@@ -106,10 +106,10 @@ class SyncRossumAPIClient(
         base_url: str,
         credentials: UserCredentials | Token,
         *,
-        deserializer: Optional[Deserializer] = None,
-        timeout: Optional[float] = None,
+        deserializer: Deserializer | None = None,
+        timeout: float | None = None,
         n_retries: int = 3,
-        response_post_processor: Optional[ResponsePostProcessor] = None,
+        response_post_processor: ResponsePostProcessor | None = None,
     ):
         """
         Parameters
@@ -163,8 +163,8 @@ class SyncRossumAPIClient(
         self,
         url: str,
         files: Sequence[Tuple[str | Path, str]],
-        values: Optional[dict[str, Any]],
-        metadata: Optional[dict[str, Any]],
+        values: dict[str, Any] | None,
+        metadata: dict[str, Any] | None,
     ) -> list[int]:
         """Depending on the endpoint, it either returns annotation IDs, or task IDs."""
         results = []
@@ -182,8 +182,8 @@ class SyncRossumAPIClient(
         self,
         queue_id: int,
         files: Sequence[Tuple[str | Path, str]],
-        values: Optional[dict[str, Any]] = None,
-        metadata: Optional[dict[str, Any]] = None,
+        values: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> list[int]:
         """https://elis.rossum.ai/api/docs/#import-a-document.
 
@@ -214,8 +214,8 @@ class SyncRossumAPIClient(
         self,
         queue_id: int,
         files: Sequence[Tuple[str | pathlib.Path, str]],
-        values: Optional[dict[str, Any]] = None,
-        metadata: Optional[dict[str, Any]] = None,
+        values: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> list[TaskType]:
         """https://elis.rossum.ai/api/docs/#create-upload
 
@@ -385,8 +385,8 @@ class SyncRossumAPIClient(
 
     def search_for_annotations(
         self,
-        query: Optional[dict] = None,
-        query_string: Optional[dict] = None,
+        query: dict | None = None,
+        query_string: dict | None = None,
         ordering: Sequence[str] = (),
         sideloads: Sequence[str] = (),
         **kwargs: Any,
@@ -547,8 +547,8 @@ class SyncRossumAPIClient(
         self,
         file_name: str,
         file_data: bytes,
-        metadata: Optional[dict[str, Any]] = None,
-        parent: Optional[str] = None,
+        metadata: dict[str, Any] | None = None,
+        parent: str | None = None,
     ) -> DocumentType:
         """https://elis.rossum.ai/api/docs/#create-document"""
         files = build_create_document_params(file_name, file_data, metadata, parent)

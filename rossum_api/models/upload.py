@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List
 
 
 @dataclass
@@ -17,4 +17,4 @@ class Upload:
     documents: List[str]
     additional_documents: List[str] = field(default_factory=list)
     annotations: List[str] = field(default_factory=list)
-    email: Optional[str] = None
+    email: str | None = None

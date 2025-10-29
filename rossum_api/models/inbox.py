@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 
 @dataclass
@@ -12,7 +12,7 @@ class Inbox:
     queues: List[str]
     email: str
     email_prefix: str
-    bounce_email_to: Optional[str]
+    bounce_email_to: str | None
     bounce_unprocessable_attachments: bool = False
     bounce_postponed_annotations: bool = False
     bounce_deleted_annotations: bool = False

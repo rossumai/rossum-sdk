@@ -23,7 +23,7 @@ from rossum_api.exceptions import APIClientError
 from rossum_api.utils import enforce_domain
 
 if typing.TYPE_CHECKING:
-    from typing import Any, Iterator, Optional, Sequence
+    from typing import Any, Iterator, Sequence
 
     from rossum_api.models import ResponsePostProcessor
 
@@ -34,11 +34,11 @@ class InternalSyncClient:
         base_url: str,
         credentials: UserCredentials | Token,
         *,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
         n_retries: int = 3,
         retry_backoff_factor: float = 1.0,
         retry_max_jitter: float = 1.0,
-        response_post_processor: Optional[ResponsePostProcessor] = None,
+        response_post_processor: ResponsePostProcessor | None = None,
     ):
         self.base_url = base_url
         self.client = httpx.Client(timeout=timeout)
@@ -181,8 +181,8 @@ class InternalSyncClient:
         sideloads: Sequence[str] = (),
         content_schema_ids: Sequence[str] = (),
         method: str = "GET",
-        json: Optional[dict] = None,
-        max_pages: Optional[int] = None,
+        json: dict | None = None,
+        max_pages: int | None = None,
         **filters,
     ) -> Iterator[dict[str, Any]]:
         """Retrieve a list of objects in a specific resource."""
@@ -204,8 +204,8 @@ class InternalSyncClient:
         sideloads: Sequence[str] = (),
         content_schema_ids: Sequence[str] = (),
         method: str = "GET",
-        json: Optional[dict] = None,
-        max_pages: Optional[int] = None,
+        json: dict | None = None,
+        max_pages: int | None = None,
         **filters,
     ) -> Iterator[dict[str, Any]]:
         query_params = build_pagination_params(ordering)
@@ -234,7 +234,7 @@ class InternalSyncClient:
         method: str,
         query_params: dict[str, Any],
         sideload_groups: Sequence[str],
-        json: Optional[dict] = None,
+        json: dict | None = None,
     ) -> tuple[list[dict[str, Any]], int]:
         data = self.request_json(method, url, params=query_params, json=json)
         embed_sideloads(data, sideload_groups)

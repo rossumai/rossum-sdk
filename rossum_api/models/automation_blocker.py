@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 
 @dataclass
 class AutomationBlockerContent:
     level: str
     type: str
-    schema_id: Optional[str] = None
-    samples_truncated: Optional[bool] = False
+    schema_id: str | None = None
+    samples_truncated: bool | None = False
     samples: List[Dict[str, Any]] = field(default_factory=list)
     details: Dict[str, Any] = field(default_factory=dict)
 

@@ -23,8 +23,6 @@ from rossum_api.domain_logic.resources import Resource
 from rossum_api.dtos import Token
 
 if TYPE_CHECKING:
-    from typing import Optional
-
     from rossum_api.clients.external_async_client import (
         AsyncRossumAPIClientWithDefaultDeserializer,
     )
@@ -44,9 +42,9 @@ WORKSPACE = {
 @pytest.mark.asyncio
 class TestE2E:
     async def test_import_document(self):
-        workspace: Optional[Workspace] = None
-        queue: Optional[Queue] = None
-        schema: Optional[Schema] = None
+        workspace: Workspace | None = None
+        queue: Queue | None = None
+        schema: Schema | None = None
         client: AsyncRossumAPIClientWithDefaultDeserializer = AsyncRossumAPIClient(
             credentials=Token(os.environ["ROSSUM_TOKEN"]),
             base_url=os.environ["ROSSUM_BASE_URL"],
@@ -88,9 +86,9 @@ class TestE2E:
 
     async def test_create_upload(self):
         """An idea for potential E2E test for https://elis.rossum.ai/api/docs/#create-upload."""
-        workspace: Optional[Workspace] = None
-        queue: Optional[Queue] = None
-        schema: Optional[Schema] = None
+        workspace: Workspace | None = None
+        queue: Queue | None = None
+        schema: Schema | None = None
         client: AsyncRossumAPIClientWithDefaultDeserializer = AsyncRossumAPIClient(
             credentials=Token(os.environ["ROSSUM_TOKEN"]),
             base_url=os.environ["ROSSUM_BASE_URL"],

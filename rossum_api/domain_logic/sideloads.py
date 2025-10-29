@@ -26,10 +26,7 @@ def build_sideload_params(sideloads: Sequence[str], content_schema_ids: Sequence
         sideloads only particular `content` fields when fetching `annotations` resource,
         has no effect when fetching other resources
     """
-    return {
-        "sideload": ",".join(sideloads),
-        "content.schema_id": ",".join(content_schema_ids),
-    }
+    return {"sideload": ",".join(sideloads), "content.schema_id": ",".join(content_schema_ids)}
 
 
 def embed_sideloads(response_data: dict[str, Any], sideloads: Sequence[str]) -> None:

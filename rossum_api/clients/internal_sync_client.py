@@ -94,11 +94,7 @@ class InternalSyncClient:
         """
         self._request("DELETE", build_url(resource, id_))
 
-    def upload(
-        self,
-        url: str,
-        files: dict[str, Any],
-    ) -> dict[str, Any]:
+    def upload(self, url: str, files: dict[str, Any]) -> dict[str, Any]:
         """Upload a file to a resource that supports this."""
         return self.request_json("POST", url, files=files)
 
@@ -157,10 +153,7 @@ class InternalSyncClient:
                     yield chunk
 
     def fetch_resource(
-        self,
-        resource: Resource,
-        id_: int | str,
-        request_params: dict[str, Any] | None = None,
+        self, resource: Resource, id_: int | str, request_params: dict[str, Any] | None = None
     ) -> dict[str, Any]:
         """Retrieve a single object in a specific resource.
 

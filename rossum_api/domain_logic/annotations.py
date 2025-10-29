@@ -41,9 +41,7 @@ def is_annotation_imported(annotation: ObjectWithStatus) -> bool:
 
 
 def build_export_query_params(
-    export_format: str,
-    columns: Sequence[str] = (),
-    **filters: Any,
+    export_format: str, columns: Sequence[str] = (), **filters: Any
 ) -> dict[str, Any]:
     query_params = {"format": export_format}
     filters = filters or {}

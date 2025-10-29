@@ -133,19 +133,12 @@ class SyncRossumAPIClient(
 
     # ##### QUEUES #####
 
-    def retrieve_queue(
-        self,
-        queue_id: int,
-    ) -> QueueType:
+    def retrieve_queue(self, queue_id: int) -> QueueType:
         """https://elis.rossum.ai/api/docs/#retrieve-a-queue-2."""
         queue = self.internal_client.fetch_resource(Resource.Queue, queue_id)
         return self._deserializer(Resource.Queue, queue)
 
-    def list_queues(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
-    ) -> Iterator[QueueType]:
+    def list_queues(self, ordering: Sequence[str] = (), **filters: Any) -> Iterator[QueueType]:
         """https://elis.rossum.ai/api/docs/#list-all-queues."""
         for q in self.internal_client.fetch_resources(Resource.Queue, ordering, **filters):
             yield self._deserializer(Resource.Queue, q)
@@ -243,10 +236,7 @@ class SyncRossumAPIClient(
         task_ids = self._import_document(url, files, values, metadata)
         return [self.retrieve_task(task_id) for task_id in task_ids]
 
-    def retrieve_upload(
-        self,
-        upload_id: int,
-    ) -> UploadType:
+    def retrieve_upload(self, upload_id: int) -> UploadType:
         """Implements https://elis.rossum.ai/api/docs/#retrieve-upload."""
         upload = self.internal_client.fetch_resource(Resource.Upload, upload_id)
         return self._deserializer(Resource.Upload, upload)
@@ -254,9 +244,7 @@ class SyncRossumAPIClient(
     # ##### EXPORT #####
 
     def export_annotations_to_json(
-        self,
-        queue_id: int,
-        **filters: Any,
+        self, queue_id: int, **filters: Any
     ) -> Iterator[AnnotationType]:
         """https://elis.rossum.ai/api/docs/#export-annotations.
 
@@ -284,9 +272,7 @@ class SyncRossumAPIClient(
     # ##### ORGANIZATIONS #####
 
     def list_organizations(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> Iterator[OrganizationType]:
         """https://elis.rossum.ai/api/docs/#list-all-organizations."""
         for o in self.internal_client.fetch_resources(Resource.Organization, ordering, **filters):
@@ -305,11 +291,7 @@ class SyncRossumAPIClient(
 
     # ##### SCHEMAS #####
 
-    def list_schemas(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
-    ) -> Iterator[SchemaType]:
+    def list_schemas(self, ordering: Sequence[str] = (), **filters: Any) -> Iterator[SchemaType]:
         """https://elis.rossum.ai/api/docs/#list-all-schemas."""
         for s in self.internal_client.fetch_resources(Resource.Schema, ordering, **filters):
             yield self._deserializer(Resource.Schema, s)
@@ -330,11 +312,7 @@ class SyncRossumAPIClient(
 
     # ##### USERS #####
 
-    def list_users(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
-    ) -> Iterator[UserType]:
+    def list_users(self, ordering: Sequence[str] = (), **filters: Any) -> Iterator[UserType]:
         """https://elis.rossum.ai/api/docs/#list-all-users."""
         for u in self.internal_client.fetch_resources(Resource.User, ordering, **filters):
             yield self._deserializer(Resource.User, u)
@@ -446,10 +424,7 @@ class SyncRossumAPIClient(
         return self._deserializer(Resource.Task, task)
 
     def poll_task(
-        self,
-        task_id: int,
-        predicate: Callable[[TaskType], bool],
-        sleep_s: int = 3,
+        self, task_id: int, predicate: Callable[[TaskType], bool], sleep_s: int = 3
     ) -> TaskType:
         """Poll on Task until predicate is true.
 
@@ -462,11 +437,7 @@ class SyncRossumAPIClient(
 
         return task
 
-    def poll_task_until_succeeded(
-        self,
-        task_id: int,
-        sleep_s: int = 3,
-    ) -> TaskType:
+    def poll_task_until_succeeded(self, task_id: int, sleep_s: int = 3) -> TaskType:
         """Poll on Task until it is succeeded."""
         return self.poll_task(task_id, is_task_succeeded, sleep_s)
 
@@ -609,9 +580,7 @@ class SyncRossumAPIClient(
     # ##### WORKSPACES #####
 
     def list_workspaces(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> Iterator[WorkspaceType]:
         """https://elis.rossum.ai/api/docs/#list-all-workspaces."""
         for w in self.internal_client.fetch_resources(Resource.Workspace, ordering, **filters):
@@ -640,11 +609,7 @@ class SyncRossumAPIClient(
         engine = self.internal_client.fetch_resource(Resource.Engine, engine_id)
         return self._deserializer(Resource.Engine, engine)
 
-    def list_engines(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
-    ) -> Iterator[EngineType]:
+    def list_engines(self, ordering: Sequence[str] = (), **filters: Any) -> Iterator[EngineType]:
         for c in self.internal_client.fetch_resources(Resource.Engine, ordering, **filters):
             yield self._deserializer(Resource.Engine, c)
 
@@ -691,9 +656,7 @@ class SyncRossumAPIClient(
     # ##### EMAIL TEMPLATES #####
 
     def list_email_templates(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> Iterator[EmailTemplateType]:
         """https://elis.rossum.ai/api/docs/#list-all-email-templates."""
         for c in self.internal_client.fetch_resources(Resource.EmailTemplate, ordering, **filters):
@@ -714,9 +677,7 @@ class SyncRossumAPIClient(
     # ##### CONNECTORS #####
 
     def list_connectors(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> Iterator[ConnectorType]:
         """https://elis.rossum.ai/api/docs/#list-all-connectors."""
         for c in self.internal_client.fetch_resources(Resource.Connector, ordering, **filters):
@@ -734,11 +695,7 @@ class SyncRossumAPIClient(
 
     # ##### HOOKS #####
 
-    def list_hooks(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
-    ) -> Iterator[HookType]:
+    def list_hooks(self, ordering: Sequence[str] = (), **filters: Any) -> Iterator[HookType]:
         """https://elis.rossum.ai/api/docs/#list-all-hooks."""
         for h in self.internal_client.fetch_resources(Resource.Hook, ordering, **filters):
             yield self._deserializer(Resource.Hook, h)
@@ -764,11 +721,7 @@ class SyncRossumAPIClient(
 
     # ##### USER ROLES #####
 
-    def list_user_roles(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
-    ) -> Iterator[GroupType]:
+    def list_user_roles(self, ordering: Sequence[str] = (), **filters: Any) -> Iterator[GroupType]:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles."""
         for g in self.internal_client.fetch_resources(Resource.Group, ordering, **filters):
             yield self._deserializer(Resource.Group, g)

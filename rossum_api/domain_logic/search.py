@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from typing import Any
 
 
-def validate_search_params(query: dict | None = None, query_string: dict | None = None):
+def validate_search_params(query: dict | None = None, query_string: dict | None = None) -> None:
     if not query and not query_string:
         raise ValueError("Either query or query_string must be provided")
 

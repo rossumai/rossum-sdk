@@ -9,4 +9,5 @@ if TYPE_CHECKING:
 
 
 def is_task_succeeded(task: ObjectWithStatus) -> bool:
-    return task.status == TaskStatus.SUCCEEDED.value
+    success: bool = task.status == TaskStatus.SUCCEEDED.value
+    return success

@@ -45,7 +45,26 @@ from rossum_api.models.task import Task
 from rossum_api.models.upload import Upload
 from rossum_api.models.user import User
 from rossum_api.models.workspace import Workspace
-from rossum_api.utils import ObjectWithStatus
+from rossum_api.types import (
+    AnnotationType,
+    ConnectorType,
+    DocumentRelationType,
+    DocumentType,
+    EmailTemplateType,
+    EmailType,
+    EngineFieldType,
+    EngineType,
+    GroupType,
+    HookType,
+    InboxType,
+    OrganizationType,
+    QueueType,
+    SchemaType,
+    TaskType,
+    UploadType,
+    UserType,
+    WorkspaceType,
+)
 
 if typing.TYPE_CHECKING:
     import pathlib
@@ -53,26 +72,8 @@ if typing.TYPE_CHECKING:
 
     import httpx
 
-    from rossum_api.models import Deserializer, ResponsePostProcessor
-
-AnnotationType = typing.TypeVar("AnnotationType", bound=ObjectWithStatus)
-ConnectorType = typing.TypeVar("ConnectorType")
-DocumentType = typing.TypeVar("DocumentType")
-DocumentRelationType = typing.TypeVar("DocumentRelationType")
-EmailTemplateType = typing.TypeVar("EmailTemplateType")
-EngineType = typing.TypeVar("EngineType")
-EngineFieldType = typing.TypeVar("EngineFieldType")
-GroupType = typing.TypeVar("GroupType")
-HookType = typing.TypeVar("HookType")
-InboxType = typing.TypeVar("InboxType")
-EmailType = typing.TypeVar("EmailType")
-OrganizationType = typing.TypeVar("OrganizationType")
-QueueType = typing.TypeVar("QueueType")
-SchemaType = typing.TypeVar("SchemaType")
-TaskType = typing.TypeVar("TaskType", bound=ObjectWithStatus)
-UploadType = typing.TypeVar("UploadType")
-UserType = typing.TypeVar("UserType")
-WorkspaceType = typing.TypeVar("WorkspaceType")
+    from rossum_api.models import Deserializer, JsonDict, ResponsePostProcessor
+    from rossum_api.types import HttpMethod, RossumApiType
 
 
 class AsyncRossumAPIClient(
@@ -142,7 +143,9 @@ class AsyncRossumAPIClient(
             max_in_flight_requests=max_in_flight_requests,
             response_post_processor=response_post_processor,
         )
-        self._deserializer = deserializer or deserialize_default
+        self._deserializer: Callable[[Resource, JsonDict], RossumApiType] = (
+            deserializer or deserialize_default
+        )
 
     # ##### QUEUE #####
     async def retrieve_queue(self, queue_id: int) -> QueueType:
@@ -202,7 +205,14 @@ class AsyncRossumAPIClient(
 
         return await asyncio.gather(*tasks)
 
-    async def _upload(self, file, queue_id, filename, values, metadata) -> int:
+    async def _upload(
+        self,
+        file: str | pathlib.Path,
+        queue_id: int,
+        filename: str,
+        values: dict[str, Any] | None,
+        metadata: dict[str, Any] | None,
+    ) -> int:
         """A helper method used for the import document endpoint.
 
         This does not create an Upload object."""
@@ -477,7 +487,7 @@ class AsyncRossumAPIClient(
         return self._deserializer(Resource.Task, task)
 
     async def upload_and_wait_until_imported(
-        self, queue_id: int, filepath: str | pathlib.Path, filename: str, **poll_kwargs
+        self, queue_id: int, filepath: str | pathlib.Path, filename: str, **poll_kwargs: Any
     ) -> AnnotationType:
         """A shortcut for uploading a single file and waiting until its annotation is imported."""
         (annotation_id,) = await self.import_document(queue_id, [(filepath, filename)])
@@ -551,7 +561,7 @@ class AsyncRossumAPIClient(
         document_content = await self._http_client.request(
             "GET", url=build_resource_content_url(Resource.Document, document_id)
         )
-        return document_content.content
+        return document_content.content  # type: ignore[no-any-return]
 
     async def create_new_document(
         self,
@@ -697,7 +707,7 @@ class AsyncRossumAPIClient(
             url=EMAIL_IMPORT_URL,
             files=build_email_import_files(raw_message, recipient, mime_type),
         )
-        return response["url"]
+        return response["url"]  # type: ignore[no-any-return]
 
     # ##### EMAIL TEMPLATES #####
     async def list_email_templates(
@@ -780,20 +790,20 @@ class AsyncRossumAPIClient(
             yield self._deserializer(Resource.Group, g)
 
     # ##### GENERIC METHODS #####
-    async def request_paginated(self, url: str, *args, **kwargs) -> AsyncIterator[dict]:
+    async def request_paginated(self, url: str, *args: Any, **kwargs: Any) -> AsyncIterator[dict]:
         """Use to perform requests to seldomly used or experimental endpoints with paginated response that do not have
         direct support in the client and return iterable.
         """
         async for element in self._http_client.fetch_all_by_url(url, *args, **kwargs):
             yield element
 
-    async def request_json(self, method: str, *args, **kwargs) -> dict[str, Any]:
+    async def request_json(self, method: HttpMethod, *args: Any, **kwargs: Any) -> dict[str, Any]:
         """Use to perform requests to seldomly used or experimental endpoints that do not have
         direct support in the client and return JSON.
         """
         return await self._http_client.request_json(method, *args, **kwargs)
 
-    async def request(self, method: str, *args, **kwargs) -> httpx.Response:
+    async def request(self, method: HttpMethod, *args: Any, **kwargs: Any) -> httpx.Response:
         """Use to perform requests to seldomly used or experimental endpoints that do not have
         direct support in the client and return the raw response.
         """

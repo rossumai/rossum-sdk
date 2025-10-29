@@ -22,6 +22,7 @@ if typing.TYPE_CHECKING:
 
     from rossum_api.domain_logic.resources import Resource
     from rossum_api.models import ResponsePostProcessor
+    from rossum_api.types import HttpMethod
 
 
 class InternalSyncClient:
@@ -72,7 +73,7 @@ class InternalSyncClient:
         self.token = response.json()["key"]
 
     @property
-    def _headers(self):
+    def _headers(self) -> dict[str, str]:
         return {"Authorization": f"Bearer {self.token}"}
 
     def create(self, resource: Resource, data: dict[str, Any]) -> dict[str, Any]:
@@ -119,7 +120,7 @@ class InternalSyncClient:
             # chunks of bytes are yielded from HTTP stream to keep memory consumption low.
             yield from self._stream(method, url, params=query_params)
 
-    def _stream(self, method: str, url: str, *args, **kwargs) -> Iterator[bytes]:
+    def _stream(self, method: HttpMethod, url: str, *args: Any, **kwargs: Any) -> Iterator[bytes]:
         """Performs a streaming HTTP call."""
         if not self.token:
             self._authenticate()
@@ -169,10 +170,10 @@ class InternalSyncClient:
         ordering: Sequence[str] = (),
         sideloads: Sequence[str] = (),
         content_schema_ids: Sequence[str] = (),
-        method: str = "GET",
+        method: HttpMethod = "GET",
         json: dict[str, Any] | None = None,
         max_pages: int | None = None,
-        **filters,
+        **filters: Any,
     ) -> Iterator[dict[str, Any]]:
         """Retrieve a list of objects in a specific resource."""
         return self.fetch_resources_by_url(
@@ -192,10 +193,10 @@ class InternalSyncClient:
         ordering: Sequence[str] = (),
         sideloads: Sequence[str] = (),
         content_schema_ids: Sequence[str] = (),
-        method: str = "GET",
+        method: HttpMethod = "GET",
         json: dict | None = None,
         max_pages: int | None = None,
-        **filters,
+        **filters: Any,
     ) -> Iterator[dict[str, Any]]:
         query_params = build_pagination_params(ordering)
         query_params.update(build_sideload_params(sideloads, content_schema_ids))
@@ -203,7 +204,15 @@ class InternalSyncClient:
 
         return self._fetch_paginated_results(url, method, query_params, sideloads, json, max_pages)
 
-    def _fetch_paginated_results(self, url, method, query_params, sideloads, json, max_pages):
+    def _fetch_paginated_results(
+        self,
+        url: str,
+        method: HttpMethod,
+        query_params: dict[str, Any],
+        sideloads: Sequence[str],
+        json: dict | None,
+        max_pages: int | None,
+    ) -> Iterator[dict[str, Any]]:
         first_page_results, total_pages = self._fetch_page(
             url, method, query_params, sideloads, json=json
         )
@@ -220,7 +229,7 @@ class InternalSyncClient:
     def _fetch_page(
         self,
         url: str,
-        method: str,
+        method: HttpMethod,
         query_params: dict[str, Any],
         sideload_groups: Sequence[str],
         json: dict | None = None,
@@ -229,16 +238,16 @@ class InternalSyncClient:
         embed_sideloads(data, sideload_groups)
         return data["results"], data["pagination"]["total_pages"]
 
-    def request_json(self, method: str, *args, **kwargs) -> dict[str, Any]:
+    def request_json(self, method: HttpMethod, *args: Any, **kwargs: Any) -> dict[str, Any]:
         response = self._request(method, *args, **kwargs)
         if response.status_code == 204:
             return {}
-        return response.json()
+        return response.json()  # type: ignore[no-any-return]
 
-    def request(self, method: str, *args, **kwargs) -> httpx.Response:
+    def request(self, method: HttpMethod, *args: Any, **kwargs: Any) -> httpx.Response:
         return self._request(method, *args, **kwargs)
 
-    def _request(self, method: str, url: str, *args, **kwargs) -> httpx.Response:
+    def _request(self, method: HttpMethod, url: str, *args: Any, **kwargs: Any) -> httpx.Response:
         """Performs the actual HTTP call and does error handling.
 
         Arguments:
@@ -270,7 +279,7 @@ class InternalSyncClient:
                 return response
 
     @staticmethod
-    def _raise_for_status(response: httpx.Response):
+    def _raise_for_status(response: httpx.Response) -> None:
         """Raise an exception in case of HTTP error.
 
         Re-pack to our own exception class to shield users from the fact that we're using

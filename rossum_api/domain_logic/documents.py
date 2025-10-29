@@ -6,14 +6,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Any
 
-    import httpx
-
 
 def build_create_document_params(
     file_name: str, file_data: bytes, metadata: dict[str, Any] | None, parent: str | None
 ) -> dict[str, Any]:
     metadata = metadata or {}
-    files: httpx._types.RequestFiles = {
+    files: dict[str, Any] = {
         "content": (file_name, file_data),
         "metadata": ("", json.dumps(metadata).encode("utf-8")),
     }

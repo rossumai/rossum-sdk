@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Any, Sequence
 
+    from rossum_api.types import HttpMethod
     from rossum_api.utils import ObjectWithStatus
 
 
@@ -25,14 +26,12 @@ def validate_list_annotations_params(
         )
 
 
-def get_http_method_for_annotation_export(**filters) -> str:
+def get_http_method_for_annotation_export(**filters: Any) -> HttpMethod:
     """to_status filter requires a different HTTP method.
 
     https://elis.rossum.ai/api/docs/#export-annotations
     """
-    if "to_status" in filters:
-        return "POST"
-    return "GET"
+    return "POST" if "to_status" in filters else "GET"
 
 
 def is_annotation_imported(annotation: ObjectWithStatus) -> bool:

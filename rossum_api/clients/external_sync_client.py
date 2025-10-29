@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import time
-import typing
+from typing import TYPE_CHECKING, Generic, cast
 
 from rossum_api.clients.internal_sync_client import InternalSyncClient
 from rossum_api.domain_logic.annotations import (
@@ -48,39 +48,39 @@ from rossum_api.models import (
     deserialize_default,
 )
 from rossum_api.models.task import Task
-from rossum_api.utils import ObjectWithStatus
+from rossum_api.types import (
+    AnnotationType,
+    ConnectorType,
+    DocumentRelationType,
+    DocumentType,
+    EmailTemplateType,
+    EmailType,
+    EngineFieldType,
+    EngineType,
+    GroupType,
+    HookType,
+    InboxType,
+    OrganizationType,
+    QueueType,
+    SchemaType,
+    TaskType,
+    UploadType,
+    UserType,
+    WorkspaceType,
+)
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     import pathlib
     from pathlib import Path
     from typing import Any, Callable, Iterator, Sequence
 
     from rossum_api.dtos import Token, UserCredentials
-    from rossum_api.models import Deserializer, ResponsePostProcessor
-
-
-AnnotationType = typing.TypeVar("AnnotationType", bound=ObjectWithStatus)
-ConnectorType = typing.TypeVar("ConnectorType")
-DocumentType = typing.TypeVar("DocumentType")
-DocumentRelationType = typing.TypeVar("DocumentRelationType")
-EmailTemplateType = typing.TypeVar("EmailTemplateType")
-EngineType = typing.TypeVar("EngineType")
-EngineFieldType = typing.TypeVar("EngineFieldType")
-GroupType = typing.TypeVar("GroupType")
-HookType = typing.TypeVar("HookType")
-InboxType = typing.TypeVar("InboxType")
-EmailType = typing.TypeVar("EmailType")
-OrganizationType = typing.TypeVar("OrganizationType")
-QueueType = typing.TypeVar("QueueType")
-SchemaType = typing.TypeVar("SchemaType")
-TaskType = typing.TypeVar("TaskType", bound=ObjectWithStatus)
-UploadType = typing.TypeVar("UploadType")
-UserType = typing.TypeVar("UserType")
-WorkspaceType = typing.TypeVar("WorkspaceType")
+    from rossum_api.models import Deserializer, JsonDict, ResponsePostProcessor
+    from rossum_api.types import RossumApiType
 
 
 class SyncRossumAPIClient(
-    typing.Generic[
+    Generic[
         AnnotationType,
         ConnectorType,
         DocumentType,
@@ -110,7 +110,7 @@ class SyncRossumAPIClient(
         timeout: float | None = None,
         n_retries: int = 3,
         response_post_processor: ResponsePostProcessor | None = None,
-    ):
+    ) -> None:
         """
         Parameters
         ----------
@@ -122,7 +122,9 @@ class SyncRossumAPIClient(
         response_post_processor
             pass a custom response post-processing callable
         """
-        self._deserializer = deserializer or deserialize_default
+        self._deserializer: Callable[[Resource, JsonDict], RossumApiType] = (
+            deserializer or deserialize_default
+        )
         self.internal_client = InternalSyncClient(
             base_url,
             credentials,
@@ -252,10 +254,10 @@ class SyncRossumAPIClient(
         """
         for chunk in self.internal_client.export(Resource.Queue, queue_id, "json", **filters):
             # JSON export can be translated directly to Annotation object
-            yield self._deserializer(Resource.Annotation, typing.cast("dict", chunk))
+            yield self._deserializer(Resource.Annotation, cast("dict", chunk))
 
     def export_annotations_to_file(
-        self, queue_id: int, export_format: ExportFileFormats, **filters
+        self, queue_id: int, export_format: ExportFileFormats, **filters: Any
     ) -> Iterator[bytes]:
         """https://elis.rossum.ai/api/docs/#export-annotations.
 
@@ -267,7 +269,7 @@ class SyncRossumAPIClient(
             export_format.value,
             **filters,
         ):
-            yield typing.cast("bytes", chunk)
+            yield cast("bytes", chunk)
 
     # ##### ORGANIZATIONS #####
 
@@ -442,7 +444,7 @@ class SyncRossumAPIClient(
         return self.poll_task(task_id, is_task_succeeded, sleep_s)
 
     def upload_and_wait_until_imported(
-        self, queue_id: int, filepath: str | pathlib.Path, filename: str, **poll_kwargs
+        self, queue_id: int, filepath: str | pathlib.Path, filename: str, **poll_kwargs: Any
     ) -> AnnotationType:
         """A shortcut for uploading a single file and waiting until its annotation is imported."""
         (annotation_id,) = self.import_document(queue_id, [(filepath, filename)])
@@ -512,7 +514,7 @@ class SyncRossumAPIClient(
         document_content = self.internal_client.request(
             "GET", url=build_resource_content_url(Resource.Document, document_id)
         )
-        return document_content.content
+        return document_content.content  # type: ignore[no-any-return]
 
     def create_new_document(
         self,
@@ -651,7 +653,7 @@ class SyncRossumAPIClient(
             url=EMAIL_IMPORT_URL,
             files=build_email_import_files(raw_message, recipient, mime_type),
         )
-        return response["url"]
+        return response["url"]  # type: ignore[no-any-return]
 
     # ##### EMAIL TEMPLATES #####
 

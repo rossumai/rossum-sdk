@@ -21,7 +21,7 @@ Thank you for contributing!
 ### Clone the repo
 
 ```bash
-git@github.com:rossumai/rossum-sdk.git
+git clone git@github.com:rossumai/rossum-sdk.git
 ```
 
 Make sure that you have Python 3 installed. Version 3.10 or higher is required to run style checkers on pre-commit. On macOS, we recommend using `brew` to install Python.
@@ -56,25 +56,6 @@ pre-commit install-hooks
 That's it. You should be ready to make changes, run tests, and make commits!
 
 ## Running tests
-
-We have a `Makefile` to help people get started with hacking on the SDK
-without having to know or understand the Python ecosystem.
-Run `make` or `make help` to list commands.
-
-So the simplest way to run tests is:
-
-```bash
-cd rossum-sdk
-
-make test
-```
-
-This will use [Tox](https://tox.wiki/en/latest/) to run our whole test suite
-under multiple Python 3 versions.
-
-Of course you can always run the underlying commands yourself, which is
-particularly useful when wanting to provide arguments to `pytest` to run
-specific tests:
 
 ```bash
 cd rossum-sdk

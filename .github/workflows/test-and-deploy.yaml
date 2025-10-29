@@ -22,8 +22,7 @@ jobs:
       - name: Lint all files
         run: pre-commit run --all-files --show-diff-on-failure
       - name: Run tests
-        # Run tox using the version of Python in `PATH`
-        run: tox -e py -c tox.ini
+        run: pytest --cov=rossum_api --cov-report=xml --cov-report=term-missing
   deploy:
     runs-on: ubuntu-latest
     needs: build-and-test

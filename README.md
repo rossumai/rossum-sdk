@@ -22,6 +22,11 @@ from rossum_api.dtos import UserCredentialsfrom rossum_api.dtos import UserCrede
 The easiest way is to install the package from PyPI:
 
 ```bash
+pip install rossum-api
+```
+
+or from the github repo:
+```bash
 pip install git+https://github.com/rossumai/rossum-sdk#egg=rossum-api
 ```
 

@@ -111,17 +111,6 @@ def main_with_sync_client():
 main_with_sync_client()
 ```
 
-### Development
-
-There is a `Makefile` that can help you setup a development environment quickly, run the following commands
-
-```
-make .venv  # Creates virtualenv in .venv folder
-make install # Installs all project dependencies including test ones
-```
-
-Run `make help` to see more available actions.
-
 ### TODO
 
 * convert datetimes to ISO 8601 string in `APIClient` to allow users passing standard datetime objects

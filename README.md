@@ -117,12 +117,6 @@ def main_with_sync_client():
 main_with_sync_client()
 ```
 
-### TODO
-
-* convert datetimes to ISO 8601 string in `APIClient` to allow users passing standard datetime objects
-* implement password reset
-* rate limiting?
-
 ## License
 
 MIT

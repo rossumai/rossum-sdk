@@ -81,7 +81,10 @@ class InternalAsyncClient:
         return {"Authorization": f"Bearer {self.token}"}
 
     async def fetch_one(
-        self, resource: Resource, id_: Union[int, str], request_params: Dict[str, Any] = None
+        self,
+        resource: Resource,
+        id_: Union[int, str],
+        request_params: Dict[str, Any] | None = None,
     ) -> Dict[str, Any]:
         """Retrieve a single object in a specific resource.
 

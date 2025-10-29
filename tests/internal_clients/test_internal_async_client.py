@@ -643,8 +643,7 @@ async def test_request_repacks_exception(client, httpx_mock):
     with pytest.raises(APIClientError) as err:
         await client._request("GET", "workspaces/123")
     assert str(err.value) == (
-        "[GET] https://elis.rossum.ai/api/v1/workspaces/123 - "
-        'HTTP 404 - {"detail":"Not found."}'
+        '[GET] https://elis.rossum.ai/api/v1/workspaces/123 - HTTP 404 - {"detail":"Not found."}'
     )
 
 

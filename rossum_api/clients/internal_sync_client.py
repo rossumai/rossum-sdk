@@ -162,7 +162,10 @@ class InternalSyncClient:
                     yield chunk
 
     def fetch_resource(
-        self, resource: Resource, id_: Union[int, str], request_params: dict[str, Any] = None
+        self,
+        resource: Resource,
+        id_: Union[int, str],
+        request_params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Retrieve a single object in a specific resource.
 

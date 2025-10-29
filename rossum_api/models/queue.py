@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -26,8 +26,8 @@ class Queue:
     locale: str = "en_GB"
     metadata: Dict[str, Any] = field(default_factory=dict)
     settings: Dict[str, Any] = field(default_factory=dict)
-    dedicated_engine: Optional[Union[str, Dict[str, Any]]] = None
-    generic_engine: Optional[Union[str, Dict[str, Any]]] = None
+    dedicated_engine: Optional[str | Dict[str, Any]] = None
+    generic_engine: Optional[str | Dict[str, Any]] = None
     use_confirmed_state: bool = False
     document_lifetime: Optional[str] = None
     delete_after: Optional[str] = None

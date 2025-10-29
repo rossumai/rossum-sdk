@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from rossum_api.models.automation_blocker import AutomationBlocker
 from rossum_api.models.document import Document
@@ -19,8 +19,8 @@ class Annotation:
     url: str
     status: str
     schema: str
-    modifier: Optional[Union[str, User]]
-    content: Union[List[Dict[str, Any]], str]  # No dataclass for Annotation content yet
+    modifier: Optional[str | User]
+    content: List[Dict[str, Any]] | str  # No dataclass for Annotation content yet
     id: Optional[int] = None
     queue: Optional[str] = None
     creator: Optional[str] = None
@@ -35,7 +35,7 @@ class Annotation:
     time_spent: Optional[float] = 0
     relations: List[str] = field(default_factory=list)
     pages: List[str] = field(default_factory=list)
-    document: Optional[Union[str, Document]] = None
+    document: Optional[str | Document] = None
     confirmed_at: Optional[str] = None
     modified_at: Optional[str] = None
     exported_at: Optional[str] = None
@@ -48,7 +48,7 @@ class Annotation:
     organization: Optional[str] = None
     metadata: Dict[Any, Any] = field(default_factory=dict)
     automated: bool = False
-    automation_blocker: Optional[Union[AutomationBlocker, str]] = None
+    automation_blocker: Optional[AutomationBlocker | str] = None
     related_emails: List[str] = field(default_factory=list)
     automatically_rejected: Optional[bool] = None
     prediction: Optional[Prediction] = None

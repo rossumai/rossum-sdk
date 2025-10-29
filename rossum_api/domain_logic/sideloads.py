@@ -11,7 +11,7 @@ from rossum_api.utils import to_singular
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
-    from typing import Any, Union
+    from typing import Any
 
 
 def build_sideload_params(sideloads: Sequence[str], content_schema_ids: Sequence[str]) -> dict:
@@ -49,8 +49,8 @@ def embed_sideloads(response_data: dict[str, Any], sideloads: Sequence[str]) -> 
 
 def _group_sideloads_by_annotation_id(
     sideloads: Sequence[str], response_data: dict[str, Any]
-) -> dict[str, dict[int, Union[dict, list]]]:
-    sideloads_by_id: dict[str, dict[int, Union[dict, list]]] = {}
+) -> dict[str, dict[int, dict | list]]:
+    sideloads_by_id: dict[str, dict[int, dict | list]] = {}
     for sideload in sideloads:
         if sideload == "content":
             # Datapoints from all annotations are present in response data, we have to construct

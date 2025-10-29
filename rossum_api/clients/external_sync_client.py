@@ -54,7 +54,7 @@ from rossum_api.models.task import Task
 from rossum_api.utils import ObjectWithStatus
 
 if typing.TYPE_CHECKING:
-    from typing import Any, Callable, Iterator, Optional, Sequence, Tuple, Union
+    from typing import Any, Callable, Iterator, Optional, Sequence, Tuple
 
     from rossum_api.models import Deserializer, ResponsePostProcessor
 
@@ -162,7 +162,7 @@ class SyncRossumAPIClient(
     def _import_document(
         self,
         url: str,
-        files: Sequence[Tuple[Union[str, Path], str]],
+        files: Sequence[Tuple[str | Path, str]],
         values: Optional[dict[str, Any]],
         metadata: Optional[dict[str, Any]],
     ) -> list[int]:
@@ -181,7 +181,7 @@ class SyncRossumAPIClient(
     def import_document(
         self,
         queue_id: int,
-        files: Sequence[Tuple[Union[str, Path], str]],
+        files: Sequence[Tuple[str | Path, str]],
         values: Optional[dict[str, Any]] = None,
         metadata: Optional[dict[str, Any]] = None,
     ) -> list[int]:
@@ -213,7 +213,7 @@ class SyncRossumAPIClient(
     def upload_document(
         self,
         queue_id: int,
-        files: Sequence[Tuple[Union[str, pathlib.Path], str]],
+        files: Sequence[Tuple[str | pathlib.Path, str]],
         values: Optional[dict[str, Any]] = None,
         metadata: Optional[dict[str, Any]] = None,
     ) -> list[TaskType]:
@@ -471,7 +471,7 @@ class SyncRossumAPIClient(
         return self.poll_task(task_id, is_task_succeeded, sleep_s)
 
     def upload_and_wait_until_imported(
-        self, queue_id: int, filepath: Union[str, pathlib.Path], filename: str, **poll_kwargs
+        self, queue_id: int, filepath: str | pathlib.Path, filename: str, **poll_kwargs
     ) -> AnnotationType:
         """A shortcut for uploading a single file and waiting until its annotation is imported."""
         (annotation_id,) = self.import_document(queue_id, [(filepath, filename)])

@@ -26,7 +26,7 @@ from rossum_api.exceptions import APIClientError
 from rossum_api.utils import enforce_domain
 
 if typing.TYPE_CHECKING:
-    from typing import Any, AsyncIterator, Dict, List, Optional, Sequence, Tuple, Union
+    from typing import Any, AsyncIterator, Dict, List, Optional, Sequence, Tuple
 
     from aiofiles.threadpool.binary import AsyncBufferedReader
 
@@ -83,7 +83,7 @@ class InternalAsyncClient:
     async def fetch_one(
         self,
         resource: Resource,
-        id_: Union[int, str],
+        id_: int | str,
         request_params: Dict[str, Any] | None = None,
     ) -> Dict[str, Any]:
         """Retrieve a single object in a specific resource.
@@ -268,7 +268,7 @@ class InternalAsyncClient:
         export_format: str,
         columns: Sequence[str] = (),
         **filters: Any,
-    ) -> AsyncIterator[Union[Dict[str, Any], bytes]]:
+    ) -> AsyncIterator[Dict[str, Any] | bytes]:
         query_params = build_export_query_params(export_format, columns, **filters)
         url = build_export_url(resource, id_)
         # to_status parameter is valid only in POST requests, we can use GET in all other cases

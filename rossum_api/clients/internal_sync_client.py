@@ -23,7 +23,7 @@ from rossum_api.exceptions import APIClientError
 from rossum_api.utils import enforce_domain
 
 if typing.TYPE_CHECKING:
-    from typing import Any, Iterator, List, Optional, Sequence, Tuple, Union
+    from typing import Any, Iterator, Optional, Sequence
 
     from rossum_api.models import ResponsePostProcessor
 
@@ -113,7 +113,7 @@ class InternalSyncClient:
         export_format: str,
         columns: Sequence[str] = (),
         **filters: Any,
-    ) -> Iterator[Union[dict[str, Any], bytes]]:
+    ) -> Iterator[dict[str, Any] | bytes]:
         query_params = build_export_query_params(export_format, columns, **filters)
         url = build_export_url(resource, id_)
         method = get_http_method_for_annotation_export(**filters)
@@ -163,7 +163,7 @@ class InternalSyncClient:
     def fetch_resource(
         self,
         resource: Resource,
-        id_: Union[int, str],
+        id_: int | str,
         request_params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Retrieve a single object in a specific resource.
@@ -235,7 +235,7 @@ class InternalSyncClient:
         query_params: dict[str, Any],
         sideload_groups: Sequence[str],
         json: Optional[dict] = None,
-    ) -> Tuple[List[dict[str, Any]], int]:
+    ) -> tuple[list[dict[str, Any]], int]:
         data = self.request_json(method, url, params=query_params, json=json)
         embed_sideloads(data, sideload_groups)
         return data["results"], data["pagination"]["total_pages"]

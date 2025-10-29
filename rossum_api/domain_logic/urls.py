@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from rossum_api.models import Resource
@@ -22,7 +22,7 @@ def parse_annotation_id_from_datapoint_url(url: str) -> int:
     return parse_resource_id_from_url(re.sub(r"/content/.*", "", url))
 
 
-def build_url(resource: Resource, id_: Union[int, str]) -> str:
+def build_url(resource: Resource, id_: int | str) -> str:
     return f"{resource.value}/{id_}"
 
 

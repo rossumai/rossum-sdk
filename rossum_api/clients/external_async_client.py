@@ -58,7 +58,6 @@ if typing.TYPE_CHECKING:
         Optional,
         Sequence,
         Tuple,
-        Union,
     )
 
     import httpx
@@ -181,7 +180,7 @@ class AsyncRossumAPIClient(
     async def import_document(
         self,
         queue_id: int,
-        files: Sequence[Tuple[Union[str, pathlib.Path], str]],
+        files: Sequence[Tuple[str | pathlib.Path, str]],
         values: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None,
     ) -> List[int]:
@@ -227,7 +226,7 @@ class AsyncRossumAPIClient(
     async def upload_document(
         self,
         queue_id: int,
-        files: Sequence[Tuple[Union[str, pathlib.Path], str]],
+        files: Sequence[Tuple[str | pathlib.Path, str]],
         values: Optional[Dict[str, Any]] = None,
         metadata: Optional[Dict[str, Any]] = None,
     ) -> List[TaskType]:
@@ -260,7 +259,7 @@ class AsyncRossumAPIClient(
 
     async def _create_upload(
         self,
-        file: Union[str, pathlib.Path],
+        file: str | pathlib.Path,
         queue_id: int,
         filename: str,
         values: Optional[Dict[str, Any]] = None,
@@ -487,7 +486,7 @@ class AsyncRossumAPIClient(
         return self._deserializer(Resource.Task, task)
 
     async def upload_and_wait_until_imported(
-        self, queue_id: int, filepath: Union[str, pathlib.Path], filename: str, **poll_kwargs
+        self, queue_id: int, filepath: str | pathlib.Path, filename: str, **poll_kwargs
     ) -> AnnotationType:
         """A shortcut for uploading a single file and waiting until its annotation is imported."""
         (annotation_id,) = await self.import_document(queue_id, [(filepath, filename)])

@@ -117,6 +117,36 @@ def main_with_sync_client():
 main_with_sync_client()
 ```
 
+### Local development
+
+Pull the repository, create a virtual environment, and install the package from the source with test dependencies:
+```bash
+# Create and activate virtual environment
+python -m venv .env
+source .env/bin/activate
+
+# Install in editable mode with test dependencies
+pip install -e .[tests]
+```
+
+We use ruff for linting and formatting. Run all pre-commit hooks with:
+```bash
+pre-commit run --all-files
+```
+
+Or run specific tools:
+```bash
+# Linting and formatting
+pre-commit run ruff --all-files
+pre-commit run ruff-format --all-files
+
+# Type checking
+pre-commit run mypy --all-files
+
+# Run tests
+pytest
+```
+
 ## License
 
 MIT

@@ -26,7 +26,7 @@ from rossum_api.exceptions import APIClientError
 from rossum_api.utils import enforce_domain
 
 if typing.TYPE_CHECKING:
-    from typing import Any, AsyncIterator, Dict, List, Sequence, Tuple
+    from typing import Any, AsyncIterator, Sequence
 
     from aiofiles.threadpool.binary import AsyncBufferedReader
 
@@ -84,8 +84,8 @@ class InternalAsyncClient:
         self,
         resource: Resource,
         id_: int | str,
-        request_params: Dict[str, Any] | None = None,
-    ) -> Dict[str, Any]:
+        request_params: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Retrieve a single object in a specific resource.
 
         Allows passing extra params specifically to allow disabling redirects feature of Tasks.
@@ -104,7 +104,7 @@ class InternalAsyncClient:
         max_pages: int | None = None,
         json: dict | None = None,
         **filters: Any,
-    ) -> AsyncIterator[Dict[str, Any]]:
+    ) -> AsyncIterator[dict[str, Any]]:
         """Retrieve a list of objects in a specific resource.
 
         Arguments
@@ -151,7 +151,7 @@ class InternalAsyncClient:
         max_pages: int | None = None,
         json: dict | None = None,
         **filters: Any,
-    ) -> AsyncIterator[Dict[str, Any]]:
+    ) -> AsyncIterator[dict[str, Any]]:
         """Retrieve a list of objects from a specified URL.
 
         Arguments
@@ -209,23 +209,23 @@ class InternalAsyncClient:
         self,
         url: str,
         method: str,
-        query_params: Dict[str, Any],
+        query_params: dict[str, Any],
         sideload_groups: Sequence[str],
         json: dict | None = None,
-    ) -> Tuple[List[Dict[str, Any]], int]:
+    ) -> tuple[list[dict[str, Any]], int]:
         data = await self.request_json(method, url, params=query_params, json=json)
         embed_sideloads(data, sideload_groups)
         return data["results"], data["pagination"]["total_pages"]
 
-    async def create(self, resource: Resource, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def create(self, resource: Resource, data: dict[str, Any]) -> dict[str, Any]:
         """Create a new object."""
         return await self.request_json("POST", resource.value, json=data)
 
-    async def replace(self, resource: Resource, id_: int, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def replace(self, resource: Resource, id_: int, data: dict[str, Any]) -> dict[str, Any]:
         "Modify an entire existing object."
         return await self.request_json("PUT", build_url(resource, id_), json=data)
 
-    async def update(self, resource: Resource, id_: int, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def update(self, resource: Resource, id_: int, data: dict[str, Any]) -> dict[str, Any]:
         "Modify particular fields of an existing object."
         return await self.request_json("PATCH", build_url(resource, id_), json=data)
 
@@ -242,9 +242,9 @@ class InternalAsyncClient:
         id_: int,
         fp: AsyncBufferedReader,
         filename: str,
-        values: Dict[str, Any] | None = None,
-        metadata: Dict[str, Any] | None = None,
-    ) -> Dict[str, Any]:
+        values: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Upload a file to a resource that supports this.
 
         Arguments
@@ -268,7 +268,7 @@ class InternalAsyncClient:
         export_format: str,
         columns: Sequence[str] = (),
         **filters: Any,
-    ) -> AsyncIterator[Dict[str, Any] | bytes]:
+    ) -> AsyncIterator[dict[str, Any] | bytes]:
         query_params = build_export_query_params(export_format, columns, **filters)
         url = build_export_url(resource, id_)
         # to_status parameter is valid only in POST requests, we can use GET in all other cases
@@ -284,7 +284,7 @@ class InternalAsyncClient:
             async for bytes_chunk in self._stream(method, url, params=query_params):
                 yield bytes_chunk
 
-    async def request_json(self, method: str, *args, **kwargs) -> Dict[str, Any]:
+    async def request_json(self, method: str, *args, **kwargs) -> dict[str, Any]:
         response = await self._request(method, *args, **kwargs)
         if response.status_code == 204:
             return {}

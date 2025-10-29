@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List
 
 
 @dataclass
@@ -9,8 +8,8 @@ class Organization:
     id: int
     name: str
     url: str
-    workspaces: List[str]
-    users: List[str]
+    workspaces: list[str]
+    users: list[str]
     organization_group: str
     is_trial: bool
     created_at: str

@@ -181,7 +181,7 @@ class InternalSyncClient:
         sideloads: Sequence[str] = (),
         content_schema_ids: Sequence[str] = (),
         method: str = "GET",
-        json: dict | None = None,
+        json: dict[str, Any] | None = None,
         max_pages: int | None = None,
         **filters,
     ) -> Iterator[dict[str, Any]]:

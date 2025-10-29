@@ -54,7 +54,7 @@ from rossum_api.models.task import Task
 from rossum_api.utils import ObjectWithStatus
 
 if typing.TYPE_CHECKING:
-    from typing import Any, Callable, Iterator, Sequence, Tuple
+    from typing import Any, Callable, Iterator, Sequence
 
     from rossum_api.models import Deserializer, ResponsePostProcessor
 
@@ -162,7 +162,7 @@ class SyncRossumAPIClient(
     def _import_document(
         self,
         url: str,
-        files: Sequence[Tuple[str | Path, str]],
+        files: Sequence[tuple[str | Path, str]],
         values: dict[str, Any] | None,
         metadata: dict[str, Any] | None,
     ) -> list[int]:
@@ -181,7 +181,7 @@ class SyncRossumAPIClient(
     def import_document(
         self,
         queue_id: int,
-        files: Sequence[Tuple[str | Path, str]],
+        files: Sequence[tuple[str | Path, str]],
         values: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> list[int]:
@@ -213,7 +213,7 @@ class SyncRossumAPIClient(
     def upload_document(
         self,
         queue_id: int,
-        files: Sequence[Tuple[str | pathlib.Path, str]],
+        files: Sequence[tuple[str | pathlib.Path, str]],
         values: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> list[TaskType]:

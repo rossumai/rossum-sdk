@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List
 
 
 @dataclass
@@ -18,9 +17,9 @@ class User:
     is_active: bool = True
     email_verified: bool | None = False
     password: str | None = None
-    groups: List[str] = field(default_factory=list)
-    queues: List[str] = field(default_factory=list)
-    ui_settings: Dict = field(default_factory=dict)
+    groups: list[str] = field(default_factory=list)
+    queues: list[str] = field(default_factory=list)
+    ui_settings: dict = field(default_factory=dict)
     metadata: dict = field(default_factory=dict)
     oidc_id: str | None = None
     auth_type: str = "password"

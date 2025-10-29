@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List
+from typing import Any
 
 
 @dataclass
@@ -13,21 +13,21 @@ class Queue:
     connector: str | None
     schema: str
     inbox: str | None
-    counts: Dict[str, int]
+    counts: dict[str, int]
     session_timeout: str = "01:00:00"
-    webhooks: List[str] = field(default_factory=list)
-    hooks: List[str] = field(default_factory=list)
-    users: List[str] = field(default_factory=list)
+    webhooks: list[str] = field(default_factory=list)
+    hooks: list[str] = field(default_factory=list)
+    users: list[str] = field(default_factory=list)
     rir_url: str | None = None
     rir_params: str | None = None
     automation_enabled: bool = False
     automation_level: str = "never"
     default_score_threshold: float = 0.8
     locale: str = "en_GB"
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    settings: Dict[str, Any] = field(default_factory=dict)
-    dedicated_engine: str | Dict[str, Any] | None = None
-    generic_engine: str | Dict[str, Any] | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+    settings: dict[str, Any] = field(default_factory=dict)
+    dedicated_engine: str | dict[str, Any] | None = None
+    generic_engine: str | dict[str, Any] | None = None
     use_confirmed_state: bool = False
     document_lifetime: str | None = None
     delete_after: str | None = None

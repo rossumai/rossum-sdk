@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List
+from typing import Any
 
 
 @dataclass
@@ -9,7 +9,7 @@ class Inbox:
     id: int
     name: str
     url: str
-    queues: List[str]
+    queues: list[str]
     email: str
     email_prefix: str
     bounce_email_to: str | None
@@ -17,6 +17,6 @@ class Inbox:
     bounce_postponed_annotations: bool = False
     bounce_deleted_annotations: bool = False
     bounce_email_with_no_attachments: bool = True
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    filters: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    filters: dict[str, Any] = field(default_factory=dict)
     dmarc_check_action: str = "accept"

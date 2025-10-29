@@ -49,15 +49,7 @@ from rossum_api.utils import ObjectWithStatus
 
 if typing.TYPE_CHECKING:
     import pathlib
-    from typing import (
-        Any,
-        AsyncIterator,
-        Callable,
-        Dict,
-        List,
-        Sequence,
-        Tuple,
-    )
+    from typing import Any, AsyncIterator, Callable, Sequence
 
     import httpx
 
@@ -166,7 +158,7 @@ class AsyncRossumAPIClient(
         async for q in self._http_client.fetch_all(Resource.Queue, ordering, **filters):
             yield self._deserializer(Resource.Queue, q)
 
-    async def create_new_queue(self, data: Dict[str, Any]) -> QueueType:
+    async def create_new_queue(self, data: dict[str, Any]) -> QueueType:
         """https://elis.rossum.ai/api/docs/#create-new-queue."""
         queue = await self._http_client.create(Resource.Queue, data)
 
@@ -179,10 +171,10 @@ class AsyncRossumAPIClient(
     async def import_document(
         self,
         queue_id: int,
-        files: Sequence[Tuple[str | pathlib.Path, str]],
-        values: Dict[str, Any] | None = None,
-        metadata: Dict[str, Any] | None = None,
-    ) -> List[int]:
+        files: Sequence[tuple[str | pathlib.Path, str]],
+        values: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> list[int]:
         """https://elis.rossum.ai/api/docs/#import-a-document.
 
         Deprecated now, consider upload_document.
@@ -225,10 +217,10 @@ class AsyncRossumAPIClient(
     async def upload_document(
         self,
         queue_id: int,
-        files: Sequence[Tuple[str | pathlib.Path, str]],
-        values: Dict[str, Any] | None = None,
-        metadata: Dict[str, Any] | None = None,
-    ) -> List[TaskType]:
+        files: Sequence[tuple[str | pathlib.Path, str]],
+        values: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> list[TaskType]:
         """https://elis.rossum.ai/api/docs/#create-upload.
 
         Parameters
@@ -261,8 +253,8 @@ class AsyncRossumAPIClient(
         file: str | pathlib.Path,
         queue_id: int,
         filename: str,
-        values: Dict[str, Any] | None = None,
-        metadata: Dict[str, Any] | None = None,
+        values: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> TaskType:
         """Helper method that uploads the files and gets back Task response for each.
 
@@ -296,7 +288,7 @@ class AsyncRossumAPIClient(
         """
         async for chunk in self._http_client.export(Resource.Queue, queue_id, "json", **filters):
             # JSON export can be translated directly to Annotation object
-            yield self._deserializer(Resource.Annotation, typing.cast("typing.Dict", chunk))
+            yield self._deserializer(Resource.Annotation, typing.cast("dict", chunk))
 
     async def export_annotations_to_file(
         self, queue_id: int, export_format: ExportFileFormats, **filters: Any
@@ -326,7 +318,7 @@ class AsyncRossumAPIClient(
 
     async def retrieve_own_organization(self) -> OrganizationType:
         """Retrieve organization of currently logged in user."""
-        user: Dict[Any, Any] = await self._http_client.fetch_one(Resource.Auth, "user")
+        user: dict[Any, Any] = await self._http_client.fetch_one(Resource.Auth, "user")
         organization_id = parse_resource_id_from_url(user["organization"])
         return await self.retrieve_organization(organization_id)
 
@@ -340,11 +332,11 @@ class AsyncRossumAPIClient(
 
     async def retrieve_schema(self, schema_id: int) -> SchemaType:
         """https://elis.rossum.ai/api/docs/#retrieve-a-schema."""
-        schema: Dict[Any, Any] = await self._http_client.fetch_one(Resource.Schema, schema_id)
+        schema: dict[Any, Any] = await self._http_client.fetch_one(Resource.Schema, schema_id)
 
         return self._deserializer(Resource.Schema, schema)
 
-    async def create_new_schema(self, data: Dict[str, Any]) -> SchemaType:
+    async def create_new_schema(self, data: dict[str, Any]) -> SchemaType:
         """https://elis.rossum.ai/api/docs/#create-a-new-schema."""
         schema = await self._http_client.create(Resource.Schema, data)
 
@@ -368,7 +360,7 @@ class AsyncRossumAPIClient(
 
         return self._deserializer(Resource.User, user)
 
-    async def create_new_user(self, data: Dict[str, Any]) -> UserType:
+    async def create_new_user(self, data: dict[str, Any]) -> UserType:
         """https://elis.rossum.ai/api/docs/#create-new-user."""
         user = await self._http_client.create(Resource.User, data)
 
@@ -497,14 +489,14 @@ class AsyncRossumAPIClient(
             "POST", build_resource_start_url(Resource.Annotation, annotation_id)
         )
 
-    async def update_annotation(self, annotation_id: int, data: Dict[str, Any]) -> AnnotationType:
+    async def update_annotation(self, annotation_id: int, data: dict[str, Any]) -> AnnotationType:
         """https://elis.rossum.ai/api/docs/#update-an-annotation."""
         annotation = await self._http_client.replace(Resource.Annotation, annotation_id, data)
 
         return self._deserializer(Resource.Annotation, annotation)
 
     async def update_part_annotation(
-        self, annotation_id: int, data: Dict[str, Any]
+        self, annotation_id: int, data: dict[str, Any]
     ) -> AnnotationType:
         """https://elis.rossum.ai/api/docs/#update-part-of-an-annotation."""
         annotation = await self._http_client.update(Resource.Annotation, annotation_id, data)
@@ -512,7 +504,7 @@ class AsyncRossumAPIClient(
         return self._deserializer(Resource.Annotation, annotation)
 
     async def bulk_update_annotation_data(
-        self, annotation_id: int, operations: List[Dict[str, Any]]
+        self, annotation_id: int, operations: list[dict[str, Any]]
     ) -> None:
         """https://elis.rossum.ai/api/docs/#bulk-update-annotation-data"""
         await self._http_client.request_json(
@@ -548,7 +540,7 @@ class AsyncRossumAPIClient(
     # ##### DOCUMENTS #####
     async def retrieve_document(self, document_id: int) -> DocumentType:
         """https://elis.rossum.ai/api/docs/#retrieve-a-document"""
-        document: Dict[Any, Any] = await self._http_client.fetch_one(
+        document: dict[Any, Any] = await self._http_client.fetch_one(
             Resource.Document, document_id
         )
 
@@ -565,7 +557,7 @@ class AsyncRossumAPIClient(
         self,
         file_name: str,
         file_data: bytes,
-        metadata: Dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
         parent: str | None = None,
     ) -> DocumentType:
         """https://elis.rossum.ai/api/docs/#create-document"""
@@ -595,14 +587,14 @@ class AsyncRossumAPIClient(
 
         return self._deserializer(Resource.DocumentRelation, document_relation)
 
-    async def create_new_document_relation(self, data: Dict[str, Any]) -> DocumentRelationType:
+    async def create_new_document_relation(self, data: dict[str, Any]) -> DocumentRelationType:
         """https://elis.rossum.ai/api/docs/#create-a-new-document-relation"""
         document_relation = await self._http_client.create(Resource.DocumentRelation, data)
 
         return self._deserializer(Resource.DocumentRelation, document_relation)
 
     async def update_document_relation(
-        self, document_relation_id: int, data: Dict[str, Any]
+        self, document_relation_id: int, data: dict[str, Any]
     ) -> DocumentRelationType:
         """https://elis.rossum.ai/api/docs/#update-a-document-relation"""
         document_relation = await self._http_client.replace(
@@ -612,7 +604,7 @@ class AsyncRossumAPIClient(
         return self._deserializer(Resource.DocumentRelation, document_relation)
 
     async def update_part_document_relation(
-        self, document_relation_id: int, data: Dict[str, Any]
+        self, document_relation_id: int, data: dict[str, Any]
     ) -> DocumentRelationType:
         """https://elis.rossum.ai/api/docs/#update-part-of-a-document-relation"""
         document_relation = await self._http_client.update(
@@ -639,7 +631,7 @@ class AsyncRossumAPIClient(
 
         return self._deserializer(Resource.Workspace, workspace)
 
-    async def create_new_workspace(self, data: Dict[str, Any]) -> WorkspaceType:
+    async def create_new_workspace(self, data: dict[str, Any]) -> WorkspaceType:
         """https://elis.rossum.ai/api/docs/#create-a-new-workspace."""
         workspace = await self._http_client.create(Resource.Workspace, data)
 
@@ -680,7 +672,7 @@ class AsyncRossumAPIClient(
             yield self._deserializer(Resource.Queue, queue)
 
     # ##### INBOX #####
-    async def create_new_inbox(self, data: Dict[str, Any]) -> InboxType:
+    async def create_new_inbox(self, data: dict[str, Any]) -> InboxType:
         """https://elis.rossum.ai/api/docs/#create-a-new-inbox."""
         inbox = await self._http_client.create(Resource.Inbox, data)
 
@@ -723,7 +715,7 @@ class AsyncRossumAPIClient(
 
         return self._deserializer(Resource.EmailTemplate, email_template)
 
-    async def create_new_email_template(self, data: Dict[str, Any]) -> EmailTemplateType:
+    async def create_new_email_template(self, data: dict[str, Any]) -> EmailTemplateType:
         """https://elis.rossum.ai/api/docs/#create-new-email-template-object."""
         email_template = await self._http_client.create(Resource.EmailTemplate, data)
 
@@ -743,7 +735,7 @@ class AsyncRossumAPIClient(
 
         return self._deserializer(Resource.Connector, connector)
 
-    async def create_new_connector(self, data: Dict[str, Any]) -> ConnectorType:
+    async def create_new_connector(self, data: dict[str, Any]) -> ConnectorType:
         """https://elis.rossum.ai/api/docs/#create-a-new-connector."""
         connector = await self._http_client.create(Resource.Connector, data)
 
@@ -763,13 +755,13 @@ class AsyncRossumAPIClient(
 
         return self._deserializer(Resource.Hook, hook)
 
-    async def create_new_hook(self, data: Dict[str, Any]) -> HookType:
+    async def create_new_hook(self, data: dict[str, Any]) -> HookType:
         """https://elis.rossum.ai/api/docs/#create-a-new-hook."""
         hook = await self._http_client.create(Resource.Hook, data)
 
         return self._deserializer(Resource.Hook, hook)
 
-    async def update_part_hook(self, hook_id: int, data: Dict[str, Any]) -> HookType:
+    async def update_part_hook(self, hook_id: int, data: dict[str, Any]) -> HookType:
         """https://elis.rossum.ai/api/docs/#update-part-of-a-hook"""
         hook = await self._http_client.update(Resource.Hook, hook_id, data)
 
@@ -795,7 +787,7 @@ class AsyncRossumAPIClient(
         async for element in self._http_client.fetch_all_by_url(url, *args, **kwargs):
             yield element
 
-    async def request_json(self, method: str, *args, **kwargs) -> Dict[str, Any]:
+    async def request_json(self, method: str, *args, **kwargs) -> dict[str, Any]:
         """Use to perform requests to seldomly used or experimental endpoints that do not have
         direct support in the client and return JSON.
         """
@@ -820,7 +812,7 @@ class AsyncRossumAPIClient(
     async def authenticate(self) -> None:
         await self._http_client._authenticate()
 
-    async def _sideload(self, resource: Dict[str, Any], sideloads: Sequence[str]) -> None:
+    async def _sideload(self, resource: dict[str, Any], sideloads: Sequence[str]) -> None:
         """The API does not support sideloading when fetching a single resource, we need to load
         it manually.
         """

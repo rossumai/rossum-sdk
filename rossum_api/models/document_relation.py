@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import List
 
 
 class DocumentRelationType(str, Enum):
@@ -16,5 +15,5 @@ class DocumentRelation:
     type: DocumentRelationType
     annotation: str  # Multiple values may be separated using a comma.
     key: str | None
-    documents: List[str]
+    documents: list[str]
     url: str

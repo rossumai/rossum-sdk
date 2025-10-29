@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List
+from typing import Any
 
 
 @dataclass
@@ -17,6 +17,6 @@ class Document:
     arrived_at: str
     original_file_name: str
     content: str
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    annotations: List[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    annotations: list[str] = field(default_factory=list)
     attachment_status: str | None = None

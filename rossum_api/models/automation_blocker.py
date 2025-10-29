@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List
+from typing import Any
 
 
 @dataclass
@@ -10,8 +10,8 @@ class AutomationBlockerContent:
     type: str
     schema_id: str | None = None
     samples_truncated: bool | None = False
-    samples: List[Dict[str, Any]] = field(default_factory=list)
-    details: Dict[str, Any] = field(default_factory=dict)
+    samples: list[dict[str, Any]] = field(default_factory=list)
+    details: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -19,4 +19,4 @@ class AutomationBlocker:
     id: int
     url: str
     annotation: str
-    content: List[AutomationBlockerContent] = field(default_factory=list)
+    content: list[AutomationBlockerContent] = field(default_factory=list)

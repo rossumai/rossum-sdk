@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List
 
 
 @dataclass
@@ -14,7 +13,7 @@ class Upload:
     organization: str
     creator: str
     created_at: str
-    documents: List[str]
-    additional_documents: List[str] = field(default_factory=list)
-    annotations: List[str] = field(default_factory=list)
+    documents: list[str]
+    additional_documents: list[str] = field(default_factory=list)
+    annotations: list[str] = field(default_factory=list)
     email: str | None = None

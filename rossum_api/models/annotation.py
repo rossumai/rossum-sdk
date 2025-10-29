@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List
+from typing import Any
 
 from rossum_api.models.automation_blocker import AutomationBlocker
 from rossum_api.models.document import Document
@@ -20,7 +20,7 @@ class Annotation:
     status: str
     schema: str
     modifier: str | User | None
-    content: List[Dict[str, Any]] | str  # No dataclass for Annotation content yet
+    content: list[dict[str, Any]] | str  # No dataclass for Annotation content yet
     id: int | None = None
     queue: str | None = None
     creator: str | None = None
@@ -31,10 +31,10 @@ class Annotation:
     has_email_thread_with_replies: bool = False
     has_email_thread_with_new_replies: bool = False
     suggested_edit: str | None = None
-    messages: List[dict] | None = None
+    messages: list[dict] | None = None
     time_spent: float | None = 0
-    relations: List[str] = field(default_factory=list)
-    pages: List[str] = field(default_factory=list)
+    relations: list[str] = field(default_factory=list)
+    pages: list[str] = field(default_factory=list)
     document: str | Document | None = None
     confirmed_at: str | None = None
     modified_at: str | None = None
@@ -46,14 +46,14 @@ class Annotation:
     deleted_at: str | None = None
     export_failed_at: str | None = None
     organization: str | None = None
-    metadata: Dict[Any, Any] = field(default_factory=dict)
+    metadata: dict[Any, Any] = field(default_factory=dict)
     automated: bool = False
     automation_blocker: AutomationBlocker | str | None = None
-    related_emails: List[str] = field(default_factory=list)
+    related_emails: list[str] = field(default_factory=list)
     automatically_rejected: bool | None = None
     prediction: Prediction | None = None
-    assignees: List[str] = field(default_factory=list)
-    labels: List[str] = field(default_factory=list)
+    assignees: list[str] = field(default_factory=list)
+    labels: list[str] = field(default_factory=list)
     restricted_access: bool | None = None
     training_enabled: bool | None = None
     einvoice: bool | None = None

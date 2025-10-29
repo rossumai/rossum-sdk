@@ -2,9 +2,9 @@ from rossum_api.dtos import UserCredentialsfrom rossum_api.dtos import UserCrede
 
 # Rossum SDK
 
-[![Build Status](https://github.com/rossumai/rossum-sdk/actions/workflows/lint-and-test.yaml/badge.svg)](https://github.com/rossumai/rossum-sdk/actions)
+[![Build Status](https://github.com/rossumai/rossum-sdk/actions/workflows/test-and-deploy.yaml/badge.svg)](https://github.com/rossumai/rossum-sdk/actions)
 [![Coverage](https://codecov.io/gh/rossumai/rossum-sdk/branch/main/graph/badge.svg)](https://codecov.io/gh/rossumai/rossum-sdk)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+[![Code style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 ![MIT licence](https://img.shields.io/pypi/l/rossum.svg)
 
 **rossum-sdk** is a repository for libraries useful when integrating Rossum platform into other Python applications. The following packages are provided:

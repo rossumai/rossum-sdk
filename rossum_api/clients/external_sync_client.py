@@ -264,7 +264,7 @@ class SyncRossumAPIClient(
         """
         for chunk in self.internal_client.export(Resource.Queue, queue_id, "json", **filters):
             # JSON export can be translated directly to Annotation object
-            yield self._deserializer(Resource.Annotation, typing.cast(dict, chunk))
+            yield self._deserializer(Resource.Annotation, typing.cast("dict", chunk))
 
     def export_annotations_to_file(
         self, queue_id: int, export_format: ExportFileFormats, **filters
@@ -279,7 +279,7 @@ class SyncRossumAPIClient(
             export_format.value,
             **filters,
         ):
-            yield typing.cast(bytes, chunk)
+            yield typing.cast("bytes", chunk)
 
     # ##### ORGANIZATIONS #####
 

@@ -2,9 +2,10 @@ from rossum_api.dtos import UserCredentialsfrom rossum_api.dtos import UserCrede
 
 # Rossum SDK
 
-[![Build Status](https://github.com/rossumai/rossum-sdk/actions/workflows/lint-and-test.yaml/badge.svg)](https://github.com/rossumai/rossum-sdk/actions)
+[![Build Status](https://github.com/rossumai/rossum-sdk/actions/workflows/test-and-deploy.yaml/badge.svg)](https://github.com/rossumai/rossum-sdk/actions)
 [![Coverage](https://codecov.io/gh/rossumai/rossum-sdk/branch/main/graph/badge.svg)](https://codecov.io/gh/rossumai/rossum-sdk)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+[![Code style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![PyPI version](https://img.shields.io/pypi/v/rossum-api.svg)](https://pypi.org/project/rossum-api/)
 ![MIT licence](https://img.shields.io/pypi/l/rossum.svg)
 
 **rossum-sdk** is a repository for libraries useful when integrating Rossum platform into other Python applications. The following packages are provided:
@@ -20,6 +21,11 @@ from rossum_api.dtos import UserCredentialsfrom rossum_api.dtos import UserCrede
 
 The easiest way is to install the package from PyPI:
 
+```bash
+pip install rossum-api
+```
+
+or from the github repo:
 ```bash
 pip install git+https://github.com/rossumai/rossum-sdk#egg=rossum-api
 ```
@@ -111,22 +117,35 @@ def main_with_sync_client():
 main_with_sync_client()
 ```
 
-### Development
+### Local development
 
-There is a `Makefile` that can help you setup a development environment quickly, run the following commands
+Pull the repository, create a virtual environment, and install the package from the source with test dependencies:
+```bash
+# Create and activate virtual environment
+python -m venv .env
+source .env/bin/activate
 
+# Install in editable mode with test dependencies
+pip install -e .[tests]
 ```
-make .venv  # Creates virtualenv in .venv folder
-make install # Installs all project dependencies including test ones
+
+We use ruff for linting and formatting. Run all pre-commit hooks with:
+```bash
+pre-commit run --all-files
 ```
 
-Run `make help` to see more available actions.
+Or run specific tools:
+```bash
+# Linting and formatting
+pre-commit run ruff --all-files
+pre-commit run ruff-format --all-files
 
-### TODO
+# Type checking
+pre-commit run mypy --all-files
 
-* convert datetimes to ISO 8601 string in `APIClient` to allow users passing standard datetime objects
-* implement password reset
-* rate limiting?
+# Run tests
+pytest
+```
 
 ## License
 

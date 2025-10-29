@@ -17,7 +17,6 @@ from rossum_api.domain_logic.urls import (
     build_export_url,
     build_full_login_url,
     build_url,
-    parse_resource_id_from_url,
 )
 from rossum_api.dtos import Token, UserCredentials
 from rossum_api.exceptions import APIClientError
@@ -162,7 +161,10 @@ class InternalSyncClient:
                     yield chunk
 
     def fetch_resource(
-        self, resource: Resource, id_: Union[int, str], request_params: dict[str, Any] = None
+        self,
+        resource: Resource,
+        id_: Union[int, str],
+        request_params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Retrieve a single object in a specific resource.
 

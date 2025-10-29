@@ -10,14 +10,9 @@ from rossum_api.domain_logic.annotations import (
     get_http_method_for_annotation_export,
 )
 from rossum_api.domain_logic.pagination import build_pagination_params
-from rossum_api.domain_logic.resources import Resource
 from rossum_api.domain_logic.retry import ForceRetry, should_retry
 from rossum_api.domain_logic.sideloads import build_sideload_params, embed_sideloads
-from rossum_api.domain_logic.urls import (
-    build_export_url,
-    build_full_login_url,
-    build_url,
-)
+from rossum_api.domain_logic.urls import build_export_url, build_full_login_url, build_url
 from rossum_api.dtos import Token, UserCredentials
 from rossum_api.exceptions import APIClientError
 from rossum_api.utils import enforce_domain
@@ -25,6 +20,7 @@ from rossum_api.utils import enforce_domain
 if typing.TYPE_CHECKING:
     from typing import Any, Iterator, Sequence
 
+    from rossum_api.domain_logic.resources import Resource
     from rossum_api.models import ResponsePostProcessor
 
 

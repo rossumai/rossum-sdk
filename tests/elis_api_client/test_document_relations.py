@@ -1,14 +1,20 @@
 from __future__ import annotations
 
-from typing import Any
-from unittest.mock import MagicMock
+from typing import TYPE_CHECKING
 
 import pytest
 
-from rossum_api.clients.external_async_client import AsyncRossumAPIClientWithDefaultDeserializer
-from rossum_api.clients.external_sync_client import SyncRossumAPIClientWithDefaultDeserializer
 from rossum_api.domain_logic.resources import Resource
 from rossum_api.models.document_relation import DocumentRelation, DocumentRelationType
+
+if TYPE_CHECKING:
+    from typing import Any
+    from unittest.mock import MagicMock
+
+    from rossum_api.clients.external_async_client import (
+        AsyncRossumAPIClientWithDefaultDeserializer,
+    )
+    from rossum_api.clients.external_sync_client import SyncRossumAPIClientWithDefaultDeserializer
 
 _CREATE_DOCUMENT_RELATION_DATA = _REPLACE_DOCUMENT_RELATION_DATA = {
     "type": DocumentRelationType.EXPORT.value,

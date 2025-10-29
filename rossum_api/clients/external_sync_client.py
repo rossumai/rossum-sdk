@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import pathlib
 import time
 import typing
-from pathlib import Path
 
 from rossum_api.clients.internal_sync_client import InternalSyncClient
 from rossum_api.domain_logic.annotations import (
@@ -29,7 +27,6 @@ from rossum_api.domain_logic.urls import (
     build_upload_url,
     parse_resource_id_from_url,
 )
-from rossum_api.dtos import Token, UserCredentials
 from rossum_api.models import (
     Annotation,
     Connector,
@@ -54,8 +51,11 @@ from rossum_api.models.task import Task
 from rossum_api.utils import ObjectWithStatus
 
 if typing.TYPE_CHECKING:
+    import pathlib
+    from pathlib import Path
     from typing import Any, Callable, Iterator, Sequence
 
+    from rossum_api.dtos import Token, UserCredentials
     from rossum_api.models import Deserializer, ResponsePostProcessor
 
 

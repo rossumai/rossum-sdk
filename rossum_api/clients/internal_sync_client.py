@@ -17,7 +17,6 @@ from rossum_api.domain_logic.urls import (
     build_export_url,
     build_full_login_url,
     build_url,
-    parse_resource_id_from_url,
 )
 from rossum_api.dtos import Token, UserCredentials
 from rossum_api.exceptions import APIClientError

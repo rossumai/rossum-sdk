@@ -298,7 +298,7 @@ class AsyncRossumAPIClient(
         """
         async for chunk in self._http_client.export(Resource.Queue, queue_id, "json", **filters):
             # JSON export can be translated directly to Annotation object
-            yield self._deserializer(Resource.Annotation, typing.cast(typing.Dict, chunk))
+            yield self._deserializer(Resource.Annotation, typing.cast("typing.Dict", chunk))
 
     async def export_annotations_to_file(
         self, queue_id: int, export_format: ExportFileFormats, **filters: Any
@@ -310,7 +310,7 @@ class AsyncRossumAPIClient(
         async for chunk in self._http_client.export(
             Resource.Queue, queue_id, export_format.value, **filters
         ):
-            yield typing.cast(bytes, chunk)
+            yield typing.cast("bytes", chunk)
 
     # ##### ORGANIZATIONS #####
     async def list_organizations(

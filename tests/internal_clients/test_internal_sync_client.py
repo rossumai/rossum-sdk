@@ -184,7 +184,7 @@ def test_fetch_resources(client, httpx_mock):
             "results": WORKSPACES[2:],
         },
     )
-    workspaces = [w for w in client.fetch_resources(Resource.Workspace)]
+    workspaces = list(client.fetch_resources(Resource.Workspace))
     assert workspaces == WORKSPACES
 
 
@@ -198,7 +198,7 @@ def test_fetch_resources_with_max_pages_limit(client, httpx_mock):
             "results": WORKSPACES[:1],
         },
     )
-    workspaces = [w for w in client.fetch_resources(Resource.Workspace, max_pages=1)]
+    workspaces = list(client.fetch_resources(Resource.Workspace, max_pages=1))
     assert workspaces == WORKSPACES[:1]
 
 
@@ -211,7 +211,7 @@ def test_fetch_resources_ordering(client, httpx_mock):
             "results": WORKSPACES,
         },
     )
-    workspaces = [w for w in client.fetch_resources(Resource.Workspace, ordering=["-id", "name"])]
+    workspaces = list(client.fetch_resources(Resource.Workspace, ordering=["-id", "name"]))
     assert workspaces == WORKSPACES
 
 
@@ -224,7 +224,7 @@ def test_fetch_resources_filters(client, httpx_mock):
             "results": WORKSPACES,
         },
     )
-    workspaces = [w for w in client.fetch_resources(Resource.Workspace, name="Test", autopilot=1)]
+    workspaces = list(client.fetch_resources(Resource.Workspace, name="Test", autopilot=1))
     assert workspaces == WORKSPACES
 
 
@@ -239,14 +239,13 @@ def test_fetch_resources_sideload(client, httpx_mock):
             "automation_blockers": AUTOMATION_BLOCKERS,
         },
     )
-    annotations = [
-        w
-        for w in client.fetch_resources(
+    annotations = list(
+        client.fetch_resources(
             Resource.Annotation,
             sideloads=["content", "automation_blockers"],
             content_schema_ids=["invoice_id", "date_issue"],
         )
-    ]
+    )
 
     expected_annotations = copy.deepcopy(ANNOTATIONS)
     expected_annotations[0]["content"] = [CONTENT[1]]
@@ -385,12 +384,11 @@ async def test_export_json(client, httpx_mock, filters, expected_method, first_u
         },
     )
     cols = ["col1", "col2"]
-    annotations = [
-        w
-        for w in client.export(
+    annotations = list(
+        client.export(
             Resource.Queue, id_=123, export_format="json", columns=cols, id="456,789", **filters
         )
-    ]
+    )
     assert annotations == ANNOTATIONS  # Annotations are yielded in correct order
 
 
@@ -465,7 +463,7 @@ def test_authenticate_generator_if_needed_token_expired(client, httpx_mock):
         client.token = "new-token"
 
     with mock.patch.object(client, "_authenticate", side_effect=set_token):
-        chunks = [chunk for chunk in client._stream("GET", "queues/123/export?format=csv")]
+        chunks = list(client._stream("GET", "queues/123/export?format=csv"))
     assert b"".join(chunks) == CSV_EXPORT
 
 
@@ -510,7 +508,7 @@ def test_authenticate_generator_if_needed_no_token(client, httpx_mock):
         client.token = "new-token"
 
     with mock.patch.object(client, "_authenticate", side_effect=set_token):
-        chunks = [chunk for chunk in client._stream("GET", "queues/123/export?format=csv")]
+        chunks = list(client._stream("GET", "queues/123/export?format=csv"))
     assert b"".join(chunks) == CSV_EXPORT
 
 

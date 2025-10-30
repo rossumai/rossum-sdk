@@ -29,9 +29,8 @@ if TYPE_CHECKING:
 
     import httpx
 
-    from rossum_api.types import RossumApiType
+    from rossum_api.types import JsonDict, RossumApiType
 
-    JsonDict = dict[str, Any]
     Deserializer = Callable[[Resource, JsonDict], RossumApiType]
     ResponsePostProcessor = Callable[[httpx.Response], Any]
 

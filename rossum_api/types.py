@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import typing
-from typing import Literal
+from typing import Any, Literal
 
 from rossum_api.utils import ObjectWithStatus
+
+JsonDict = dict[str, Any]
 
 HttpMethod = Literal["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
 

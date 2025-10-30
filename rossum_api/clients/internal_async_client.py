@@ -32,7 +32,7 @@ if typing.TYPE_CHECKING:
 
     from rossum_api.domain_logic.resources import Resource
     from rossum_api.models import ResponsePostProcessor
-    from rossum_api.types import HttpMethod
+    from rossum_api.types import HttpMethod, JsonDict
 
 
 RETRIED_HTTP_CODES = (408, 429, 500, 502, 503, 504)
@@ -100,7 +100,7 @@ class InternalAsyncClient:
         content_schema_ids: Sequence[str] = (),
         method: HttpMethod = "GET",
         max_pages: int | None = None,
-        json: dict | None = None,
+        json: JsonDict | None = None,
         **filters: Any,
     ) -> AsyncIterator[dict[str, Any]]:
         """Retrieve a list of objects in a specific resource.
@@ -147,7 +147,7 @@ class InternalAsyncClient:
         content_schema_ids: Sequence[str] = (),
         method: HttpMethod = "GET",
         max_pages: int | None = None,
-        json: dict | None = None,
+        json: JsonDict | None = None,
         **filters: Any,
     ) -> AsyncIterator[dict[str, Any]]:
         """Retrieve a list of objects from a specified URL.
@@ -209,7 +209,7 @@ class InternalAsyncClient:
         method: HttpMethod,
         query_params: dict[str, Any],
         sideload_groups: Sequence[str],
-        json: dict | None = None,
+        json: JsonDict | None = None,
     ) -> tuple[list[dict[str, Any]], int]:
         data = await self.request_json(method, url, params=query_params, json=json)
         embed_sideloads(data, sideload_groups)

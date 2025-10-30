@@ -22,7 +22,7 @@ if typing.TYPE_CHECKING:
 
     from rossum_api.domain_logic.resources import Resource
     from rossum_api.models import ResponsePostProcessor
-    from rossum_api.types import HttpMethod
+    from rossum_api.types import HttpMethod, JsonDict
 
 
 class InternalSyncClient:
@@ -171,7 +171,7 @@ class InternalSyncClient:
         sideloads: Sequence[str] = (),
         content_schema_ids: Sequence[str] = (),
         method: HttpMethod = "GET",
-        json: dict[str, Any] | None = None,
+        json: JsonDict | None = None,
         max_pages: int | None = None,
         **filters: Any,
     ) -> Iterator[dict[str, Any]]:
@@ -194,7 +194,7 @@ class InternalSyncClient:
         sideloads: Sequence[str] = (),
         content_schema_ids: Sequence[str] = (),
         method: HttpMethod = "GET",
-        json: dict | None = None,
+        json: JsonDict | None = None,
         max_pages: int | None = None,
         **filters: Any,
     ) -> Iterator[dict[str, Any]]:
@@ -210,7 +210,7 @@ class InternalSyncClient:
         method: HttpMethod,
         query_params: dict[str, Any],
         sideloads: Sequence[str],
-        json: dict | None,
+        json: JsonDict | None,
         max_pages: int | None,
     ) -> Iterator[dict[str, Any]]:
         first_page_results, total_pages = self._fetch_page(
@@ -232,7 +232,7 @@ class InternalSyncClient:
         method: HttpMethod,
         query_params: dict[str, Any],
         sideload_groups: Sequence[str],
-        json: dict | None = None,
+        json: JsonDict | None = None,
     ) -> tuple[list[dict[str, Any]], int]:
         data = self.request_json(method, url, params=query_params, json=json)
         embed_sideloads(data, sideload_groups)

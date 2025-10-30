@@ -1,19 +1,17 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Optional
+from typing import TYPE_CHECKING
 
-import httpx
+if TYPE_CHECKING:
+    from typing import Any
 
 
 def build_create_document_params(
-    file_name: str,
-    file_data: bytes,
-    metadata: Optional[dict[str, Any]],
-    parent: Optional[str],
+    file_name: str, file_data: bytes, metadata: dict[str, Any] | None, parent: str | None
 ) -> dict[str, Any]:
     metadata = metadata or {}
-    files: httpx._types.RequestFiles = {
+    files: dict[str, Any] = {
         "content": (file_name, file_data),
         "metadata": ("", json.dumps(metadata).encode("utf-8")),
     }

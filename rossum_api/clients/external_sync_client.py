@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import pathlib
 import time
-import typing
-from pathlib import Path
+from typing import TYPE_CHECKING, Generic, cast
 
 from rossum_api.clients.internal_sync_client import InternalSyncClient
 from rossum_api.domain_logic.annotations import (
@@ -29,58 +27,57 @@ from rossum_api.domain_logic.urls import (
     build_upload_url,
     parse_resource_id_from_url,
 )
-from rossum_api.dtos import Token, UserCredentials
-from rossum_api.models import (
-    Annotation,
-    Connector,
-    Document,
-    DocumentRelation,
-    Email,
-    EmailTemplate,
-    Engine,
-    EngineField,
-    Group,
-    Hook,
-    Inbox,
-    Organization,
-    Queue,
-    Schema,
-    Upload,
-    User,
-    Workspace,
-    deserialize_default,
-)
+from rossum_api.models import deserialize_default
+from rossum_api.models.annotation import Annotation
+from rossum_api.models.connector import Connector
+from rossum_api.models.document import Document
+from rossum_api.models.document_relation import DocumentRelation
+from rossum_api.models.email import Email
+from rossum_api.models.email_template import EmailTemplate
+from rossum_api.models.engine import Engine, EngineField
+from rossum_api.models.group import Group
+from rossum_api.models.hook import Hook
+from rossum_api.models.inbox import Inbox
+from rossum_api.models.organization import Organization
+from rossum_api.models.queue import Queue
+from rossum_api.models.schema import Schema
 from rossum_api.models.task import Task
-from rossum_api.utils import ObjectWithStatus
+from rossum_api.models.upload import Upload
+from rossum_api.models.user import User
+from rossum_api.models.workspace import Workspace
+from rossum_api.types import (
+    AnnotationType,
+    ConnectorType,
+    DocumentRelationType,
+    DocumentType,
+    EmailTemplateType,
+    EmailType,
+    EngineFieldType,
+    EngineType,
+    GroupType,
+    HookType,
+    InboxType,
+    OrganizationType,
+    QueueType,
+    SchemaType,
+    TaskType,
+    UploadType,
+    UserType,
+    WorkspaceType,
+)
 
-if typing.TYPE_CHECKING:
-    from typing import Any, Callable, Iterator, Optional, Sequence, Tuple, Union
+if TYPE_CHECKING:
+    import pathlib
+    from pathlib import Path
+    from typing import Any, Callable, Iterator, Sequence
 
-    from rossum_api.models import Deserializer, ResponsePostProcessor
-
-
-AnnotationType = typing.TypeVar("AnnotationType", bound=ObjectWithStatus)
-ConnectorType = typing.TypeVar("ConnectorType")
-DocumentType = typing.TypeVar("DocumentType")
-DocumentRelationType = typing.TypeVar("DocumentRelationType")
-EmailTemplateType = typing.TypeVar("EmailTemplateType")
-EngineType = typing.TypeVar("EngineType")
-EngineFieldType = typing.TypeVar("EngineFieldType")
-GroupType = typing.TypeVar("GroupType")
-HookType = typing.TypeVar("HookType")
-InboxType = typing.TypeVar("InboxType")
-EmailType = typing.TypeVar("EmailType")
-OrganizationType = typing.TypeVar("OrganizationType")
-QueueType = typing.TypeVar("QueueType")
-SchemaType = typing.TypeVar("SchemaType")
-TaskType = typing.TypeVar("TaskType", bound=ObjectWithStatus)
-UploadType = typing.TypeVar("UploadType")
-UserType = typing.TypeVar("UserType")
-WorkspaceType = typing.TypeVar("WorkspaceType")
+    from rossum_api.dtos import Token, UserCredentials
+    from rossum_api.models import Deserializer, JsonDict, ResponsePostProcessor
+    from rossum_api.types import RossumApiType
 
 
 class SyncRossumAPIClient(
-    typing.Generic[
+    Generic[
         AnnotationType,
         ConnectorType,
         DocumentType,
@@ -106,11 +103,11 @@ class SyncRossumAPIClient(
         base_url: str,
         credentials: UserCredentials | Token,
         *,
-        deserializer: Optional[Deserializer] = None,
-        timeout: Optional[float] = None,
+        deserializer: Deserializer | None = None,
+        timeout: float | None = None,
         n_retries: int = 3,
-        response_post_processor: Optional[ResponsePostProcessor] = None,
-    ):
+        response_post_processor: ResponsePostProcessor | None = None,
+    ) -> None:
         """
         Parameters
         ----------
@@ -122,7 +119,9 @@ class SyncRossumAPIClient(
         response_post_processor
             pass a custom response post-processing callable
         """
-        self._deserializer = deserializer or deserialize_default
+        self._deserializer: Callable[[Resource, JsonDict], RossumApiType] = (
+            deserializer or deserialize_default
+        )
         self.internal_client = InternalSyncClient(
             base_url,
             credentials,
@@ -133,19 +132,12 @@ class SyncRossumAPIClient(
 
     # ##### QUEUES #####
 
-    def retrieve_queue(
-        self,
-        queue_id: int,
-    ) -> QueueType:
+    def retrieve_queue(self, queue_id: int) -> QueueType:
         """https://elis.rossum.ai/api/docs/#retrieve-a-queue-2."""
         queue = self.internal_client.fetch_resource(Resource.Queue, queue_id)
         return self._deserializer(Resource.Queue, queue)
 
-    def list_queues(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
-    ) -> Iterator[QueueType]:
+    def list_queues(self, ordering: Sequence[str] = (), **filters: Any) -> Iterator[QueueType]:
         """https://elis.rossum.ai/api/docs/#list-all-queues."""
         for q in self.internal_client.fetch_resources(Resource.Queue, ordering, **filters):
             yield self._deserializer(Resource.Queue, q)
@@ -162,9 +154,9 @@ class SyncRossumAPIClient(
     def _import_document(
         self,
         url: str,
-        files: Sequence[Tuple[Union[str, Path], str]],
-        values: Optional[dict[str, Any]],
-        metadata: Optional[dict[str, Any]],
+        files: Sequence[tuple[str | Path, str]],
+        values: dict[str, Any] | None,
+        metadata: dict[str, Any] | None,
     ) -> list[int]:
         """Depending on the endpoint, it either returns annotation IDs, or task IDs."""
         results = []
@@ -181,9 +173,9 @@ class SyncRossumAPIClient(
     def import_document(
         self,
         queue_id: int,
-        files: Sequence[Tuple[Union[str, Path], str]],
-        values: Optional[dict[str, Any]] = None,
-        metadata: Optional[dict[str, Any]] = None,
+        files: Sequence[tuple[str | Path, str]],
+        values: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> list[int]:
         """https://elis.rossum.ai/api/docs/#import-a-document.
 
@@ -213,9 +205,9 @@ class SyncRossumAPIClient(
     def upload_document(
         self,
         queue_id: int,
-        files: Sequence[Tuple[Union[str, pathlib.Path], str]],
-        values: Optional[dict[str, Any]] = None,
-        metadata: Optional[dict[str, Any]] = None,
+        files: Sequence[tuple[str | pathlib.Path, str]],
+        values: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> list[TaskType]:
         """https://elis.rossum.ai/api/docs/#create-upload
 
@@ -243,10 +235,7 @@ class SyncRossumAPIClient(
         task_ids = self._import_document(url, files, values, metadata)
         return [self.retrieve_task(task_id) for task_id in task_ids]
 
-    def retrieve_upload(
-        self,
-        upload_id: int,
-    ) -> UploadType:
+    def retrieve_upload(self, upload_id: int) -> UploadType:
         """Implements https://elis.rossum.ai/api/docs/#retrieve-upload."""
         upload = self.internal_client.fetch_resource(Resource.Upload, upload_id)
         return self._deserializer(Resource.Upload, upload)
@@ -254,9 +243,7 @@ class SyncRossumAPIClient(
     # ##### EXPORT #####
 
     def export_annotations_to_json(
-        self,
-        queue_id: int,
-        **filters: Any,
+        self, queue_id: int, **filters: Any
     ) -> Iterator[AnnotationType]:
         """https://elis.rossum.ai/api/docs/#export-annotations.
 
@@ -264,10 +251,10 @@ class SyncRossumAPIClient(
         """
         for chunk in self.internal_client.export(Resource.Queue, queue_id, "json", **filters):
             # JSON export can be translated directly to Annotation object
-            yield self._deserializer(Resource.Annotation, typing.cast("dict", chunk))
+            yield self._deserializer(Resource.Annotation, cast("dict", chunk))
 
     def export_annotations_to_file(
-        self, queue_id: int, export_format: ExportFileFormats, **filters
+        self, queue_id: int, export_format: ExportFileFormats, **filters: Any
     ) -> Iterator[bytes]:
         """https://elis.rossum.ai/api/docs/#export-annotations.
 
@@ -279,14 +266,12 @@ class SyncRossumAPIClient(
             export_format.value,
             **filters,
         ):
-            yield typing.cast("bytes", chunk)
+            yield cast("bytes", chunk)
 
     # ##### ORGANIZATIONS #####
 
     def list_organizations(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> Iterator[OrganizationType]:
         """https://elis.rossum.ai/api/docs/#list-all-organizations."""
         for o in self.internal_client.fetch_resources(Resource.Organization, ordering, **filters):
@@ -305,11 +290,7 @@ class SyncRossumAPIClient(
 
     # ##### SCHEMAS #####
 
-    def list_schemas(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
-    ) -> Iterator[SchemaType]:
+    def list_schemas(self, ordering: Sequence[str] = (), **filters: Any) -> Iterator[SchemaType]:
         """https://elis.rossum.ai/api/docs/#list-all-schemas."""
         for s in self.internal_client.fetch_resources(Resource.Schema, ordering, **filters):
             yield self._deserializer(Resource.Schema, s)
@@ -330,11 +311,7 @@ class SyncRossumAPIClient(
 
     # ##### USERS #####
 
-    def list_users(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
-    ) -> Iterator[UserType]:
+    def list_users(self, ordering: Sequence[str] = (), **filters: Any) -> Iterator[UserType]:
         """https://elis.rossum.ai/api/docs/#list-all-users."""
         for u in self.internal_client.fetch_resources(Resource.User, ordering, **filters):
             yield self._deserializer(Resource.User, u)
@@ -385,8 +362,8 @@ class SyncRossumAPIClient(
 
     def search_for_annotations(
         self,
-        query: Optional[dict] = None,
-        query_string: Optional[dict] = None,
+        query: dict | None = None,
+        query_string: dict | None = None,
         ordering: Sequence[str] = (),
         sideloads: Sequence[str] = (),
         **kwargs: Any,
@@ -446,10 +423,7 @@ class SyncRossumAPIClient(
         return self._deserializer(Resource.Task, task)
 
     def poll_task(
-        self,
-        task_id: int,
-        predicate: Callable[[TaskType], bool],
-        sleep_s: int = 3,
+        self, task_id: int, predicate: Callable[[TaskType], bool], sleep_s: int = 3
     ) -> TaskType:
         """Poll on Task until predicate is true.
 
@@ -462,16 +436,12 @@ class SyncRossumAPIClient(
 
         return task
 
-    def poll_task_until_succeeded(
-        self,
-        task_id: int,
-        sleep_s: int = 3,
-    ) -> TaskType:
+    def poll_task_until_succeeded(self, task_id: int, sleep_s: int = 3) -> TaskType:
         """Poll on Task until it is succeeded."""
         return self.poll_task(task_id, is_task_succeeded, sleep_s)
 
     def upload_and_wait_until_imported(
-        self, queue_id: int, filepath: Union[str, pathlib.Path], filename: str, **poll_kwargs
+        self, queue_id: int, filepath: str | pathlib.Path, filename: str, **poll_kwargs: Any
     ) -> AnnotationType:
         """A shortcut for uploading a single file and waiting until its annotation is imported."""
         (annotation_id,) = self.import_document(queue_id, [(filepath, filename)])
@@ -541,14 +511,14 @@ class SyncRossumAPIClient(
         document_content = self.internal_client.request(
             "GET", url=build_resource_content_url(Resource.Document, document_id)
         )
-        return document_content.content
+        return document_content.content  # type: ignore[no-any-return]
 
     def create_new_document(
         self,
         file_name: str,
         file_data: bytes,
-        metadata: Optional[dict[str, Any]] = None,
-        parent: Optional[str] = None,
+        metadata: dict[str, Any] | None = None,
+        parent: str | None = None,
     ) -> DocumentType:
         """https://elis.rossum.ai/api/docs/#create-document"""
         files = build_create_document_params(file_name, file_data, metadata, parent)
@@ -609,9 +579,7 @@ class SyncRossumAPIClient(
     # ##### WORKSPACES #####
 
     def list_workspaces(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> Iterator[WorkspaceType]:
         """https://elis.rossum.ai/api/docs/#list-all-workspaces."""
         for w in self.internal_client.fetch_resources(Resource.Workspace, ordering, **filters):
@@ -640,11 +608,7 @@ class SyncRossumAPIClient(
         engine = self.internal_client.fetch_resource(Resource.Engine, engine_id)
         return self._deserializer(Resource.Engine, engine)
 
-    def list_engines(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
-    ) -> Iterator[EngineType]:
+    def list_engines(self, ordering: Sequence[str] = (), **filters: Any) -> Iterator[EngineType]:
         for c in self.internal_client.fetch_resources(Resource.Engine, ordering, **filters):
             yield self._deserializer(Resource.Engine, c)
 
@@ -686,14 +650,12 @@ class SyncRossumAPIClient(
             url=EMAIL_IMPORT_URL,
             files=build_email_import_files(raw_message, recipient, mime_type),
         )
-        return response["url"]
+        return response["url"]  # type: ignore[no-any-return]
 
     # ##### EMAIL TEMPLATES #####
 
     def list_email_templates(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> Iterator[EmailTemplateType]:
         """https://elis.rossum.ai/api/docs/#list-all-email-templates."""
         for c in self.internal_client.fetch_resources(Resource.EmailTemplate, ordering, **filters):
@@ -714,9 +676,7 @@ class SyncRossumAPIClient(
     # ##### CONNECTORS #####
 
     def list_connectors(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
+        self, ordering: Sequence[str] = (), **filters: Any
     ) -> Iterator[ConnectorType]:
         """https://elis.rossum.ai/api/docs/#list-all-connectors."""
         for c in self.internal_client.fetch_resources(Resource.Connector, ordering, **filters):
@@ -734,11 +694,7 @@ class SyncRossumAPIClient(
 
     # ##### HOOKS #####
 
-    def list_hooks(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
-    ) -> Iterator[HookType]:
+    def list_hooks(self, ordering: Sequence[str] = (), **filters: Any) -> Iterator[HookType]:
         """https://elis.rossum.ai/api/docs/#list-all-hooks."""
         for h in self.internal_client.fetch_resources(Resource.Hook, ordering, **filters):
             yield self._deserializer(Resource.Hook, h)
@@ -764,11 +720,7 @@ class SyncRossumAPIClient(
 
     # ##### USER ROLES #####
 
-    def list_user_roles(
-        self,
-        ordering: Sequence[str] = (),
-        **filters: Any,
-    ) -> Iterator[GroupType]:
+    def list_user_roles(self, ordering: Sequence[str] = (), **filters: Any) -> Iterator[GroupType]:
         """https://elis.rossum.ai/api/docs/#list-all-user-roles."""
         for g in self.internal_client.fetch_resources(Resource.Group, ordering, **filters):
             yield self._deserializer(Resource.Group, g)

@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Any
 
 
 def build_email_import_files(
@@ -11,7 +14,4 @@ def build_email_import_files(
     if mime_type:
         raw_message_value.append(mime_type)
 
-    return {
-        "raw_message": tuple(raw_message_value),
-        "recipient": (None, recipient),
-    }
+    return {"raw_message": tuple(raw_message_value), "recipient": (None, recipient)}

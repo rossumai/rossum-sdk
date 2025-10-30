@@ -10,22 +10,19 @@ from rossum_api.domain_logic.annotations import (
     get_http_method_for_annotation_export,
 )
 from rossum_api.domain_logic.pagination import build_pagination_params
-from rossum_api.domain_logic.resources import Resource
 from rossum_api.domain_logic.retry import ForceRetry, should_retry
 from rossum_api.domain_logic.sideloads import build_sideload_params, embed_sideloads
-from rossum_api.domain_logic.urls import (
-    build_export_url,
-    build_full_login_url,
-    build_url,
-)
+from rossum_api.domain_logic.urls import build_export_url, build_full_login_url, build_url
 from rossum_api.dtos import Token, UserCredentials
 from rossum_api.exceptions import APIClientError
 from rossum_api.utils import enforce_domain
 
 if typing.TYPE_CHECKING:
-    from typing import Any, Iterator, List, Optional, Sequence, Tuple, Union
+    from typing import Any, Iterator, Sequence
 
+    from rossum_api.domain_logic.resources import Resource
     from rossum_api.models import ResponsePostProcessor
+    from rossum_api.types import HttpMethod, JsonDict
 
 
 class InternalSyncClient:
@@ -34,11 +31,11 @@ class InternalSyncClient:
         base_url: str,
         credentials: UserCredentials | Token,
         *,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
         n_retries: int = 3,
         retry_backoff_factor: float = 1.0,
         retry_max_jitter: float = 1.0,
-        response_post_processor: Optional[ResponsePostProcessor] = None,
+        response_post_processor: ResponsePostProcessor | None = None,
     ):
         self.base_url = base_url
         self.client = httpx.Client(timeout=timeout)
@@ -76,7 +73,7 @@ class InternalSyncClient:
         self.token = response.json()["key"]
 
     @property
-    def _headers(self):
+    def _headers(self) -> dict[str, str]:
         return {"Authorization": f"Bearer {self.token}"}
 
     def create(self, resource: Resource, data: dict[str, Any]) -> dict[str, Any]:
@@ -98,11 +95,7 @@ class InternalSyncClient:
         """
         self._request("DELETE", build_url(resource, id_))
 
-    def upload(
-        self,
-        url: str,
-        files: dict[str, Any],
-    ) -> dict[str, Any]:
+    def upload(self, url: str, files: dict[str, Any]) -> dict[str, Any]:
         """Upload a file to a resource that supports this."""
         return self.request_json("POST", url, files=files)
 
@@ -113,7 +106,7 @@ class InternalSyncClient:
         export_format: str,
         columns: Sequence[str] = (),
         **filters: Any,
-    ) -> Iterator[Union[dict[str, Any], bytes]]:
+    ) -> Iterator[dict[str, Any] | bytes]:
         query_params = build_export_query_params(export_format, columns, **filters)
         url = build_export_url(resource, id_)
         method = get_http_method_for_annotation_export(**filters)
@@ -127,7 +120,7 @@ class InternalSyncClient:
             # chunks of bytes are yielded from HTTP stream to keep memory consumption low.
             yield from self._stream(method, url, params=query_params)
 
-    def _stream(self, method: str, url: str, *args, **kwargs) -> Iterator[bytes]:
+    def _stream(self, method: HttpMethod, url: str, *args: Any, **kwargs: Any) -> Iterator[bytes]:
         """Performs a streaming HTTP call."""
         if not self.token:
             self._authenticate()
@@ -161,10 +154,7 @@ class InternalSyncClient:
                     yield chunk
 
     def fetch_resource(
-        self,
-        resource: Resource,
-        id_: Union[int, str],
-        request_params: dict[str, Any] | None = None,
+        self, resource: Resource, id_: int | str, request_params: dict[str, Any] | None = None
     ) -> dict[str, Any]:
         """Retrieve a single object in a specific resource.
 
@@ -180,10 +170,10 @@ class InternalSyncClient:
         ordering: Sequence[str] = (),
         sideloads: Sequence[str] = (),
         content_schema_ids: Sequence[str] = (),
-        method: str = "GET",
-        json: Optional[dict] = None,
-        max_pages: Optional[int] = None,
-        **filters,
+        method: HttpMethod = "GET",
+        json: JsonDict | None = None,
+        max_pages: int | None = None,
+        **filters: Any,
     ) -> Iterator[dict[str, Any]]:
         """Retrieve a list of objects in a specific resource."""
         return self.fetch_resources_by_url(
@@ -203,10 +193,10 @@ class InternalSyncClient:
         ordering: Sequence[str] = (),
         sideloads: Sequence[str] = (),
         content_schema_ids: Sequence[str] = (),
-        method: str = "GET",
-        json: Optional[dict] = None,
-        max_pages: Optional[int] = None,
-        **filters,
+        method: HttpMethod = "GET",
+        json: JsonDict | None = None,
+        max_pages: int | None = None,
+        **filters: Any,
     ) -> Iterator[dict[str, Any]]:
         query_params = build_pagination_params(ordering)
         query_params.update(build_sideload_params(sideloads, content_schema_ids))
@@ -214,7 +204,15 @@ class InternalSyncClient:
 
         return self._fetch_paginated_results(url, method, query_params, sideloads, json, max_pages)
 
-    def _fetch_paginated_results(self, url, method, query_params, sideloads, json, max_pages):
+    def _fetch_paginated_results(
+        self,
+        url: str,
+        method: HttpMethod,
+        query_params: dict[str, Any],
+        sideloads: Sequence[str],
+        json: JsonDict | None,
+        max_pages: int | None,
+    ) -> Iterator[dict[str, Any]]:
         first_page_results, total_pages = self._fetch_page(
             url, method, query_params, sideloads, json=json
         )
@@ -231,25 +229,25 @@ class InternalSyncClient:
     def _fetch_page(
         self,
         url: str,
-        method: str,
+        method: HttpMethod,
         query_params: dict[str, Any],
         sideload_groups: Sequence[str],
-        json: Optional[dict] = None,
-    ) -> Tuple[List[dict[str, Any]], int]:
+        json: JsonDict | None = None,
+    ) -> tuple[list[dict[str, Any]], int]:
         data = self.request_json(method, url, params=query_params, json=json)
         embed_sideloads(data, sideload_groups)
         return data["results"], data["pagination"]["total_pages"]
 
-    def request_json(self, method: str, *args, **kwargs) -> dict[str, Any]:
+    def request_json(self, method: HttpMethod, *args: Any, **kwargs: Any) -> dict[str, Any]:
         response = self._request(method, *args, **kwargs)
         if response.status_code == 204:
             return {}
-        return response.json()
+        return response.json()  # type: ignore[no-any-return]
 
-    def request(self, method: str, *args, **kwargs) -> httpx.Response:
+    def request(self, method: HttpMethod, *args: Any, **kwargs: Any) -> httpx.Response:
         return self._request(method, *args, **kwargs)
 
-    def _request(self, method: str, url: str, *args, **kwargs) -> httpx.Response:
+    def _request(self, method: HttpMethod, url: str, *args: Any, **kwargs: Any) -> httpx.Response:
         """Performs the actual HTTP call and does error handling.
 
         Arguments:
@@ -281,7 +279,7 @@ class InternalSyncClient:
                 return response
 
     @staticmethod
-    def _raise_for_status(response: httpx.Response):
+    def _raise_for_status(response: httpx.Response) -> None:
         """Raise an exception in case of HTTP error.
 
         Re-pack to our own exception class to shield users from the fact that we're using

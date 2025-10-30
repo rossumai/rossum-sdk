@@ -26,12 +26,13 @@ from rossum_api.exceptions import APIClientError
 from rossum_api.utils import enforce_domain
 
 if typing.TYPE_CHECKING:
-    from typing import Any, AsyncIterator, Dict, List, Optional, Sequence, Tuple, Union
+    from typing import Any, AsyncIterator, Sequence
 
     from aiofiles.threadpool.binary import AsyncBufferedReader
 
     from rossum_api.domain_logic.resources import Resource
     from rossum_api.models import ResponsePostProcessor
+    from rossum_api.types import HttpMethod, JsonDict
 
 
 RETRIED_HTTP_CODES = (408, 429, 500, 502, 503, 504)
@@ -49,16 +50,16 @@ class InternalAsyncClient:
     def __init__(
         self,
         base_url: str = DEFAULT_BASE_URL,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        token: Optional[str] = None,
+        username: str | None = None,
+        password: str | None = None,
+        token: str | None = None,
         *,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
         n_retries: int = 3,
         retry_backoff_factor: float = 1.0,
         retry_max_jitter: float = 1.0,
         max_in_flight_requests: int = 4,
-        response_post_processor: Optional[ResponsePostProcessor] = None,
+        response_post_processor: ResponsePostProcessor | None = None,
     ):
         if token is None and (username is None and password is None):
             raise TypeError(
@@ -77,15 +78,12 @@ class InternalAsyncClient:
         self.response_post_processor = response_post_processor
 
     @property
-    def _headers(self):
+    def _headers(self) -> dict[str, str]:
         return {"Authorization": f"Bearer {self.token}"}
 
     async def fetch_one(
-        self,
-        resource: Resource,
-        id_: Union[int, str],
-        request_params: Dict[str, Any] | None = None,
-    ) -> Dict[str, Any]:
+        self, resource: Resource, id_: int | str, request_params: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """Retrieve a single object in a specific resource.
 
         Allows passing extra params specifically to allow disabling redirects feature of Tasks.
@@ -100,11 +98,11 @@ class InternalAsyncClient:
         ordering: Sequence[str] = (),
         sideloads: Sequence[str] = (),
         content_schema_ids: Sequence[str] = (),
-        method: str = "GET",
-        max_pages: Optional[int] = None,
-        json: Optional[dict] = None,
+        method: HttpMethod = "GET",
+        max_pages: int | None = None,
+        json: JsonDict | None = None,
         **filters: Any,
-    ) -> AsyncIterator[Dict[str, Any]]:
+    ) -> AsyncIterator[dict[str, Any]]:
         """Retrieve a list of objects in a specific resource.
 
         Arguments
@@ -147,11 +145,11 @@ class InternalAsyncClient:
         ordering: Sequence[str] = (),
         sideloads: Sequence[str] = (),
         content_schema_ids: Sequence[str] = (),
-        method: str = "GET",
-        max_pages: Optional[int] = None,
-        json: Optional[dict] = None,
+        method: HttpMethod = "GET",
+        max_pages: int | None = None,
+        json: JsonDict | None = None,
         **filters: Any,
-    ) -> AsyncIterator[Dict[str, Any]]:
+    ) -> AsyncIterator[dict[str, Any]]:
         """Retrieve a list of objects from a specified URL.
 
         Arguments
@@ -189,7 +187,7 @@ class InternalAsyncClient:
 
         in_flight_guard = asyncio.Semaphore(self.max_in_flight_requests)
 
-        async def _fetch_page(page_number):
+        async def _fetch_page(page_number: int) -> tuple[list[dict[str, Any]], int]:
             async with in_flight_guard:
                 return await self._fetch_page(
                     url, method, {**query_params, "page": page_number}, sideloads, json=json
@@ -208,24 +206,24 @@ class InternalAsyncClient:
     async def _fetch_page(
         self,
         url: str,
-        method: str,
-        query_params: Dict[str, Any],
+        method: HttpMethod,
+        query_params: dict[str, Any],
         sideload_groups: Sequence[str],
-        json: Optional[dict] = None,
-    ) -> Tuple[List[Dict[str, Any]], int]:
+        json: JsonDict | None = None,
+    ) -> tuple[list[dict[str, Any]], int]:
         data = await self.request_json(method, url, params=query_params, json=json)
         embed_sideloads(data, sideload_groups)
         return data["results"], data["pagination"]["total_pages"]
 
-    async def create(self, resource: Resource, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def create(self, resource: Resource, data: dict[str, Any]) -> dict[str, Any]:
         """Create a new object."""
         return await self.request_json("POST", resource.value, json=data)
 
-    async def replace(self, resource: Resource, id_: int, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def replace(self, resource: Resource, id_: int, data: dict[str, Any]) -> dict[str, Any]:
         "Modify an entire existing object."
         return await self.request_json("PUT", build_url(resource, id_), json=data)
 
-    async def update(self, resource: Resource, id_: int, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def update(self, resource: Resource, id_: int, data: dict[str, Any]) -> dict[str, Any]:
         "Modify particular fields of an existing object."
         return await self.request_json("PATCH", build_url(resource, id_), json=data)
 
@@ -242,9 +240,9 @@ class InternalAsyncClient:
         id_: int,
         fp: AsyncBufferedReader,
         filename: str,
-        values: Optional[Dict[str, Any]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        values: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Upload a file to a resource that supports this.
 
         Arguments
@@ -268,7 +266,7 @@ class InternalAsyncClient:
         export_format: str,
         columns: Sequence[str] = (),
         **filters: Any,
-    ) -> AsyncIterator[Union[Dict[str, Any], bytes]]:
+    ) -> AsyncIterator[dict[str, Any] | bytes]:
         query_params = build_export_query_params(export_format, columns, **filters)
         url = build_export_url(resource, id_)
         # to_status parameter is valid only in POST requests, we can use GET in all other cases
@@ -284,13 +282,13 @@ class InternalAsyncClient:
             async for bytes_chunk in self._stream(method, url, params=query_params):
                 yield bytes_chunk
 
-    async def request_json(self, method: str, *args, **kwargs) -> Dict[str, Any]:
+    async def request_json(self, method: HttpMethod, *args: Any, **kwargs: Any) -> dict[str, Any]:
         response = await self._request(method, *args, **kwargs)
         if response.status_code == 204:
             return {}
-        return response.json()
+        return response.json()  # type: ignore[no-any-return]
 
-    async def request(self, method: str, *args, **kwargs) -> httpx.Response:
+    async def request(self, method: HttpMethod, *args: Any, **kwargs: Any) -> httpx.Response:
         response = await self._request(method, *args, **kwargs)
         return response
 
@@ -330,7 +328,9 @@ class InternalAsyncClient:
             reraise=True,
         )
 
-    async def _request(self, method: str, url: str, *args, **kwargs) -> httpx.Response:
+    async def _request(
+        self, method: HttpMethod, url: str, *args: Any, **kwargs: Any
+    ) -> httpx.Response:
         """Performs the actual HTTP call and does error handling.
 
         Arguments:
@@ -356,7 +356,9 @@ class InternalAsyncClient:
                 await self._raise_for_status(response, method)
                 return response
 
-    async def _stream(self, method: str, url: str, *args, **kwargs) -> AsyncIterator[bytes]:
+    async def _stream(
+        self, method: HttpMethod, url: str, *args: Any, **kwargs: Any
+    ) -> AsyncIterator[bytes]:
         """Performs a streaming HTTP call."""
         if not self.token:
             await self._authenticate()
@@ -377,7 +379,7 @@ class InternalAsyncClient:
                     async for chunk in response.aiter_bytes():
                         yield chunk
 
-    async def _raise_for_status(self, response: httpx.Response, method: str) -> None:
+    async def _raise_for_status(self, response: httpx.Response, method: HttpMethod) -> None:
         """Raise an exception in case of HTTP error.
 
         Re-pack to our own exception class to shield users from the fact that we're using

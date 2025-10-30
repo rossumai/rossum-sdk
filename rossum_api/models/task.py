@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any
 
 
 class TaskType(str, Enum):
@@ -26,7 +26,7 @@ class Task:
     type: TaskType
     status: TaskStatus
     expires_at: str
-    content: Optional[Dict[str, Any]] = None
-    detail: Optional[str] = None
-    code: Optional[str] = None
-    result_url: Optional[str] = None
+    content: dict[str, Any] | None = None
+    detail: str | None = None
+    code: str | None = None
+    result_url: str | None = None

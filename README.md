@@ -1,5 +1,3 @@
-from rossum_api.dtos import UserCredentialsfrom rossum_api.dtos import UserCredentials
-
 # Rossum SDK
 
 [![Build Status](https://github.com/rossumai/rossum-sdk/actions/workflows/test-and-deploy.yaml/badge.svg)](https://github.com/rossumai/rossum-sdk/actions)

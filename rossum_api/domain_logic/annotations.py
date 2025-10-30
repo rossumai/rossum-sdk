@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Sequence
-
-from rossum_api.utils import ObjectWithStatus
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Sequence
+    from typing import Any, Sequence
+
+    from rossum_api.types import HttpMethod
+    from rossum_api.utils import ObjectWithStatus
 
 
 class ExportFileFormats(Enum):
@@ -16,8 +17,7 @@ class ExportFileFormats(Enum):
 
 
 def validate_list_annotations_params(
-    sideloads: Sequence[str] = (),
-    content_schema_ids: Sequence[str] = (),
+    sideloads: Sequence[str] = (), content_schema_ids: Sequence[str] = ()
 ) -> None:
     """Validate parameters to list_annotations request."""
     if sideloads and "content" in sideloads and not content_schema_ids:
@@ -26,14 +26,12 @@ def validate_list_annotations_params(
         )
 
 
-def get_http_method_for_annotation_export(**filters) -> str:
+def get_http_method_for_annotation_export(**filters: Any) -> HttpMethod:
     """to_status filter requires a different HTTP method.
 
     https://elis.rossum.ai/api/docs/#export-annotations
     """
-    if "to_status" in filters:
-        return "POST"
-    return "GET"
+    return "POST" if "to_status" in filters else "GET"
 
 
 def is_annotation_imported(annotation: ObjectWithStatus) -> bool:
@@ -42,9 +40,7 @@ def is_annotation_imported(annotation: ObjectWithStatus) -> bool:
 
 
 def build_export_query_params(
-    export_format: str,
-    columns: Sequence[str] = (),
-    **filters: Any,
+    export_format: str, columns: Sequence[str] = (), **filters: Any
 ) -> dict[str, Any]:
     query_params = {"format": export_format}
     filters = filters or {}

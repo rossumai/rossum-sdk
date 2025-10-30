@@ -25,12 +25,13 @@ from rossum_api.models.user import User
 from rossum_api.models.workspace import Workspace
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict
+    from typing import Any, Callable
 
     import httpx
 
-    JsonDict = Dict[str, Any]
-    Deserializer = Callable[[Resource, JsonDict], Any]
+    from rossum_api.types import JsonDict, RossumApiType
+
+    Deserializer = Callable[[Resource, JsonDict], RossumApiType]
     ResponsePostProcessor = Callable[[httpx.Response], Any]
 
 

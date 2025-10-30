@@ -15,6 +15,7 @@ lint.extend-select = [
     "G",  # logging-format
     "T",  # print
     "T10",  # breakpoint
+    "TCH",  # type-checking
     "TID252",  # absolute imports
     "UP031",  # f-strings (flynt)
     "UP032",  # f-strings (flynt)

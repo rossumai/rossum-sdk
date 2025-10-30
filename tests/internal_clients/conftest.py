@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import functools
 import logging
+from typing import TYPE_CHECKING
 
-import httpx
 import pytest
+
+if TYPE_CHECKING:
+    import httpx
 
 WORKSPACES = [
     {

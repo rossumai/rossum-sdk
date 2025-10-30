@@ -13,9 +13,7 @@ dependencies = [
     # The code uses the "case conversion" feature added in this version.
     # See deserialize_default function in models/__init__.py.
     "dacite>=1.9.0",
-    "inflect",
     "httpx",
-    "inflect",
     "tenacity",
 ]
 
@@ -52,10 +50,6 @@ warn_return_any = true
 namespace_packages = true
 
 disable_error_code = ["operator", "index", "var-annotated"]
-
-[[tool.mypy.overrides]]
-module = "inflect"
-ignore_missing_imports = true
 
 [tool.semantic_release]
 upload_to_repository = false

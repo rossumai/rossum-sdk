@@ -29,10 +29,12 @@ from rossum_api.domain_logic.urls import (
     parse_resource_id_from_url,
 )
 from rossum_api.dtos import Token, UserCredentials
-from rossum_api.models import DocumentRelation, Email, deserialize_default
+from rossum_api.models import deserialize_default
 from rossum_api.models.annotation import Annotation
 from rossum_api.models.connector import Connector
 from rossum_api.models.document import Document
+from rossum_api.models.document_relation import DocumentRelation
+from rossum_api.models.email import Email
 from rossum_api.models.email_template import EmailTemplate
 from rossum_api.models.engine import Engine, EngineField
 from rossum_api.models.group import Group

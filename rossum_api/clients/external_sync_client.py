@@ -27,27 +27,24 @@ from rossum_api.domain_logic.urls import (
     build_upload_url,
     parse_resource_id_from_url,
 )
-from rossum_api.models import (
-    Annotation,
-    Connector,
-    Document,
-    DocumentRelation,
-    Email,
-    EmailTemplate,
-    Engine,
-    EngineField,
-    Group,
-    Hook,
-    Inbox,
-    Organization,
-    Queue,
-    Schema,
-    Upload,
-    User,
-    Workspace,
-    deserialize_default,
-)
+from rossum_api.models import deserialize_default
+from rossum_api.models.annotation import Annotation
+from rossum_api.models.connector import Connector
+from rossum_api.models.document import Document
+from rossum_api.models.document_relation import DocumentRelation
+from rossum_api.models.email import Email
+from rossum_api.models.email_template import EmailTemplate
+from rossum_api.models.engine import Engine, EngineField
+from rossum_api.models.group import Group
+from rossum_api.models.hook import Hook
+from rossum_api.models.inbox import Inbox
+from rossum_api.models.organization import Organization
+from rossum_api.models.queue import Queue
+from rossum_api.models.schema import Schema
 from rossum_api.models.task import Task
+from rossum_api.models.upload import Upload
+from rossum_api.models.user import User
+from rossum_api.models.workspace import Workspace
 from rossum_api.types import (
     AnnotationType,
     ConnectorType,

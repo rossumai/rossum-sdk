@@ -13,8 +13,12 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
     from typing import Any
 
+    from rossum_api.types import Sideload
 
-def build_sideload_params(sideloads: Sequence[str], content_schema_ids: Sequence[str]) -> dict:
+
+def build_sideload_params(
+    sideloads: Sequence[Sideload], content_schema_ids: Sequence[str]
+) -> dict:
     """Build params used for sideloading.
 
     Arguments
@@ -29,7 +33,7 @@ def build_sideload_params(sideloads: Sequence[str], content_schema_ids: Sequence
     return {"sideload": ",".join(sideloads), "content.schema_id": ",".join(content_schema_ids)}
 
 
-def embed_sideloads(response_data: dict[str, Any], sideloads: Sequence[str]) -> None:
+def embed_sideloads(response_data: dict[str, Any], sideloads: Sequence[Sideload]) -> None:
     """Put sideloads into the response data."""
     sideloads_by_id = _group_sideloads_by_annotation_id(sideloads, response_data)
     for result, sideload in itertools.product(response_data["results"], sideloads):
@@ -45,7 +49,7 @@ def embed_sideloads(response_data: dict[str, Any], sideloads: Sequence[str]) -> 
 
 
 def _group_sideloads_by_annotation_id(
-    sideloads: Sequence[str], response_data: dict[str, Any]
+    sideloads: Sequence[Sideload], response_data: dict[str, Any]
 ) -> dict[str, dict[int, dict | list]]:
     sideloads_by_id: dict[str, dict[int, dict | list]] = {}
     for sideload in sideloads:

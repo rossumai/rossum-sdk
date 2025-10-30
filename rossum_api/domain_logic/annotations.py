@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Any, Sequence
 
-    from rossum_api.types import HttpMethod
+    from rossum_api.types import HttpMethod, Sideload
     from rossum_api.utils import ObjectWithStatus
 
 
@@ -17,7 +17,7 @@ class ExportFileFormats(Enum):
 
 
 def validate_list_annotations_params(
-    sideloads: Sequence[str] = (), content_schema_ids: Sequence[str] = ()
+    sideloads: Sequence[Sideload] = (), content_schema_ids: Sequence[str] = ()
 ) -> None:
     """Validate parameters to list_annotations request."""
     if sideloads and "content" in sideloads and not content_schema_ids:

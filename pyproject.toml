@@ -56,3 +56,6 @@ upload_to_repository = false
 branch = "main"
 version_variables = ["rossum_api/__init__.py:__version__"]
 version_toml = ["pyproject.toml:project.version"]
+
+[tool.semantic_release.changelog]
+mode = "init"  # temporary fix to re-generate correctly full Changelog

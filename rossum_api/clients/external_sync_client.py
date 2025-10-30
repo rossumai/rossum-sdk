@@ -73,7 +73,7 @@ if TYPE_CHECKING:
 
     from rossum_api.dtos import Token, UserCredentials
     from rossum_api.models import Deserializer, JsonDict, ResponsePostProcessor
-    from rossum_api.types import RossumApiType
+    from rossum_api.types import RossumApiType, Sideload
 
 
 class SyncRossumAPIClient(
@@ -337,7 +337,7 @@ class SyncRossumAPIClient(
     # ##### ANNOTATIONS #####
 
     def retrieve_annotation(
-        self, annotation_id: int, sideloads: Sequence[str] = ()
+        self, annotation_id: int, sideloads: Sequence[Sideload] = ()
     ) -> AnnotationType:
         """https://elis.rossum.ai/api/docs/#retrieve-an-annotation."""
         annotation = self.internal_client.fetch_resource(Resource.Annotation, annotation_id)
@@ -348,7 +348,7 @@ class SyncRossumAPIClient(
     def list_annotations(
         self,
         ordering: Sequence[str] = (),
-        sideloads: Sequence[str] = (),
+        sideloads: Sequence[Sideload] = (),
         content_schema_ids: Sequence[str] = (),
         **filters: Any,
     ) -> Iterator[AnnotationType]:
@@ -365,7 +365,7 @@ class SyncRossumAPIClient(
         query: dict | None = None,
         query_string: dict | None = None,
         ordering: Sequence[str] = (),
-        sideloads: Sequence[str] = (),
+        sideloads: Sequence[Sideload] = (),
         **kwargs: Any,
     ) -> Iterator[AnnotationType]:
         """https://elis.rossum.ai/api/docs/#search-for-annotations."""
@@ -386,7 +386,7 @@ class SyncRossumAPIClient(
         annotation_id: int,
         predicate: Callable[[AnnotationType], bool],
         sleep_s: int = 3,
-        sideloads: Sequence[str] = (),
+        sideloads: Sequence[Sideload] = (),
     ) -> AnnotationType:
         """Poll on Annotation until predicate is true.
 

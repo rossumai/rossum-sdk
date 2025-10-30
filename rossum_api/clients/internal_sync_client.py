@@ -22,7 +22,7 @@ if typing.TYPE_CHECKING:
 
     from rossum_api.domain_logic.resources import Resource
     from rossum_api.models import ResponsePostProcessor
-    from rossum_api.types import HttpMethod, JsonDict
+    from rossum_api.types import HttpMethod, JsonDict, Sideload
 
 
 class InternalSyncClient:
@@ -168,7 +168,7 @@ class InternalSyncClient:
         self,
         resource: Resource,
         ordering: Sequence[str] = (),
-        sideloads: Sequence[str] = (),
+        sideloads: Sequence[Sideload] = (),
         content_schema_ids: Sequence[str] = (),
         method: HttpMethod = "GET",
         json: JsonDict | None = None,
@@ -191,7 +191,7 @@ class InternalSyncClient:
         self,
         url: str,
         ordering: Sequence[str] = (),
-        sideloads: Sequence[str] = (),
+        sideloads: Sequence[Sideload] = (),
         content_schema_ids: Sequence[str] = (),
         method: HttpMethod = "GET",
         json: JsonDict | None = None,
@@ -209,7 +209,7 @@ class InternalSyncClient:
         url: str,
         method: HttpMethod,
         query_params: dict[str, Any],
-        sideloads: Sequence[str],
+        sideloads: Sequence[Sideload],
         json: JsonDict | None,
         max_pages: int | None,
     ) -> Iterator[dict[str, Any]]:
@@ -231,7 +231,7 @@ class InternalSyncClient:
         url: str,
         method: HttpMethod,
         query_params: dict[str, Any],
-        sideload_groups: Sequence[str],
+        sideload_groups: Sequence[Sideload],
         json: JsonDict | None = None,
     ) -> tuple[list[dict[str, Any]], int]:
         data = self.request_json(method, url, params=query_params, json=json)
@@ -296,7 +296,7 @@ class InternalSyncClient:
                 content.decode("utf-8"),
             ) from e
 
-    def sideload(self, resource: dict[str, Any], sideloads: Sequence[str]) -> None:
+    def sideload(self, resource: dict[str, Any], sideloads: Sequence[Sideload]) -> None:
         """Update sideloaded resources in place.
 
         The API does not support sideloading when fetching a single resource, we need to load

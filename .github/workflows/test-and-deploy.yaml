@@ -8,9 +8,9 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -28,12 +28,12 @@ jobs:
     needs: build-and-test
     if: github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           token: ${{ secrets.PUBLISH_TOKEN }}
       - name: Semantic release
-        uses: relekang/python-semantic-release@master
+        uses: relekang/python-semantic-release@v10.4.1
         with:
             # Personal Access Token that belongs to an admin of the repo must
             # be set in PUBLISH_TOKEN secret to bypass `main` branch protection

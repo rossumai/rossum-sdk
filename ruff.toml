@@ -5,6 +5,7 @@ lint.select = [
     "E",  # PEP8 (pycodestyle)
     "F",  # pyflakes
     "I",  # isort
+    "S",  # bandit
     "W",  # PEP8  (pycodestyle)
 ]
 lint.extend-select = [
@@ -60,4 +61,5 @@ max-complexity = 10
 
 [lint.per-file-ignores]
 # commons module files
-"test.py" = ["ERA001", "T201"]
+"test.py" = ["ERA001", "S", "T201"]
+"tests/**" = ["S"]

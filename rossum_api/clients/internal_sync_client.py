@@ -247,7 +247,9 @@ class InternalSyncClient:
     def request(self, method: HttpMethod, *args: Any, **kwargs: Any) -> httpx.Response:
         return self._request(method, *args, **kwargs)
 
-    def _request(self, method: HttpMethod, url: str, *args: Any, **kwargs: Any) -> httpx.Response:
+    def _request(  # noqa: RET503 (false positive)
+        self, method: HttpMethod, url: str, *args: Any, **kwargs: Any
+    ) -> httpx.Response:
         """Performs the actual HTTP call and does error handling.
 
         Arguments:

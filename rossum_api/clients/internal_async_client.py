@@ -290,8 +290,7 @@ class InternalAsyncClient:
         return response.json()  # type: ignore[no-any-return]
 
     async def request(self, method: HttpMethod, *args: Any, **kwargs: Any) -> httpx.Response:
-        response = await self._request(method, *args, **kwargs)
-        return response
+        return await self._request(method, *args, **kwargs)
 
     async def get_token(self, refresh: bool = False) -> str:
         """Returns the current token. Authentication is done automatically if needed.
@@ -329,7 +328,7 @@ class InternalAsyncClient:
             reraise=True,
         )
 
-    async def _request(
+    async def _request(  # noqa: RET503 (false positive)
         self, method: HttpMethod, url: str, *args: Any, **kwargs: Any
     ) -> httpx.Response:
         """Performs the actual HTTP call and does error handling.

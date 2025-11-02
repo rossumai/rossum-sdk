@@ -14,6 +14,7 @@ lint.extend-select = [
     "EXE",  # executable
     "G",  # logging-format
     "RET",  # returns formatting
+    "RUF",  # ruff-specific rules
     "SIM",  # flake8-simplify
     "T",  # print
     "T10",  # breakpoint

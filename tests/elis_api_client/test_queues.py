@@ -142,7 +142,7 @@ class TestQueues:
         http_client.upload.assert_has_calls(calls, any_order=True)
 
     async def test_create_upload(self, elis_client):
-        client, http_client = elis_client
+        client, _http_client = elis_client
 
         dummy_task = Task(
             id=16508,

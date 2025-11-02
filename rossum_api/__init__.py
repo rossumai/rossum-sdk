@@ -7,7 +7,7 @@ from rossum_api.exceptions import APIClientError
 __version__ = "3.4.0"
 
 __all__ = (
+    "APIClientError",
     "AsyncRossumAPIClient",
     "SyncRossumAPIClient",
-    "APIClientError",
 )

@@ -68,8 +68,9 @@ from rossum_api.types import (
 
 if TYPE_CHECKING:
     import pathlib
+    from collections.abc import Callable, Iterator, Sequence
     from pathlib import Path
-    from typing import Any, Callable, Iterator, Sequence
+    from typing import Any
 
     from rossum_api.dtos import Token, UserCredentials
     from rossum_api.models import Deserializer, JsonDict, ResponsePostProcessor

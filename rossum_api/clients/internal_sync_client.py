@@ -18,7 +18,8 @@ from rossum_api.exceptions import APIClientError
 from rossum_api.utils import enforce_domain
 
 if typing.TYPE_CHECKING:
-    from typing import Any, Iterator, Sequence
+    from collections.abc import Iterator, Sequence
+    from typing import Any
 
     from rossum_api.domain_logic.resources import Resource
     from rossum_api.models import ResponsePostProcessor
@@ -150,8 +151,7 @@ class InternalSyncClient:
                     if attempt.retry_state.attempt_number == 1:
                         raise ForceRetry()
                 self._raise_for_status(response)
-                for chunk in response.iter_bytes():
-                    yield chunk
+                yield from response.iter_bytes()
 
     def fetch_resource(
         self, resource: Resource, id_: int | str, request_params: dict[str, Any] | None = None

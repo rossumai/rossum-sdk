@@ -4,7 +4,8 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Sequence
+    from collections.abc import Sequence
+    from typing import Any
 
     from rossum_api.types import HttpMethod, Sideload
     from rossum_api.utils import ObjectWithStatus

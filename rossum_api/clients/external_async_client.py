@@ -70,7 +70,8 @@ from rossum_api.types import (
 
 if typing.TYPE_CHECKING:
     import pathlib
-    from typing import Any, AsyncIterator, Callable, Sequence
+    from collections.abc import AsyncIterator, Callable, Sequence
+    from typing import Any
 
     import httpx
 

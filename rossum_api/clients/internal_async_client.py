@@ -26,7 +26,8 @@ from rossum_api.exceptions import APIClientError
 from rossum_api.utils import enforce_domain
 
 if typing.TYPE_CHECKING:
-    from typing import Any, AsyncIterator, Sequence
+    from collections.abc import AsyncIterator, Sequence
+    from typing import Any
 
     from aiofiles.threadpool.binary import AsyncBufferedReader
 

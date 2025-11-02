@@ -25,7 +25,8 @@ from rossum_api.models.user import User
 from rossum_api.models.workspace import Workspace
 
 if TYPE_CHECKING:
-    from typing import Any, Callable
+    from collections.abc import Callable
+    from typing import Any
 
     import httpx
 

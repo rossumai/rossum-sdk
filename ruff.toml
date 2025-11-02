@@ -13,6 +13,7 @@ lint.extend-select = [
     "ERA",  # eradicate,
     "EXE",  # executable
     "G",  # logging-format
+    "SIM",  # flake8-simplify
     "T",  # print
     "T10",  # breakpoint
     "TCH",  # type-checking

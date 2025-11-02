@@ -331,20 +331,22 @@ def test_upload(client, httpx_mock):
 
     # HTTPX uses a random --boundary, patch urandom to make it fixed,
     # see section 4.1 in https://www.ietf.org/rfc/rfc2388.txt for context
-    with mock.patch("httpx._multipart.os.urandom", return_value=b"111"):
-        with tempfile.NamedTemporaryFile("wb") as temp_pdf:
-            temp_pdf.write(b"Fake PDF.")
-            temp_pdf.flush()
-            with open(temp_pdf.name, "rb") as fp:
-                files = build_upload_files(
-                    fp.read(),
-                    "filename.pdf",
-                    {"upload:organization_unit": "Sales"},
-                    {"project": "Market ABC"},
-                )
-                response = client.upload(
-                    url="https://elis.rossum.ai/api/v1/queues/123/upload", files=files
-                )
+    with (
+        mock.patch("httpx._multipart.os.urandom", return_value=b"111"),
+        tempfile.NamedTemporaryFile("wb") as temp_pdf,
+    ):
+        temp_pdf.write(b"Fake PDF.")
+        temp_pdf.flush()
+        with open(temp_pdf.name, "rb") as fp:
+            files = build_upload_files(
+                fp.read(),
+                "filename.pdf",
+                {"upload:organization_unit": "Sales"},
+                {"project": "Market ABC"},
+            )
+            response = client.upload(
+                url="https://elis.rossum.ai/api/v1/queues/123/upload", files=files
+            )
     assert response == UPLOAD_RESPONSE
 
 

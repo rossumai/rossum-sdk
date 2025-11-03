@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from typing import Any
 
 
-def build_create_document_params(
+def build_create_document_params(  # noqa: D103
     file_name: str, file_data: bytes, metadata: dict[str, Any] | None, parent: str | None
 ) -> dict[str, Any]:
     metadata = metadata or {}

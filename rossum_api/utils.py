@@ -10,14 +10,16 @@ def to_singular(word: str) -> str:
     Used primarily for converting sideload names to their corresponding
     singular resource field names in API responses.
 
-    Examples:
+    Examples
+    --------
         - 'documents' -> 'document'
         - 'automation_blockers' -> 'automation_blocker'
         - 'modifiers' -> 'modifier'
         - 'queues' -> 'queue'
         - 'content' -> 'content' (already singular, no change)
 
-    See Also:
+    See Also
+    --------
         rossum_api.types.Sideload for all available sideload values.
     """
     if word.endswith("s"):
@@ -32,5 +34,5 @@ def enforce_domain(url: str, base_url: str) -> str:
     return url
 
 
-class ObjectWithStatus(typing.Protocol):
+class ObjectWithStatus(typing.Protocol):  # noqa: D101
     status: typing.Any

@@ -23,6 +23,7 @@ jobs:
         run: pre-commit run --all-files --show-diff-on-failure
       - name: Run tests
         run: pytest --cov=rossum_api --cov-report=xml --cov-report=term-missing
+
   deploy:
     runs-on: ubuntu-latest
     needs: build-and-test

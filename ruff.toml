@@ -2,6 +2,7 @@
 lint.select = [
     "B",  # bugbear
     "C",  # mccabe
+    "D",  # PEP257 (pydocstyle)
     "E",  # PEP8 (pycodestyle)
     "F",  # pyflakes
     "I",  # isort
@@ -30,6 +31,8 @@ lint.ignore = [
     "ARG002", # Unused method argument
     "B026",  # Star-arg unpacking after a keyword argument is strongly discouraged
     "B905",  # `zip()` without an explicit `strict=` parameter
+    "D100",  # Missing docstring in public module
+    "D104",  # Missing docstring in public package
     "D105",  # Missing docstring in magic method
     "D107",  # Missing docstring in __init__
     "E501",  # Long literals which Black can't split
@@ -61,5 +64,7 @@ max-complexity = 10
 
 [lint.per-file-ignores]
 # commons module files
-"test.py" = ["ERA001", "S", "T201"]
-"tests/**" = ["S"]
+"docs/**" = ["D"]
+"rossum_api/domain_logic/urls.py" = ["D"]
+"test.py" = ["D", "ERA001", "S", "T201"]
+"tests/**" = ["D", "S"]

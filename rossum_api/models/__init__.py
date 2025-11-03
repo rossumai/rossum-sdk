@@ -73,7 +73,8 @@ def deserialize_default(resource: Resource, payload: JsonDict) -> Any:
     """Deserialize payload into dataclasses using dacite.
 
     Dacite from_dict has some limitations and not all types will work easily,
-    for example datetime."""
+    for example datetime.
+    """
     model_class = RESOURCE_TO_MODEL[resource]
     return dacite.from_dict(
         model_class, payload, config=dacite.Config(cast=[Enum], convert_key=_convert_key)

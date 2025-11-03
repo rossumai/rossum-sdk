@@ -53,31 +53,31 @@ You can choose between asynchronous and synchronous client. Both are exactly the
 Async version:
 
 ```python
-import os
 import asyncio
+import os
 from rossum_api import AsyncRossumAPIClient
 from rossum_api.dtos import UserCredentials
 
 WORKSPACE = {
-  "name": "Rossum Client NG Test",
-  "organization": "https://elis.rossum.ai/api/v1/organizations/116390",
+    "name": "Rossum Client NG Test",
+    "organization": "https://elis.rossum.ai/api/v1/organizations/116390",
 }
 
 
-async def main_with_async_client():
-  client = AsyncRossumAPIClient(
-    base_url="https://elis.rossum.ai/api/v1",
-    credentials=UserCredentials(os.environ["ELIS_USERNAME"], os.environ["ELIS_PASSWORD"]),
-  )
-  ws = await client.create_new_workspace(data=WORKSPACE)
-  workspace_id = ws.id
-  ws = await client.retrieve_workspace(workspace_id)
-  print("GET result:", ws)
-  print("LIST results:")
-  async for w in client.list_workspaces(ordering=["-id"], name=WORKSPACE["name"]):
-    print(w)
-  await client.delete_workspace(workspace_id)
-  print(f"Workspace {workspace_id} deleted.")
+async def main_with_async_client() -> None:
+    client = AsyncRossumAPIClient(
+        base_url="https://elis.rossum.ai/api/v1",
+        credentials=UserCredentials(os.environ["ELIS_USERNAME"], os.environ["ELIS_PASSWORD"]),
+    )
+    ws = await client.create_new_workspace(data=WORKSPACE)
+    workspace_id = ws.id
+    ws = await client.retrieve_workspace(workspace_id)
+    print("GET result:", ws)
+    print("LIST results:")
+    async for w in client.list_workspaces(ordering=["-id"], name=WORKSPACE["name"]):
+        print(w)
+    await client.delete_workspace(workspace_id)
+    print(f"Workspace {workspace_id} deleted.")
 
 
 asyncio.run(main_with_async_client())
@@ -87,6 +87,7 @@ Sync version:
 
 ```python
 import os
+
 from rossum_api import SyncRossumAPIClient
 from rossum_api.dtos import UserCredentials
 
@@ -96,7 +97,7 @@ WORKSPACE = {
 }
 
 
-def main_with_sync_client():
+def main_with_sync_client() -> None:
     client = SyncRossumAPIClient(
         base_url="https://elis.rossum.ai/api/v1",
         credentials=UserCredentials(os.environ["ELIS_USERNAME"], os.environ["ELIS_PASSWORD"]),

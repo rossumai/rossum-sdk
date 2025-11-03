@@ -1,0 +1,4 @@
+/* Make the documentation content wider */
+.wy-nav-content {
+    max-width: 1200px !important;
+}

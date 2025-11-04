@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+import warnings
 from typing import TYPE_CHECKING, Generic, cast
 
 from rossum_api.clients.internal_sync_client import InternalSyncClient
@@ -72,6 +73,8 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any
 
+    import httpx
+
     from rossum_api.clients.types import (
         AnnotationOrdering,
         ConnectorOrdering,
@@ -87,7 +90,7 @@ if TYPE_CHECKING:
     )
     from rossum_api.dtos import Token, UserCredentials
     from rossum_api.models import Deserializer, JsonDict, ResponsePostProcessor
-    from rossum_api.types import RossumApiType, Sideload
+    from rossum_api.types import HttpMethod, RossumApiType, Sideload
 
 
 class SyncRossumAPIClient(
@@ -492,11 +495,20 @@ class SyncRossumAPIClient(
         organization = self.internal_client.fetch_resource(Resource.Organization, org_id)
         return self._deserializer(Resource.Organization, organization)
 
-    def retrieve_my_organization(self) -> OrganizationType:
+    def retrieve_own_organization(self) -> OrganizationType:
         """Retrieve organization of currently logged in user."""
         user: dict[Any, Any] = self.internal_client.fetch_resource(Resource.Auth, "user")
         organization_id = parse_resource_id_from_url(user["organization"])
         return self.retrieve_organization(organization_id)
+
+    def retrieve_my_organization(self) -> OrganizationType:
+        """Retrieve organization of currently logged in user."""
+        warnings.warn(
+            "`retrieve_my_organization` is deprecated and will be removed. Please use `retrieve_own_organization` instead.",
+            DeprecationWarning,
+            stacklevel=2,  # point to the users' code
+        )
+        return self.retrieve_own_organization()
 
     # ##### SCHEMAS #####
 
@@ -1739,6 +1751,19 @@ class SyncRossumAPIClient(
         """
         for g in self.internal_client.fetch_resources(Resource.Group, ordering, **filters):
             yield self._deserializer(Resource.Group, g)
+
+    # ##### GENERIC METHODS #####
+    def request_paginated(self, url: str, *args: Any, **kwargs: Any) -> Iterator[dict]:
+        """Request to endpoints with paginated response that do not have direct support in the client."""
+        yield from self.internal_client.fetch_resources_by_url(url, *args, **kwargs)
+
+    def request_json(self, method: HttpMethod, *args: Any, **kwargs: Any) -> dict[str, Any]:
+        """Request to endpoints that do not have direct support in the client and return plain JSON."""
+        return self.internal_client.request_json(method, *args, **kwargs)
+
+    def request(self, method: HttpMethod, *args: Any, **kwargs: Any) -> httpx.Response:
+        """Request to endpoints that do not have direct support in the client and return plain response."""
+        return self.internal_client.request(method, *args, **kwargs)
 
     def authenticate(self) -> None:  # noqa: D102
         self.internal_client._authenticate()

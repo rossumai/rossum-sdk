@@ -335,7 +335,7 @@ The clients also provide methods for managing other API resources:
        print(org.name)
 
    org = await client.retrieve_organization(123)
-   my_org = await client.retrieve_my_organization()  # sync only
+   my_org = await client.retrieve_my_organization()
 
    # Schemas
    schema = await client.create_new_schema(data={
@@ -384,7 +384,9 @@ Authentication and Token Management
 Generic Request Methods
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-For advanced use cases, raw request methods are available:
+For advanced use cases, raw request methods are available in both clients:
+
+**Async version:**
 
 .. code-block:: python
 
@@ -404,6 +406,30 @@ For advanced use cases, raw request methods are available:
 
    # Make raw HTTP requests
    response = await client.request(
+       "GET",
+       "custom/endpoint"
+   )
+
+**Sync version:**
+
+.. code-block:: python
+
+   # Make paginated requests to custom endpoints
+   for item in client.request_paginated(
+       "custom/endpoint",
+       ordering=["id"]
+   ):
+       print(item)
+
+   # Make JSON requests
+   response = client.request_json(
+       "POST",
+       "custom/endpoint",
+       json={"data": "value"}
+   )
+
+   # Make raw HTTP requests
+   response = client.request(
        "GET",
        "custom/endpoint"
    )

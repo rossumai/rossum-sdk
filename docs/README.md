@@ -19,7 +19,7 @@ cd docs
 make html
 ```
 
-The generated HTML documentation will be in `_build/html/`. Open `_build/html/index.html` in your browser to view it.
+The generated HTML documentation will be available in `_build/html/`. Open `_build/html/index.html` in your browser to view it.
 
 ### Clean Build Artifacts
 
@@ -41,7 +41,7 @@ make help      # Show all available build targets
 
 ## Documentation Structure
 
-- `conf.py` - Sphinx configuration
+- `conf.py` - Sphinx configuration file
 - `index.rst` - Main documentation index with introduction
 - `clients.rst` - API clients documentation (async and sync)
 - `models.rst` - Data models documentation

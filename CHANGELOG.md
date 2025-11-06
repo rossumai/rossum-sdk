@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v3.5.2 (2025-11-06)
+
+### Bug Fixes
+
+- Fix README path in pyproject
+  ([`bdd1f47`](https://github.com/rossumai/rossum-api/commit/bdd1f47ff8fad04f8fb7ee7ec151a99a17b0d31e))
+
+
 ## v3.5.1 (2025-11-06)
 
 ### Bug Fixes

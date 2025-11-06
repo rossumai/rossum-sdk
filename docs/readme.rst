@@ -15,12 +15,17 @@ Rossum API
    :alt: PyPI version
 .. image:: https://img.shields.io/pypi/l/rossum.svg
    :alt: MIT licence
+.. image:: https://img.shields.io/badge/docs-read-blue.svg
+   :target: https://rossumai.github.io/rossum-api/
+   :alt: Documentation
 
 **rossum-api** provides Python programmatic access to the `Rossum API <https://api.elis.rossum.ai/docs>`_ and other useful tooling
 enabling seamless integration of the Rossum platform into Python applications.
 
 It is a replacement for `Rossum package <https://github.com/rossumai/rossum>`_. In case of any missing functionality,
 please open an issue or a pull request.
+
+For comprehensive API reference and detailed examples, visit our `documentation <https://rossumai.github.io/rossum-api/>`_.
 
 .. note::
    If you need both synchronous and asynchronous API clients, this SDK provides both flavors

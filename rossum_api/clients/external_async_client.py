@@ -1669,7 +1669,7 @@ class AsyncRossumAPIClient(
             config_app_url:
 
             extension_source: Import source of the extension.
-            For more, see `Extension sources<https://elis.rossum.ai/api/docs/#extension-sources>`_.
+            For more, see `Extension sources <https://elis.rossum.ai/api/docs/#extension-sources>`_.
 
         References
         ----------

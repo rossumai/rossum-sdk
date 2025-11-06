@@ -324,7 +324,7 @@ Both export formats are supported:
        pass
 
 Working with Additional Resources
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The clients also provide methods for managing other API resources:
 

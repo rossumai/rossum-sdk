@@ -32,7 +32,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install --system -e ".[docs]"
+          pip install -e ".[docs]"
         shell: bash
 
       - name: Build documentation

@@ -36,6 +36,9 @@ extensions = [
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
+# Suppress warning for included files
+suppress_warnings = ["toc.not_included"]
+
 # Napoleon settings for numpy-style docstrings
 napoleon_google_docstring = False
 napoleon_numpy_docstring = True

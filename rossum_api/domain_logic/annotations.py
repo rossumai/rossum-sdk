@@ -4,13 +4,14 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Sequence
+    from collections.abc import Sequence
+    from typing import Any
 
     from rossum_api.types import HttpMethod, Sideload
     from rossum_api.utils import ObjectWithStatus
 
 
-class ExportFileFormats(Enum):
+class ExportFileFormats(Enum):  # noqa: D101
     CSV = "csv"
     XML = "xml"
     XLSX = "xlsx"
@@ -39,7 +40,7 @@ def is_annotation_imported(annotation: ObjectWithStatus) -> bool:
     return annotation.status not in ("importing", "created")
 
 
-def build_export_query_params(
+def build_export_query_params(  # noqa: D103
     export_format: str, columns: Sequence[str] = (), **filters: Any
 ) -> dict[str, Any]:
     query_params = {"format": export_format}

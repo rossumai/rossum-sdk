@@ -7,6 +7,7 @@ We welcome contributions to rossum-sdk by the community. If you are building an 
 * Use [`pre-commit`](https://pre-commit.com/#install) to avoid linting issues.
 * Submit a pull request from forked version of this repo, referencing any issues it addresses.
 * Add tests for your changes to `tests/`.
+* Add proper docstrings and update Sphinx documentation if applicable.
 * Run tests and make sure all of them pass.
 * Select any of the maintainers as a reviewer.
 * After an approved review, when releasing, a `Collaborator` with `Admin` role shall do the following in `master` branch:

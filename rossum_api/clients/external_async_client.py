@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import asyncio
 import json
-import typing
+import warnings
+from typing import TYPE_CHECKING, Generic, cast
 
 import aiofiles
 
@@ -68,18 +69,32 @@ from rossum_api.types import (
     WorkspaceType,
 )
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     import pathlib
-    from typing import Any, AsyncIterator, Callable, Sequence
+    from collections.abc import AsyncIterator, Awaitable, Callable, Sequence
+    from typing import Any
 
     import httpx
 
+    from rossum_api.clients.types import (
+        AnnotationOrdering,
+        ConnectorOrdering,
+        DocumentRelationOrdering,
+        EmailTemplateOrdering,
+        HookOrdering,
+        OrganizationOrdering,
+        QueueOrdering,
+        SchemaOrdering,
+        UserOrdering,
+        UserRoleOrdering,
+        WorkspaceOrdering,
+    )
     from rossum_api.models import Deserializer, JsonDict, ResponsePostProcessor
     from rossum_api.types import HttpMethod, RossumApiType, Sideload
 
 
 class AsyncRossumAPIClient(
-    typing.Generic[
+    Generic[
         AnnotationType,
         ConnectorType,
         DocumentType,
@@ -100,6 +115,31 @@ class AsyncRossumAPIClient(
         WorkspaceType,
     ]
 ):
+    """Asynchronous Rossum API Client.
+
+    Parameters
+    ----------
+    base_url
+        Base API URL including the "/api" and version ("/v1") in the url path. For example
+        "https://elis.rossum.ai/api/v1".
+    credentials
+        User credentials or API token used for authentication.
+    deserializer
+        Pass a custom deserialization callable if different model classes should be returned.
+    timeout
+        The timeout configuration (in seconds) to use when sending requests.
+    n_retries
+        Number of request retries before raising an exception.
+    retry_backoff_factor
+        Backoff factor for exponential backoff between retries (multiplies the delay).
+    retry_max_jitter
+        Maximum random jitter (in seconds) added to retry delays.
+    max_in_flight_requests
+        Maximum number of concurrent requests allowed.
+    response_post_processor
+        pass a custom response post-processing callable. Applied only if `http_client` is not provided.
+    """
+
     def __init__(
         self,
         base_url: str,
@@ -112,18 +152,7 @@ class AsyncRossumAPIClient(
         retry_max_jitter: float = 1.0,
         max_in_flight_requests: int = 4,
         response_post_processor: ResponsePostProcessor | None = None,
-    ):
-        """
-        Parameters
-        ----------
-        base_url
-            base API URL including the "/api" and version ("/v1") in the url path. For example
-            "https://elis.rossum.ai/api/v1"
-        deserializer
-            pass a custom deserialization callable if different model classes should be returned
-        response_post_processor
-            pass a custom response post-processing callable. Applied only if `http_client` is not provided.
-        """
+    ) -> None:
         token = None
         username = None
         password = None
@@ -151,26 +180,104 @@ class AsyncRossumAPIClient(
 
     # ##### QUEUE #####
     async def retrieve_queue(self, queue_id: int) -> QueueType:
-        """https://elis.rossum.ai/api/docs/#retrieve-a-queue-2."""
-        queue = await self._http_client.fetch_one(Resource.Queue, queue_id)
+        """Retrieve a single :class:`~rossum_api.models.queue.Queue` object.
 
+        Parameters
+        ----------
+        queue_id
+            ID of a queue to be retrieved.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#retrieve-a-queue-2.
+
+        https://elis.rossum.ai/api/docs/#queue.
+        """
+        queue = await self._http_client.fetch_one(Resource.Queue, queue_id)
         return self._deserializer(Resource.Queue, queue)
 
     async def list_queues(
-        self, ordering: Sequence[str] = (), **filters: Any
+        self, ordering: Sequence[QueueOrdering] = (), **filters: Any
     ) -> AsyncIterator[QueueType]:
-        """https://elis.rossum.ai/api/docs/#list-all-queues."""
+        """Retrieve all :class:`~rossum_api.models.queue.Queue` objects satisfying the specified filters.
+
+        Parameters
+        ----------
+        ordering
+            List of object names. Their URLs are used for sorting the results
+        filters
+            id: ID of a :class:`~rossum_api.models.queue.Queue`.
+
+            name: Name of a :class:`~rossum_api.models.queue.Queue`.
+
+            workspace: ID of a :class:`~rossum_api.models.workspace.Workspace`.
+
+            inbox: ID of an :class:`~rossum_api.models.inbox.Inbox`.
+
+            connector: ID of an :class:`~rossum_api.models.connector.Connector`.
+
+            webhooks: IDs of a :class:`~rossum_api.models.hook.Hook`.
+
+            hooks: IDs of a :class:`~rossum_api.models.hook.Hook`.
+
+            locale: :class:`~rossum_api.models.queue.Queue` object locale.
+
+            dedicated_engine: ID of a `dedicated engine <https://elis.rossum.ai/api/docs/#dedicated-engine>`_.
+
+            generic_engine: ID of a `generic engine <https://elis.rossum.ai/api/docs/#generic-engine>`_.
+
+            deleting: Boolean filter - queue is being deleted (``delete_after`` is set)
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#list-all-queues.
+
+        https://elis.rossum.ai/api/docs/#queue.
+        """
         async for q in self._http_client.fetch_all(Resource.Queue, ordering, **filters):
             yield self._deserializer(Resource.Queue, q)
 
     async def create_new_queue(self, data: dict[str, Any]) -> QueueType:
-        """https://elis.rossum.ai/api/docs/#create-new-queue."""
-        queue = await self._http_client.create(Resource.Queue, data)
+        """Create a new :class:`~rossum_api.models.queue.Queue` object.
 
+        Parameters
+        ----------
+        data
+            :class:`~rossum_api.models.queue.Queue` object configuration.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#create-new-queue.
+
+        https://elis.rossum.ai/api/docs/#queue.
+        """
+        queue = await self._http_client.create(Resource.Queue, data)
         return self._deserializer(Resource.Queue, queue)
 
     async def delete_queue(self, queue_id: int) -> None:
-        """https://elis.rossum.ai/api/docs/#delete-a-queue."""
+        """Delete :class:`~rossum_api.models.queue.Queue` object.
+
+        Parameters
+        ----------
+        queue_id
+            ID of a queue to be deleted.
+
+        Notes
+        -----
+        By default, the deletion will start after 24 hours.
+
+
+        .. warning::
+            It also deletes all the related objects. Please note that while the queue
+            and related objects are being deleted the API may return inconsistent results.
+            We strongly discourage from any interaction with the queue after being scheduled for deletion.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#delete-a-queue.
+
+        https://elis.rossum.ai/api/docs/#queue.
+        """
         return await self._http_client.delete(Resource.Queue, queue_id)
 
     async def import_document(
@@ -185,7 +292,7 @@ class AsyncRossumAPIClient(
         Deprecated now, consider upload_document.
 
         Parameters
-        ---------
+        ----------
         queue_id
             ID of the queue to upload the files to
         files
@@ -200,6 +307,11 @@ class AsyncRossumAPIClient(
         annotation_ids
             list of IDs of created annotations, respects the order of `files` argument
         """
+        warnings.warn(
+            "`import_document` is deprecated and will be removed. Please use `upload_document` instead.",
+            DeprecationWarning,
+            stacklevel=2,  # point to the users' code
+        )
         tasks = [
             asyncio.create_task(self._upload(file, queue_id, filename, values, metadata))
             for file, filename in files
@@ -217,7 +329,8 @@ class AsyncRossumAPIClient(
     ) -> int:
         """A helper method used for the import document endpoint.
 
-        This does not create an Upload object."""
+        This does not create an Upload object.
+        """  # noqa: D401
         async with aiofiles.open(file, "rb") as fp:
             results = await self._http_client.upload(
                 Resource.Queue, queue_id, fp, filename, values, metadata
@@ -236,7 +349,7 @@ class AsyncRossumAPIClient(
         """https://elis.rossum.ai/api/docs/#create-upload.
 
         Parameters
-        ---------
+        ----------
         queue_id
             ID of the queue to upload the files to
         files
@@ -253,7 +366,7 @@ class AsyncRossumAPIClient(
             Tasks can be polled using poll_task and if succeeded, will contain a
             link to an Upload object that contains info on uploaded documents/annotations
         """
-        tasks: list[typing.Awaitable[TaskType]] = [
+        tasks: list[Awaitable[TaskType]] = [
             asyncio.create_task(self._create_upload(file, queue_id, filename, values, metadata))
             for file, filename in files
         ]
@@ -270,8 +383,8 @@ class AsyncRossumAPIClient(
     ) -> TaskType:
         """Helper method that uploads the files and gets back Task response for each.
 
-        A successful Task will create an Upload object."""
-
+        A successful Task will create an Upload object.
+        """  # noqa: D401
         async with aiofiles.open(file, "rb") as fp:
             url = f"uploads?queue={queue_id}"
             files = {"content": (filename, await fp.read(), "application/octet-stream")}
@@ -287,45 +400,162 @@ class AsyncRossumAPIClient(
             return await self.retrieve_task(task_id)
 
     async def retrieve_upload(self, upload_id: int) -> UploadType:
-        """Implements https://elis.rossum.ai/api/docs/#retrieve-upload."""
+        """Retrieve `rossum_api.models.upload.Upload` object.
+
+        Parameters
+        ----------
+        upload_id
+            ID of an upload to be retrieved.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#retrieve-upload.
+
+        https://elis.rossum.ai/api/docs/#upload.
+        """
         upload = await self._http_client.fetch_one(Resource.Upload, upload_id)
         return self._deserializer(Resource.Upload, upload)
 
     async def export_annotations_to_json(
         self, queue_id: int, **filters: Any
     ) -> AsyncIterator[AnnotationType]:
-        """https://elis.rossum.ai/api/docs/#export-annotations.
+        """Export annotations from the queue to JSON.
 
+        Notes
+        -----
         JSON export is paginated and returns the result in a way similar to other list_all methods.
+
+        Parameters
+        ----------
+        queue_id
+            ID of a queue annotions should be exported from.
+        filters
+            id
+                Id of annotation to be exported, multiple ids may be separated by a comma.
+            status
+                :class:`~rossum_api.models.annotation.Annotation` status.
+            modifier
+                :class:`~rossum_api.models.user.User` id.
+            arrived_at_before
+                ISO 8601 timestamp (e.g. ``arrived_at_before=2019-11-15``).
+            arrived_at_after
+                ISO 8601 timestamp (e.g. ``arrived_at_after=2019-11-14``).
+            exported_at_after
+                ISO 8601 timestamp (e.g. ``exported_at_after=2019-11-14 12:00:00``).
+            export_failed_at_before
+                ISO 8601 timestamp (e.g. ``export_failed_at_before=2019-11-14 22:00:00``).
+            export_failed_at_after
+                ISO 8601 timestamp (e.g. ``export_failed_at_after=2019-11-14 12:00:00``).
+            page_size
+                Number of the documents to be exported.
+                To be used together with ``page`` attribute. See `pagination <https://elis.rossum.ai/api/docs/#pagination>`_.
+            page
+                Number of a page to be exported when using pagination.
+                Useful for exports of large amounts of data.
+                To be used together with the ``page_size`` attribute.
+
+        Notes
+        -----
+            When the search filter is used, results are limited to 10 000.
+            We suggest narrowing down the search query if there are this many results.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#export-annotations
         """
         async for chunk in self._http_client.export(Resource.Queue, queue_id, "json", **filters):
             # JSON export can be translated directly to Annotation object
-            yield self._deserializer(Resource.Annotation, typing.cast("dict", chunk))
+            yield self._deserializer(Resource.Annotation, cast("dict", chunk))
 
     async def export_annotations_to_file(
         self, queue_id: int, export_format: ExportFileFormats, **filters: Any
     ) -> AsyncIterator[bytes]:
-        """https://elis.rossum.ai/api/docs/#export-annotations.
+        """Export annotations from the queue to a desired export format.
 
-        XLSX/CSV/XML exports can be huge, therefore byte streaming is used to keep memory consumption low.
+        Notes
+        -----
+        JSON export is paginated and returns the result in a way similar to other list_all methods.
+
+        Parameters
+        ----------
+        queue_id
+            ID of a queue annotions should be exported from.
+        export_format
+            Target export format.
+        filters
+            id
+                Id of annotation to be exported, multiple ids may be separated by a comma.
+            status
+                :class:`~rossum_api.models.annotation.Annotation` status.
+            modifier
+                :class:`~rossum_api.models.user.User` id.
+            arrived_at_before
+                ISO 8601 timestamp (e.g. ``arrived_at_before=2019-11-15``).
+            arrived_at_after
+                ISO 8601 timestamp (e.g. ``arrived_at_after=2019-11-14``).
+            exported_at_after
+                ISO 8601 timestamp (e.g. ``exported_at_after=2019-11-14 12:00:00``).
+            export_failed_at_before
+                ISO 8601 timestamp (e.g. ``export_failed_at_before=2019-11-14 22:00:00``).
+            export_failed_at_after
+                ISO 8601 timestamp (e.g. ``export_failed_at_after=2019-11-14 12:00:00``).
+            page_size
+                Number of the documents to be exported.
+                To be used together with ``page`` attribute. See `pagination <https://elis.rossum.ai/api/docs/#pagination>`_.
+            page
+                Number of a page to be exported when using pagination.
+                Useful for exports of large amounts of data.
+                To be used together with the ``page_size`` attribute.
+
+        Notes
+        -----
+            When the search filter is used, results are limited to 10 000.
+            We suggest narrowing down the search query if there are this many results.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#export-annotations
         """
         async for chunk in self._http_client.export(
             Resource.Queue, queue_id, export_format.value, **filters
         ):
-            yield typing.cast("bytes", chunk)
+            yield cast("bytes", chunk)
 
     # ##### ORGANIZATIONS #####
     async def list_organizations(
-        self, ordering: Sequence[str] = (), **filters: Any
+        self, ordering: Sequence[OrganizationOrdering] = (), **filters: Any
     ) -> AsyncIterator[OrganizationType]:
-        """https://elis.rossum.ai/api/docs/#list-all-organizations."""
+        """Retrieve all organization objects satisfying the specified filters.
+
+        Parameters
+        ----------
+        ordering
+            List of object names. Their IDs are used for sorting the results
+        filters
+            id: ID of a :class:`~rossum_api.models.organization.Organization`
+
+            name: Name of a :class:`~rossum_api.models.organization.Organization`
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#list-all-organizations.
+        """
         async for o in self._http_client.fetch_all(Resource.Organization, ordering, **filters):
             yield self._deserializer(Resource.Organization, o)
 
     async def retrieve_organization(self, org_id: int) -> OrganizationType:
-        """https://elis.rossum.ai/api/docs/#retrieve-an-organization."""
-        organization = await self._http_client.fetch_one(Resource.Organization, org_id)
+        """Retrieve a single :class:`~rossum_api.models.organization.Qrganization` object.
 
+        Parameters
+        ----------
+        org_id
+            ID of an organization to be retrieved.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#retrieve-an-organization.
+        """
+        organization = await self._http_client.fetch_one(Resource.Organization, org_id)
         return self._deserializer(Resource.Organization, organization)
 
     async def retrieve_own_organization(self) -> OrganizationType:
@@ -336,65 +566,275 @@ class AsyncRossumAPIClient(
 
     # ##### SCHEMAS #####
     async def list_schemas(
-        self, ordering: Sequence[str] = (), **filters: Any
+        self, ordering: Sequence[SchemaOrdering] = (), **filters: Any
     ) -> AsyncIterator[SchemaType]:
-        """https://elis.rossum.ai/api/docs/#list-all-schemas."""
+        """Retrieve all :class:`~rossum_api.models.schema.Schema` objects satisfying the specified filters.
+
+        Parameters
+        ----------
+        ordering
+            List of object names. Their URLs are used for sorting the results
+        filters
+            id: ID of a :class:`~rossum_api.models.schema.Schema`
+
+            name: Name of a :class:`~rossum_api.models.schema.Schema`
+
+            queue: ID of a :class:`~rossum_api.models.queue.Queue`
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#list-all-schemas.
+
+        https://elis.rossum.ai/api/docs/#schema.
+        """
         async for s in self._http_client.fetch_all(Resource.Schema, ordering, **filters):
             yield self._deserializer(Resource.Schema, s)
 
     async def retrieve_schema(self, schema_id: int) -> SchemaType:
-        """https://elis.rossum.ai/api/docs/#retrieve-a-schema."""
+        """Retrieve a single :class:`~rossum_api.models.schema.Schema` object.
+
+        Parameters
+        ----------
+        schema_id
+            ID of a schema to be retrieved.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#retrieve-a-schema.
+
+        https://elis.rossum.ai/api/docs/#schema.
+        """
         schema: dict[Any, Any] = await self._http_client.fetch_one(Resource.Schema, schema_id)
 
         return self._deserializer(Resource.Schema, schema)
 
     async def create_new_schema(self, data: dict[str, Any]) -> SchemaType:
-        """https://elis.rossum.ai/api/docs/#create-a-new-schema."""
+        """Create a new :class:`~rossum_api.models.schema.Schema` object.
+
+        Parameters
+        ----------
+        data
+            :class:`~rossum_api.models.schema.Schema` object configuration.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#create-a-new-schema.
+
+        https://elis.rossum.ai/api/docs/#schema.
+        """
         schema = await self._http_client.create(Resource.Schema, data)
 
         return self._deserializer(Resource.Schema, schema)
 
     async def delete_schema(self, schema_id: int) -> None:
-        """https://elis.rossum.ai/api/docs/#delete-a-schema."""
+        """Delete :class:`~rossum_api.models.schema.Schema` object.
+
+        Parameters
+        ----------
+        schema_id
+            ID of a schema to be deleted.
+
+
+        .. warning::
+            In case the schema is linked to some objects, like queue or annotation, the deletion
+            is not possible and the request will fail with 409 status code.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#delete-a-schema.
+        """
         return await self._http_client.delete(Resource.Schema, schema_id)
 
     # ##### USERS #####
     async def list_users(
-        self, ordering: Sequence[str] = (), **filters: Any
+        self, ordering: Sequence[UserOrdering] = (), **filters: Any
     ) -> AsyncIterator[UserType]:
-        """https://elis.rossum.ai/api/docs/#list-all-users."""
+        """Retrieve all :class:`~rossum_api.models.user.User` objects satisfying the specified filters.
+
+        Parameters
+        ----------
+        ordering
+            List of object names. Their URLs are used for sorting the results
+        filters
+            id: ID of a :class:`~rossum_api.models.user.User`
+
+            organization: ID of an :class:`~rossum_api.models.organization.Organization`
+
+            username: Username of a :class:`~rossum_api.models.user.User`
+
+            first_name: First name of a :class:`~rossum_api.models.user.User`
+
+            last_name: Last name of a :class:`~rossum_api.models.user.User`
+
+            email: Email address of a :class:`~rossum_api.models.user.User`
+
+            is_active: Boolean filter - whether the :class:`~rossum_api.models.user.User` is active
+
+            last_login: ISO 8601 timestamp filter for last login date
+
+            groups: IDs of :class:`~rossum_api.models.group.Group` objects
+
+            queue: ID of a :class:`~rossum_api.models.queue.Queue`
+
+            deleted: Boolean filter - whether the :class:`~rossum_api.models.user.User` is deleted
+
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#list-all-users.
+
+        https://elis.rossum.ai/api/docs/#user.
+        """
         async for u in self._http_client.fetch_all(Resource.User, ordering, **filters):
             yield self._deserializer(Resource.User, u)
 
     async def retrieve_user(self, user_id: int) -> UserType:
-        """https://elis.rossum.ai/api/docs/#retrieve-a-user-2."""
+        """Retrieve a single :class:`~rossum_api.models.user.User` object.
+
+        Parameters
+        ----------
+        user_id
+            ID of a user to be retrieved.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#retrieve-a-user-2.
+
+        https://elis.rossum.ai/api/docs/#user.
+        """
         user = await self._http_client.fetch_one(Resource.User, user_id)
 
         return self._deserializer(Resource.User, user)
 
     async def create_new_user(self, data: dict[str, Any]) -> UserType:
-        """https://elis.rossum.ai/api/docs/#create-new-user."""
+        """Create a new :class:`~rossum_api.models.user.User` object.
+
+        Parameters
+        ----------
+        data
+            :class:`~rossum_api.models.user.User` object configuration.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#create-new-user.
+
+        https://elis.rossum.ai/api/docs/#user.
+        """
         user = await self._http_client.create(Resource.User, data)
 
         return self._deserializer(Resource.User, user)
 
     # TODO: specific method in APICLient
-    def change_user_password(self, new_password: str) -> dict:
-        return {}
+    def change_user_password(self, new_password: str) -> dict:  # noqa: D102
+        raise NotImplementedError()
 
     # TODO: specific method in APICLient
-    def reset_user_password(self, email: str) -> dict:
-        return {}
+    def reset_user_password(self, email: str) -> dict:  # noqa: D102
+        raise NotImplementedError()
 
     # ##### ANNOTATIONS #####
     async def list_annotations(
         self,
-        ordering: Sequence[str] = (),
+        ordering: Sequence[AnnotationOrdering] = (),
         sideloads: Sequence[Sideload] = (),
         content_schema_ids: Sequence[str] = (),
         **filters: Any,
     ) -> AsyncIterator[AnnotationType]:
-        """https://elis.rossum.ai/api/docs/#list-all-annotations."""
+        """Retrieve all :class:`~rossum_api.models.annotation.Annotation` objects satisfying the specified filters.
+
+        Parameters
+        ----------
+        ordering
+            List of object names. Their URLs are used for sorting the results
+        sideloads
+            List of additional objects to sideload
+        content_schema_ids
+            List of content schema IDs
+        filters
+            status: :class:`~rossum_api.models.annotation.Annotation` status, multiple values may be separated using a comma
+
+            id: List of ids separated by a comma
+
+            modifier: :class:`~rossum_api.models.user.User` id
+
+            confirmed_by: :class:`~rossum_api.models.user.User` id
+
+            deleted_by: :class:`~rossum_api.models.user.User` id
+
+            exported_by: :class:`~rossum_api.models.user.User` id
+
+            purged_by: :class:`~rossum_api.models.user.User` id
+
+            rejected_by: :class:`~rossum_api.models.user.User` id
+
+            assignees: :class:`~rossum_api.models.user.User` id, multiple values may be separated using a comma
+
+            labels: Label id, multiple values may be separated using a comma
+
+            document: :class:`~rossum_api.models.document.Document` id
+
+            queue: List of :class:`~rossum_api.models.queue.Queue` ids separated by a comma
+
+            queue__workspace: List of :class:`~rossum_api.models.workspace.Workspace` ids separated by a comma
+
+            relations__parent: ID of parent annotation defined in related Relation object
+
+            relations__type: Type of Relation that annotation belongs to
+
+            relations__key: Key of Relation that annotation belongs to
+
+            arrived_at_before: ISO 8601 timestamp (e.g. ``arrived_at_before=2019-11-15``)
+
+            arrived_at_after: ISO 8601 timestamp (e.g. ``arrived_at_after=2019-11-14``)
+
+            assigned_at_before: ISO 8601 timestamp (e.g. ``assigned_at_before=2019-11-15``)
+
+            assigned_at_after: ISO 8601 timestamp (e.g. ``assigned_at_after=2019-11-14``)
+
+            confirmed_at_before: ISO 8601 timestamp (e.g. ``confirmed_at_before=2019-11-15``)
+
+            confirmed_at_after: ISO 8601 timestamp (e.g. ``confirmed_at_after=2019-11-14``)
+
+            modified_at_before: ISO 8601 timestamp (e.g. ``modified_at_before=2019-11-15``)
+
+            modified_at_after: ISO 8601 timestamp (e.g. ``modified_at_after=2019-11-14``)
+
+            deleted_at_before: ISO 8601 timestamp (e.g. ``deleted_at_before=2019-11-15``)
+
+            deleted_at_after: ISO 8601 timestamp (e.g. ``deleted_at_after=2019-11-14``)
+
+            exported_at_before: ISO 8601 timestamp (e.g. ``exported_at_before=2019-11-14 22:00:00``)
+
+            exported_at_after: ISO 8601 timestamp (e.g. ``exported_at_after=2019-11-14 12:00:00``)
+
+            export_failed_at_before: ISO 8601 timestamp (e.g. ``export_failed_at_before=2019-11-14 22:00:00``)
+
+            export_failed_at_after: ISO 8601 timestamp (e.g. ``export_failed_at_after=2019-11-14 12:00:00``)
+
+            purged_at_before: ISO 8601 timestamp (e.g. ``purged_at_before=2019-11-15``)
+
+            purged_at_after: ISO 8601 timestamp (e.g. ``purged_at_after=2019-11-14``)
+
+            rejected_at_before: ISO 8601 timestamp (e.g. ``rejected_at_before=2019-11-15``)
+
+            rejected_at_after: ISO 8601 timestamp (e.g. ``rejected_at_after=2019-11-14``)
+
+            restricted_access: Boolean
+
+            automated: Boolean
+
+            has_email_thread_with_replies: Boolean (related email thread contains more than one incoming emails)
+
+            has_email_thread_with_new_replies: Boolean (related email thread contains unread incoming email)
+
+            search: String, see Annotation search
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#list-all-annotations.
+
+        https://elis.rossum.ai/api/docs/#annotation.
+        """
         validate_list_annotations_params(sideloads, content_schema_ids)
         async for a in self._http_client.fetch_all(
             Resource.Annotation, ordering, sideloads, content_schema_ids, **filters
@@ -405,11 +845,31 @@ class AsyncRossumAPIClient(
         self,
         query: dict | None = None,
         query_string: dict | None = None,
-        ordering: Sequence[str] = (),
+        ordering: Sequence[AnnotationOrdering] = (),
         sideloads: Sequence[Sideload] = (),
         **kwargs: Any,
     ) -> AsyncIterator[AnnotationType]:
-        """https://elis.rossum.ai/api/docs/#search-for-annotations."""
+        """Search for :class:`~rossum_api.models.annotation.Annotation` objects.
+
+        Parameters
+        ----------
+        query
+            Query dictionary for advanced search
+        query_string
+            Query string dictionary for text search
+        ordering
+            List of object names. Their URLs are used for sorting the results
+        sideloads
+            List of additional objects to sideload
+        kwargs
+            Additional search parameters
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#search-for-annotations.
+
+        https://elis.rossum.ai/api/docs/#annotation.
+        """
         validate_search_params(query, query_string)
         search_params = build_search_params(query, query_string)
 
@@ -426,7 +886,21 @@ class AsyncRossumAPIClient(
     async def retrieve_annotation(
         self, annotation_id: int, sideloads: Sequence[Sideload] = ()
     ) -> AnnotationType:
-        """https://elis.rossum.ai/api/docs/#retrieve-an-annotation."""
+        """Retrieve a single :class:`~rossum_api.models.annotation.Annotation` object.
+
+        Parameters
+        ----------
+        annotation_id
+            ID of an annotation to be retrieved.
+        sideloads
+            List of additional objects to sideload
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#retrieve-an-annotation.
+
+        https://elis.rossum.ai/api/docs/#annotation.
+        """
         annotation_json = await self._http_client.fetch_one(Resource.Annotation, annotation_id)
         if sideloads:
             await self._sideload(annotation_json, sideloads)
@@ -459,7 +933,7 @@ class AsyncRossumAPIClient(
     async def poll_annotation_until_imported(
         self, annotation_id: int, **poll_kwargs: Any
     ) -> AnnotationType:
-        """A shortcut for waiting until annotation is imported."""
+        """Wait until annotation is imported."""
         return await self.poll_annotation(annotation_id, is_annotation_imported, **poll_kwargs)
 
     async def poll_task(
@@ -467,7 +941,8 @@ class AsyncRossumAPIClient(
     ) -> TaskType:
         """Poll on Task until predicate is true.
 
-        As with Annotation polling, there is no innate retry limit."""
+        As with Annotation polling, there is no innate retry limit.
+        """
         task = await self.retrieve_task(task_id)
 
         while not predicate(task):
@@ -481,7 +956,19 @@ class AsyncRossumAPIClient(
         return await self.poll_task(task_id, is_task_succeeded, sleep_s)
 
     async def retrieve_task(self, task_id: int) -> TaskType:
-        """Implements https://elis.rossum.ai/api/docs/#retrieve-task."""
+        """Retrieve a single :class:`~rossum_api.models.task.Task` object.
+
+        Parameters
+        ----------
+        task_id
+            ID of a task to be retrieved.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#retrieve-task.
+
+        https://elis.rossum.ai/api/docs/#task.
+        """
         task = await self._http_client.fetch_one(
             Resource.Task, task_id, request_params={"no_redirect": "True"}
         )
@@ -491,18 +978,44 @@ class AsyncRossumAPIClient(
     async def upload_and_wait_until_imported(
         self, queue_id: int, filepath: str | pathlib.Path, filename: str, **poll_kwargs: Any
     ) -> AnnotationType:
-        """A shortcut for uploading a single file and waiting until its annotation is imported."""
+        """Upload a single file and waiting until its annotation is imported in a single call."""
         (annotation_id,) = await self.import_document(queue_id, [(filepath, filename)])
         return await self.poll_annotation_until_imported(annotation_id, **poll_kwargs)
 
     async def start_annotation(self, annotation_id: int) -> None:
-        """https://elis.rossum.ai/api/docs/#start-annotation"""
+        """Start annotation processing.
+
+        Parameters
+        ----------
+        annotation_id
+            ID of an annotation to be started.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#start-annotation.
+
+        https://elis.rossum.ai/api/docs/#annotation.
+        """
         await self._http_client.request_json(
             "POST", build_resource_start_url(Resource.Annotation, annotation_id)
         )
 
     async def update_annotation(self, annotation_id: int, data: dict[str, Any]) -> AnnotationType:
-        """https://elis.rossum.ai/api/docs/#update-an-annotation."""
+        """Update an :class:`~rossum_api.models.annotation.Annotation` object.
+
+        Parameters
+        ----------
+        annotation_id
+            ID of an annotation to be updated.
+        data
+            :class:`~rossum_api.models.annotation.Annotation` object update data.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#update-an-annotation.
+
+        https://elis.rossum.ai/api/docs/#annotation.
+        """
         annotation = await self._http_client.replace(Resource.Annotation, annotation_id, data)
 
         return self._deserializer(Resource.Annotation, annotation)
@@ -510,7 +1023,21 @@ class AsyncRossumAPIClient(
     async def update_part_annotation(
         self, annotation_id: int, data: dict[str, Any]
     ) -> AnnotationType:
-        """https://elis.rossum.ai/api/docs/#update-part-of-an-annotation."""
+        """Update part of an :class:`~rossum_api.models.annotation.Annotation` object.
+
+        Parameters
+        ----------
+        annotation_id
+            ID of an annotation to be updated.
+        data
+            Partial :class:`~rossum_api.models.annotation.Annotation` object update data.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#update-part-of-an-annotation.
+
+        https://elis.rossum.ai/api/docs/#annotation.
+        """
         annotation = await self._http_client.update(Resource.Annotation, annotation_id, data)
 
         return self._deserializer(Resource.Annotation, annotation)
@@ -518,7 +1045,21 @@ class AsyncRossumAPIClient(
     async def bulk_update_annotation_data(
         self, annotation_id: int, operations: list[dict[str, Any]]
     ) -> None:
-        """https://elis.rossum.ai/api/docs/#bulk-update-annotation-data"""
+        """Bulk update annotation data.
+
+        Parameters
+        ----------
+        annotation_id
+            ID of an annotation to be updated.
+        operations
+            List of operations to perform on annotation data.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#bulk-update-annotation-data.
+
+        https://elis.rossum.ai/api/docs/#annotation.
+        """
         await self._http_client.request_json(
             "POST",
             build_resource_content_operations_url(Resource.Annotation, annotation_id),
@@ -526,32 +1067,92 @@ class AsyncRossumAPIClient(
         )
 
     async def confirm_annotation(self, annotation_id: int) -> None:
-        """https://elis.rossum.ai/api/docs/#confirm-annotation"""
+        """Confirm annotation.
+
+        Parameters
+        ----------
+        annotation_id
+            ID of an annotation to be confirmed.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#confirm-annotation.
+
+        https://elis.rossum.ai/api/docs/#annotation.
+        """
         await self._http_client.request_json(
             "POST", build_resource_confirm_url(Resource.Annotation, annotation_id)
         )
 
     async def create_new_annotation(self, data: dict[str, Any]) -> AnnotationType:
-        """https://elis.rossum.ai/api/docs/#create-an-annotation"""
+        """Create a new :class:`~rossum_api.models.annotation.Annotation` object.
+
+        Parameters
+        ----------
+        data
+            :class:`~rossum_api.models.annotation.Annotation` object configuration.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#create-an-annotation.
+
+        https://elis.rossum.ai/api/docs/#annotation.
+        """
         annotation = await self._http_client.create(Resource.Annotation, data)
 
         return self._deserializer(Resource.Annotation, annotation)
 
     async def delete_annotation(self, annotation_id: int) -> None:
-        """https://elis.rossum.ai/api/docs/#switch-to-deleted"""
+        """Delete :class:`~rossum_api.models.annotation.Annotation` object.
+
+        Parameters
+        ----------
+        annotation_id
+            ID of an annotation to be deleted.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#switch-to-deleted.
+
+        https://elis.rossum.ai/api/docs/#annotation.
+        """
         await self._http_client.request(
             "POST", url=build_resource_delete_url(Resource.Annotation, annotation_id)
         )
 
     async def cancel_annotation(self, annotation_id: int) -> None:
-        """https://elis.rossum.ai/api/docs/#cancel-annotation"""
+        """Cancel :class:`~rossum_api.models.annotation.Annotation` object.
+
+        Parameters
+        ----------
+        annotation_id
+            ID of an annotation to be cancelled.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#cancel-annotation.
+
+        https://elis.rossum.ai/api/docs/#annotation.
+        """
         await self._http_client.request(
             "POST", url=build_resource_cancel_url(Resource.Annotation, annotation_id)
         )
 
     # ##### DOCUMENTS #####
     async def retrieve_document(self, document_id: int) -> DocumentType:
-        """https://elis.rossum.ai/api/docs/#retrieve-a-document"""
+        """Retrieve a single :class:`~rossum_api.models.document.Document` object.
+
+        Parameters
+        ----------
+        document_id
+            ID of a document to be retrieved.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#retrieve-a-document.
+
+        https://elis.rossum.ai/api/docs/#document.
+        """
         document: dict[Any, Any] = await self._http_client.fetch_one(
             Resource.Document, document_id
         )
@@ -559,7 +1160,24 @@ class AsyncRossumAPIClient(
         return self._deserializer(Resource.Document, document)
 
     async def retrieve_document_content(self, document_id: int) -> bytes:
-        """https://elis.rossum.ai/api/docs/#document-content"""
+        """Retrieve :class:`~rossum_api.models.document_content.DocumentDocuntent` object.
+
+        Parameters
+        ----------
+        document_id
+            ID of a document to retrieve content for.
+
+        Returns
+        -------
+        bytes
+            Raw document content.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#document-content.
+
+        https://elis.rossum.ai/api/docs/#document.
+        """
         document_content = await self._http_client.request(
             "GET", url=build_resource_content_url(Resource.Document, document_id)
         )
@@ -572,7 +1190,25 @@ class AsyncRossumAPIClient(
         metadata: dict[str, Any] | None = None,
         parent: str | None = None,
     ) -> DocumentType:
-        """https://elis.rossum.ai/api/docs/#create-document"""
+        """Create a new :class:`~rossum_api.models.document.Document` object.
+
+        Parameters
+        ----------
+        file_name
+            Name of the file to be created.
+        file_data
+            Raw file data.
+        metadata
+            Optional metadata for the document.
+        parent
+            Optional parent document URL.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#create-document.
+
+        https://elis.rossum.ai/api/docs/#document.
+        """
         files = build_create_document_params(file_name, file_data, metadata, parent)
 
         document = await self._http_client.request_json(
@@ -583,16 +1219,50 @@ class AsyncRossumAPIClient(
 
     # ##### DOCUMENT RELATIONS #####
     async def list_document_relations(
-        self, ordering: Sequence[str] = (), **filters: Any
+        self, ordering: Sequence[DocumentRelationOrdering] = (), **filters: Any
     ) -> AsyncIterator[DocumentRelationType]:
-        """https://elis.rossum.ai/api/docs/#list-all-document-relations"""
+        """Retrieve all :class:`~rossum_api.models.document_relation.DocumentRelation` objects satisfying the specified filters.
+
+        Parameters
+        ----------
+        ordering
+            List of object names. Their URLs are used for sorting the results
+        filters
+            id: ID of :class:`~rossum_api.models.document_relation.DocumentRelation`.
+
+            type: Relation type.
+
+            annotation: ID of :class:`~rossum_api.models.annotation.Annotation`.
+
+            key: Document relation key
+
+            documents: ID of related :class:`~rossum_api.models.document.Document`.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#list-all-document-relations.
+
+        https://elis.rossum.ai/api/docs/#document-relation.
+        """
         async for dr in self._http_client.fetch_all(
             Resource.DocumentRelation, ordering, **filters
         ):
             yield self._deserializer(Resource.DocumentRelation, dr)
 
     async def retrieve_document_relation(self, document_relation_id: int) -> DocumentRelationType:
-        """https://elis.rossum.ai/api/docs/#retrieve-a-document-relation"""
+        """Retrieve a single :class:`~rossum_api.models.document_relation.DocumentRelation` object.
+
+        Parameters
+        ----------
+        document_relation_id
+            ID of a document relation to be retrieved.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#retrieve-a-document-relation.
+
+        https://elis.rossum.ai/api/docs/#document-relation.
+        """
         document_relation = await self._http_client.fetch_one(
             Resource.DocumentRelation, document_relation_id
         )
@@ -600,7 +1270,19 @@ class AsyncRossumAPIClient(
         return self._deserializer(Resource.DocumentRelation, document_relation)
 
     async def create_new_document_relation(self, data: dict[str, Any]) -> DocumentRelationType:
-        """https://elis.rossum.ai/api/docs/#create-a-new-document-relation"""
+        """Create a new :class:`~rossum_api.models.document_relation.DocumentRelation` object.
+
+        Parameters
+        ----------
+        data
+            :class:`~rossum_api.models.document_relation.DocumentRelation` object configuration.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#create-a-new-document-relation.
+
+        https://elis.rossum.ai/api/docs/#document-relation.
+        """
         document_relation = await self._http_client.create(Resource.DocumentRelation, data)
 
         return self._deserializer(Resource.DocumentRelation, document_relation)
@@ -608,7 +1290,21 @@ class AsyncRossumAPIClient(
     async def update_document_relation(
         self, document_relation_id: int, data: dict[str, Any]
     ) -> DocumentRelationType:
-        """https://elis.rossum.ai/api/docs/#update-a-document-relation"""
+        """Update a :class:`~rossum_api.models.document_relation.DocumentRelation` object.
+
+        Parameters
+        ----------
+        document_relation_id
+            ID of a document relation to be updated.
+        data
+            :class:`~rossum_api.models.document_relation.DocumentRelation` object configuration.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#update-a-document-relation.
+
+        https://elis.rossum.ai/api/docs/#document-relation.
+        """
         document_relation = await self._http_client.replace(
             Resource.DocumentRelation, document_relation_id, data
         )
@@ -618,7 +1314,21 @@ class AsyncRossumAPIClient(
     async def update_part_document_relation(
         self, document_relation_id: int, data: dict[str, Any]
     ) -> DocumentRelationType:
-        """https://elis.rossum.ai/api/docs/#update-part-of-a-document-relation"""
+        """Update part of a :class:`~rossum_api.models.document_relation.DocumentRelation` object.
+
+        Parameters
+        ----------
+        document_relation_id
+            ID of a document relation to be updated.
+        data
+            :class:`~rossum_api.models.document_relation.DocumentRelation` object partial configuration.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#update-part-of-a-document-relation.
+
+        https://elis.rossum.ai/api/docs/#document-relation.
+        """
         document_relation = await self._http_client.update(
             Resource.DocumentRelation, document_relation_id, data
         )
@@ -626,36 +1336,102 @@ class AsyncRossumAPIClient(
         return self._deserializer(Resource.DocumentRelation, document_relation)
 
     async def delete_document_relation(self, document_relation_id: int) -> None:
-        """https://elis.rossum.ai/api/docs/#delete-a-document-relation"""
+        """Delete a :class:`~rossum_api.models.document_relation.DocumentRelation` object.
+
+        Parameters
+        ----------
+        document_relation_id
+            ID of a document relation to be deleted.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#delete-a-document-relation.
+
+        https://elis.rossum.ai/api/docs/#document-relation.
+        """
         await self._http_client.delete(Resource.DocumentRelation, document_relation_id)
 
     # ##### WORKSPACES #####
     async def list_workspaces(
-        self, ordering: Sequence[str] = (), **filters: Any
+        self, ordering: Sequence[WorkspaceOrdering] = (), **filters: Any
     ) -> AsyncIterator[WorkspaceType]:
-        """https://elis.rossum.ai/api/docs/#list-all-workspaces."""
+        """Retrieve all :class:`~rossum_api.models.workspace.Workspace` objects satisfying the specified filters.
+
+        Parameters
+        ----------
+        ordering
+            List of object names. Their URLs are used for sorting the results
+        filters
+            id: ID of a :class:`~rossum_api.models.workspace.Workspace`
+
+            name: Name of a :class:`~rossum_api.models.workspace.Workspace`
+
+            organization: ID of an :class:`~rossum_api.models.organization.Organization`
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#list-all-workspaces.
+
+        https://elis.rossum.ai/api/docs/#workspace.
+        """
         async for w in self._http_client.fetch_all(Resource.Workspace, ordering, **filters):
             yield self._deserializer(Resource.Workspace, w)
 
     async def retrieve_workspace(self, workspace_id: int) -> WorkspaceType:
-        """https://elis.rossum.ai/api/docs/#retrieve-a-workspace."""
+        """Retrieve a single :class:`~rossum_api.models.workspace.Workspace` object.
+
+        Parameters
+        ----------
+        workspace_id
+            ID of a workspace to be retrieved.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#retrieve-a-workspace.
+
+        https://elis.rossum.ai/api/docs/#workspace.
+        """
         workspace = await self._http_client.fetch_one(Resource.Workspace, workspace_id)
 
         return self._deserializer(Resource.Workspace, workspace)
 
     async def create_new_workspace(self, data: dict[str, Any]) -> WorkspaceType:
-        """https://elis.rossum.ai/api/docs/#create-a-new-workspace."""
+        """Create a new :class:`~rossum_api.models.workspace.Workspace` object.
+
+        Parameters
+        ----------
+        data
+            :class:`~rossum_api.models.workspace.Workspace` object configuration.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#create-a-new-workspace.
+
+        https://elis.rossum.ai/api/docs/#workspace.
+        """
         workspace = await self._http_client.create(Resource.Workspace, data)
 
         return self._deserializer(Resource.Workspace, workspace)
 
     async def delete_workspace(self, workspace_id: int) -> None:
-        """https://elis.rossum.ai/api/docs/#delete-a-workspace."""
+        """Delete :class:`rossum_api.models.workspace.Workspace` object.
+
+        Parameters
+        ----------
+        workspace_id
+            ID of a workspace to be deleted.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#delete-a-workspace.
+
+        https://elis.rossum.ai/api/docs/#workspace.
+        """
         return await self._http_client.delete(Resource.Workspace, workspace_id)
 
     # ##### ENGINE #####
     async def retrieve_engine(self, engine_id: int) -> EngineType:
-        """ "https://elis.rossum.ai/api/docs/#retrieve-an-engine."""
+        """https://elis.rossum.ai/api/docs/#retrieve-an-engine."""
         engine = await self._http_client.fetch_one(Resource.Engine, engine_id)
 
         return self._deserializer(Resource.Engine, engine)
@@ -692,7 +1468,19 @@ class AsyncRossumAPIClient(
 
     # ##### EMAILS #####
     async def retrieve_email(self, email_id: int) -> EmailType:
-        """https://elis.rossum.ai/api/docs/#retrieve-an-email."""
+        """Retrieve a single `rossum_api.models.email.Email` object.
+
+        Parameters
+        ----------
+        email_id
+            ID of email to be retrieved
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#retrieve-an-email.
+
+        https://elis.rossum.ai/api/docs/#email.
+        """
         email = await self._http_client.fetch_one(Resource.Email, email_id)
 
         return self._deserializer(Resource.Email, email)
@@ -700,9 +1488,25 @@ class AsyncRossumAPIClient(
     async def import_email(
         self, raw_message: bytes, recipient: str, mime_type: str | None = None
     ) -> str:
-        """https://elis.rossum.ai/api/docs/#import-email.
+        """Import an email as raw data.
 
-        Returns task URL.
+        Calling this endpoint starts an asynchronous process of creating an email object
+        and importing its contents to the specified recipient inbox in Rossum.
+
+        Parameters
+        ----------
+        raw_message
+            Raw email data.
+        recipient
+            Email address of the inbox where the email will be imported.
+        mime_type
+            Mime type of imported files
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#import-email.
+
+        https://elis.rossum.ai/api/docs/#email.
         """
         response = await self._http_client.request_json(
             "POST",
@@ -713,14 +1517,46 @@ class AsyncRossumAPIClient(
 
     # ##### EMAIL TEMPLATES #####
     async def list_email_templates(
-        self, ordering: Sequence[str] = (), **filters: Any
+        self, ordering: Sequence[EmailTemplateOrdering] = (), **filters: Any
     ) -> AsyncIterator[EmailTemplateType]:
-        """https://elis.rossum.ai/api/docs/#list-all-email-templates."""
+        """Retrieve all :class:`~rossum_api.models.email_template.EmailTemplate` objects satisfying the specified filters.
+
+        Parameters
+        ----------
+        ordering
+            List of object names. Their URLs are used for sorting the results
+        filters
+            id: ID of an :class:`~rossum_api.models.email_template.EmailTemplate`
+
+            queue: ID of a :class:`~rossum_api.models.queue.Queue`
+
+            type: Type of the email template
+
+            name: Name of the :class:`~rossum_api.models.email_template.EmailTemplate`
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#list-all-email-templates.
+
+        https://elis.rossum.ai/api/docs/#email-template.
+        """
         async for c in self._http_client.fetch_all(Resource.EmailTemplate, ordering, **filters):
             yield self._deserializer(Resource.EmailTemplate, c)
 
     async def retrieve_email_template(self, email_template_id: int) -> EmailTemplateType:
-        """https://elis.rossum.ai/api/docs/#retrieve-an-email-template-object."""
+        """Retrieve a single :class:`~rossum_api.models.email_template.EmailTemplate` object.
+
+        Parameters
+        ----------
+        email_template_id
+            ID of an email template to be retrieved.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#retrieve-an-email-template-object.
+
+        https://elis.rossum.ai/api/docs/#email-template.
+        """
         email_template = await self._http_client.fetch_one(
             Resource.EmailTemplate, email_template_id
         )
@@ -728,91 +1564,233 @@ class AsyncRossumAPIClient(
         return self._deserializer(Resource.EmailTemplate, email_template)
 
     async def create_new_email_template(self, data: dict[str, Any]) -> EmailTemplateType:
-        """https://elis.rossum.ai/api/docs/#create-new-email-template-object."""
+        """Create a new :class:`~rossum_api.models.email_template.EmailTemplate` object.
+
+        Parameters
+        ----------
+        data
+            :class:`~rossum_api.models.email_template.EmailTemplate` object configuration.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#create-new-email-template-object.
+
+        https://elis.rossum.ai/api/docs/#email-template.
+        """
         email_template = await self._http_client.create(Resource.EmailTemplate, data)
 
         return self._deserializer(Resource.EmailTemplate, email_template)
 
     # ##### CONNECTORS #####
     async def list_connectors(
-        self, ordering: Sequence[str] = (), **filters: Any
+        self, ordering: Sequence[ConnectorOrdering] = (), **filters: Any
     ) -> AsyncIterator[ConnectorType]:
-        """https://elis.rossum.ai/api/docs/#list-all-connectors."""
+        """Retrieve all :class:`~rossum_api.models.connector.Connector` objects satisfying the specified filters.
+
+        Parameters
+        ----------
+        ordering
+            List of object names. Their URLs are used for sorting the results
+        filters
+            id: ID of a :class:`~rossum_api.models.connector.Connector`
+
+            name: Name of the :class:`~rossum_api.models.connector.Connector`
+
+            service_url: Service URL of the :class:`~rossum_api.models.connector.Connector`
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#list-all-connectors.
+
+        https://elis.rossum.ai/api/docs/#connector.
+        """
         async for c in self._http_client.fetch_all(Resource.Connector, ordering, **filters):
             yield self._deserializer(Resource.Connector, c)
 
     async def retrieve_connector(self, connector_id: int) -> ConnectorType:
-        """https://elis.rossum.ai/api/docs/#retrieve-a-connector."""
+        """Retrieve a single :class:`~rossum_api.models.connector.Connector` object.
+
+        Parameters
+        ----------
+        connector_id
+            ID of a connector to be retrieved.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#retrieve-a-connector.
+
+        https://elis.rossum.ai/api/docs/#connector.
+        """
         connector = await self._http_client.fetch_one(Resource.Connector, connector_id)
 
         return self._deserializer(Resource.Connector, connector)
 
     async def create_new_connector(self, data: dict[str, Any]) -> ConnectorType:
-        """https://elis.rossum.ai/api/docs/#create-a-new-connector."""
+        """Create a new :class:`~rossum_api.models.connector.Connector` object.
+
+        Parameters
+        ----------
+        data
+            :class:`~rossum_api.models.connector.Connector` object configuration.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#create-a-new-connector.
+
+        https://elis.rossum.ai/api/docs/#connector.
+        """
         connector = await self._http_client.create(Resource.Connector, data)
 
         return self._deserializer(Resource.Connector, connector)
 
     # ##### HOOKS #####
     async def list_hooks(
-        self, ordering: Sequence[str] = (), **filters: Any
+        self, ordering: Sequence[HookOrdering] = (), **filters: Any
     ) -> AsyncIterator[HookType]:
-        """https://elis.rossum.ai/api/docs/#list-all-hooks."""
+        """Retrieve all :class:`~rossum_api.models.hook.Hook` objects satisfying the specified filters.
+
+        Parameters
+        ----------
+        ordering
+            List of object names. Their URLs are used for sorting the results
+        filters
+            id: ID of a :class:`~rossum_api.models.hook.Hook`
+
+            name: Name of a :class:`~rossum_api.models.hook.Hook`
+
+            type: Hook type. Possible values: ``webhook, function``
+
+            queue: ID of a :class:`~rossum_api.models.queue.Queue`
+
+            active: If set to true the hook is notified.
+
+            config_url:
+
+            config_app_url:
+
+            extension_source: Import source of the extension.
+            For more, see `Extension sources<https://elis.rossum.ai/api/docs/#extension-sources>`_.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#list-all-hooks.
+
+        https://elis.rossum.ai/api/docs/#hook.
+        """
         async for h in self._http_client.fetch_all(Resource.Hook, ordering, **filters):
             yield self._deserializer(Resource.Hook, h)
 
     async def retrieve_hook(self, hook_id: int) -> HookType:
-        """https://elis.rossum.ai/api/docs/#retrieve-a-hook."""
+        """Retrieve a single :class:`~rossum_api.models.hook.Hook` object.
+
+        Parameters
+        ----------
+        hook_id
+            ID of a hook to be retrieved.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#retrieve-a-hook.
+
+        https://elis.rossum.ai/api/docs/#hook.
+        """
         hook = await self._http_client.fetch_one(Resource.Hook, hook_id)
 
         return self._deserializer(Resource.Hook, hook)
 
     async def create_new_hook(self, data: dict[str, Any]) -> HookType:
-        """https://elis.rossum.ai/api/docs/#create-a-new-hook."""
+        """Create a new :class:`~rossum_api.models.hook.Hook` object.
+
+        Parameters
+        ----------
+        data
+            :class:`~rossum_api.models.hook.Hook` object configuration.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#create-a-new-hook.
+
+        https://elis.rossum.ai/api/docs/#hook.
+        """
         hook = await self._http_client.create(Resource.Hook, data)
 
         return self._deserializer(Resource.Hook, hook)
 
     async def update_part_hook(self, hook_id: int, data: dict[str, Any]) -> HookType:
-        """https://elis.rossum.ai/api/docs/#update-part-of-a-hook"""
+        """Update part of a :class:`~rossum_api.models.hook.Hook` object.
+
+        Parameters
+        ----------
+        hook_id
+            ID of a hook to be updated.
+        data
+            :class:`~rossum_api.models.hook.Hook` object partial configuration.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#update-part-of-a-hook.
+
+        https://elis.rossum.ai/api/docs/#hook.
+        """
         hook = await self._http_client.update(Resource.Hook, hook_id, data)
 
         return self._deserializer(Resource.Hook, hook)
 
     async def delete_hook(self, hook_id: int) -> None:
-        """https://elis.rossum.ai/api/docs/#delete-a-hook"""
+        """Delete a :class:`~rossum_api.models.hook.Hook` object.
+
+        Parameters
+        ----------
+        hook_id
+            ID of a hook to be deleted.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#delete-a-hook.
+
+        https://elis.rossum.ai/api/docs/#hook.
+        """
         return await self._http_client.delete(Resource.Hook, hook_id)
 
     # ##### USER ROLES #####
     async def list_user_roles(
-        self, ordering: Sequence[str] = (), **filters: Any
+        self, ordering: Sequence[UserRoleOrdering] = (), **filters: Any
     ) -> AsyncIterator[GroupType]:
-        """https://elis.rossum.ai/api/docs/#list-all-user-roles."""
+        """Retrieve all :class:`~rossum_api.models.group.Group` objects satisfying the specified filters.
+
+        Parameters
+        ----------
+        ordering
+            List of object names. Their URLs are used for sorting the results
+        filters
+            name: Name of :class:`~rossum_api.models.group.Group`
+
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#list-all-user-roles.
+
+        https://elis.rossum.ai/api/docs/#user-role.
+        """
         async for g in self._http_client.fetch_all(Resource.Group, ordering, **filters):
             yield self._deserializer(Resource.Group, g)
 
     # ##### GENERIC METHODS #####
     async def request_paginated(self, url: str, *args: Any, **kwargs: Any) -> AsyncIterator[dict]:
-        """Use to perform requests to seldomly used or experimental endpoints with paginated response that do not have
-        direct support in the client and return iterable.
-        """
+        """Request to endpoints with paginated response that do not have direct support in the client."""
         async for element in self._http_client.fetch_all_by_url(url, *args, **kwargs):
             yield element
 
     async def request_json(self, method: HttpMethod, *args: Any, **kwargs: Any) -> dict[str, Any]:
-        """Use to perform requests to seldomly used or experimental endpoints that do not have
-        direct support in the client and return JSON.
-        """
+        """Request to endpoints that do not have direct support in the client and return plain JSON."""
         return await self._http_client.request_json(method, *args, **kwargs)
 
     async def request(self, method: HttpMethod, *args: Any, **kwargs: Any) -> httpx.Response:
-        """Use to perform requests to seldomly used or experimental endpoints that do not have
-        direct support in the client and return the raw response.
-        """
+        """Request to endpoints that do not have direct support in the client and return plain response."""
         return await self._http_client.request(method, *args, **kwargs)
 
     async def get_token(self, refresh: bool = False) -> str:
-        """Returns the current token. Authentication is done automatically if needed.
+        """Return the current token. Authentication is done automatically if needed.
 
         Parameters
         ----------
@@ -821,12 +1799,13 @@ class AsyncRossumAPIClient(
         """
         return await self._http_client.get_token(refresh)
 
-    async def authenticate(self) -> None:
+    async def authenticate(self) -> None:  # noqa: D102
         await self._http_client._authenticate()
 
     async def _sideload(self, resource: dict[str, Any], sideloads: Sequence[Sideload]) -> None:
-        """The API does not support sideloading when fetching a single resource, we need to load
-        it manually.
+        """Load sideloads manually.
+
+        The API does not support sideloading when fetching a single resource, we need to l
         """
         sideload_tasks = [
             asyncio.create_task(self._http_client.request_json("GET", resource[sideload]))

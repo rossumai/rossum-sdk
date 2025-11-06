@@ -26,7 +26,8 @@ from rossum_api.exceptions import APIClientError
 from rossum_api.utils import enforce_domain
 
 if typing.TYPE_CHECKING:
-    from typing import Any, AsyncIterator, Sequence
+    from collections.abc import AsyncIterator, Sequence
+    from typing import Any
 
     from aiofiles.threadpool.binary import AsyncBufferedReader
 
@@ -220,11 +221,11 @@ class InternalAsyncClient:
         return await self.request_json("POST", resource.value, json=data)
 
     async def replace(self, resource: Resource, id_: int, data: dict[str, Any]) -> dict[str, Any]:
-        "Modify an entire existing object."
+        """Modify an entire existing object."""
         return await self.request_json("PUT", build_url(resource, id_), json=data)
 
     async def update(self, resource: Resource, id_: int, data: dict[str, Any]) -> dict[str, Any]:
-        "Modify particular fields of an existing object."
+        """Modify particular fields of an existing object."""
         return await self.request_json("PATCH", build_url(resource, id_), json=data)
 
     async def delete(self, resource: Resource, id_: int) -> None:
@@ -259,7 +260,7 @@ class InternalAsyncClient:
         files = build_upload_files(await fp.read(), filename, values, metadata)
         return await self.request_json("POST", url, files=files)
 
-    async def export(
+    async def export(  # noqa: D102
         self,
         resource: Resource,
         id_: int,
@@ -282,20 +283,19 @@ class InternalAsyncClient:
             async for bytes_chunk in self._stream(method, url, params=query_params):
                 yield bytes_chunk
 
-    async def request_json(self, method: HttpMethod, *args: Any, **kwargs: Any) -> dict[str, Any]:
+    async def request_json(self, method: HttpMethod, *args: Any, **kwargs: Any) -> dict[str, Any]:  # noqa: D102
         response = await self._request(method, *args, **kwargs)
         if response.status_code == 204:
             return {}
         return response.json()  # type: ignore[no-any-return]
 
-    async def request(self, method: HttpMethod, *args: Any, **kwargs: Any) -> httpx.Response:
-        response = await self._request(method, *args, **kwargs)
-        return response
+    async def request(self, method: HttpMethod, *args: Any, **kwargs: Any) -> httpx.Response:  # noqa: D102
+        return await self._request(method, *args, **kwargs)
 
     async def get_token(self, refresh: bool = False) -> str:
-        """Returns the current token. Authentication is done automatically if needed.
+        """Return the current token. Authentication is done automatically if needed.
 
-        Arguments:
+        Parameters
         ----------
         refresh
             force refreshing the token
@@ -328,12 +328,12 @@ class InternalAsyncClient:
             reraise=True,
         )
 
-    async def _request(
+    async def _request(  # noqa: RET503 (false positive)
         self, method: HttpMethod, url: str, *args: Any, **kwargs: Any
     ) -> httpx.Response:
-        """Performs the actual HTTP call and does error handling.
+        """Perform the actual HTTP call and does error handling.
 
-        Arguments:
+        Parameters
         ----------
         url
             base URL is prepended with base_url if needed
@@ -359,7 +359,7 @@ class InternalAsyncClient:
     async def _stream(
         self, method: HttpMethod, url: str, *args: Any, **kwargs: Any
     ) -> AsyncIterator[bytes]:
-        """Performs a streaming HTTP call."""
+        """Perform a streaming HTTP call."""
         if not self.token:
             await self._authenticate()
         url = enforce_domain(url, self.base_url)

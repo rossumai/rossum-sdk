@@ -18,14 +18,15 @@ from rossum_api.exceptions import APIClientError
 from rossum_api.utils import enforce_domain
 
 if typing.TYPE_CHECKING:
-    from typing import Any, Iterator, Sequence
+    from collections.abc import Iterator, Sequence
+    from typing import Any
 
     from rossum_api.domain_logic.resources import Resource
     from rossum_api.models import ResponsePostProcessor
     from rossum_api.types import HttpMethod, JsonDict, Sideload
 
 
-class InternalSyncClient:
+class InternalSyncClient:  # noqa: D101
     def __init__(
         self,
         base_url: str,
@@ -99,7 +100,7 @@ class InternalSyncClient:
         """Upload a file to a resource that supports this."""
         return self.request_json("POST", url, files=files)
 
-    def export(
+    def export(  # noqa: D102
         self,
         resource: Resource,
         id_: int,
@@ -121,7 +122,7 @@ class InternalSyncClient:
             yield from self._stream(method, url, params=query_params)
 
     def _stream(self, method: HttpMethod, url: str, *args: Any, **kwargs: Any) -> Iterator[bytes]:
-        """Performs a streaming HTTP call."""
+        """Perform a streaming HTTP call."""
         if not self.token:
             self._authenticate()
 
@@ -150,8 +151,7 @@ class InternalSyncClient:
                     if attempt.retry_state.attempt_number == 1:
                         raise ForceRetry()
                 self._raise_for_status(response)
-                for chunk in response.iter_bytes():
-                    yield chunk
+                yield from response.iter_bytes()
 
     def fetch_resource(
         self, resource: Resource, id_: int | str, request_params: dict[str, Any] | None = None
@@ -187,7 +187,7 @@ class InternalSyncClient:
             **filters,
         )
 
-    def fetch_resources_by_url(
+    def fetch_resources_by_url(  # noqa: D102
         self,
         url: str,
         ordering: Sequence[str] = (),
@@ -238,17 +238,19 @@ class InternalSyncClient:
         embed_sideloads(data, sideload_groups)
         return data["results"], data["pagination"]["total_pages"]
 
-    def request_json(self, method: HttpMethod, *args: Any, **kwargs: Any) -> dict[str, Any]:
+    def request_json(self, method: HttpMethod, *args: Any, **kwargs: Any) -> dict[str, Any]:  # noqa: D102
         response = self._request(method, *args, **kwargs)
         if response.status_code == 204:
             return {}
         return response.json()  # type: ignore[no-any-return]
 
-    def request(self, method: HttpMethod, *args: Any, **kwargs: Any) -> httpx.Response:
+    def request(self, method: HttpMethod, *args: Any, **kwargs: Any) -> httpx.Response:  # noqa: D102
         return self._request(method, *args, **kwargs)
 
-    def _request(self, method: HttpMethod, url: str, *args: Any, **kwargs: Any) -> httpx.Response:
-        """Performs the actual HTTP call and does error handling.
+    def _request(  # noqa: RET503 (false positive)
+        self, method: HttpMethod, url: str, *args: Any, **kwargs: Any
+    ) -> httpx.Response:
+        """Perform the actual HTTP call and does error handling.
 
         Arguments:
         ----------

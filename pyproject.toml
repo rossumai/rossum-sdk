@@ -28,6 +28,11 @@ tests = [
   "types-aiofiles",
   "pre-commit",
 ]
+docs = [
+  "sphinx>=8.2",  # python >= 3.11 is required for docs generation
+  "sphinx-rtd-theme",
+  "sphinx-autodoc-typehints",
+]
 
 [tools.setuptools]
 include-package-data = true

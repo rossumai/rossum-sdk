@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from rossum_api.types import HttpMethod
 
 
-class APIClientError(Exception):
+class APIClientError(Exception):  # noqa: D101
     def __init__(self, method: HttpMethod, url: str, status_code: int, error: Exception) -> None:
         self.method = method
         self.url = url

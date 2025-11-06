@@ -2,9 +2,11 @@
 lint.select = [
     "B",  # bugbear
     "C",  # mccabe
+    "D",  # PEP257 (pydocstyle)
     "E",  # PEP8 (pycodestyle)
     "F",  # pyflakes
     "I",  # isort
+    "S",  # bandit
     "W",  # PEP8  (pycodestyle)
 ]
 lint.extend-select = [
@@ -13,12 +15,14 @@ lint.extend-select = [
     "ERA",  # eradicate,
     "EXE",  # executable
     "G",  # logging-format
+    "RET",  # returns formatting
+    "RUF",  # ruff-specific rules
+    "SIM",  # flake8-simplify
     "T",  # print
     "T10",  # breakpoint
     "TCH",  # type-checking
     "TID252",  # absolute imports
-    "UP031",  # f-strings (flynt)
-    "UP032",  # f-strings (flynt)
+    "UP",  # pyupgrade
 ]
 lint.unfixable = ["ERA"]
 
@@ -27,6 +31,8 @@ lint.ignore = [
     "ARG002", # Unused method argument
     "B026",  # Star-arg unpacking after a keyword argument is strongly discouraged
     "B905",  # `zip()` without an explicit `strict=` parameter
+    "D100",  # Missing docstring in public module
+    "D104",  # Missing docstring in public package
     "D105",  # Missing docstring in magic method
     "D107",  # Missing docstring in __init__
     "E501",  # Long literals which Black can't split
@@ -58,4 +64,7 @@ max-complexity = 10
 
 [lint.per-file-ignores]
 # commons module files
-"test.py" = ["ERA001", "T201"]
+"docs/**" = ["D"]
+"rossum_api/domain_logic/urls.py" = ["D"]
+"test.py" = ["D", "ERA001", "S", "T201"]
+"tests/**" = ["D", "S"]

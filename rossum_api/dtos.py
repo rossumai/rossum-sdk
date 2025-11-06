@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import dataclasses
+from dataclasses import dataclass
 
 
-@dataclasses.dataclass
-class Token:
+@dataclass
+class Token:  # noqa: D101
     token: str
 
 
-@dataclasses.dataclass
-class UserCredentials:
+@dataclass
+class UserCredentials:  # noqa: D101
     username: str
     password: str

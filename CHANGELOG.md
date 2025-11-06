@@ -1,24 +1,152 @@
 # CHANGELOG
 
-<!-- version list -->
+
+## v3.5.0 (2025-11-06)
+
+### Chores
+
+- Fix missing semantic release coment in chlog
+  ([`2629e3b`](https://github.com/rossumai/rossum-sdk/commit/2629e3bab410b4cb5d165563d3e33e1ebaf44abd))
+
+- Introduce all pyupgrade rules
+  ([`c02a21b`](https://github.com/rossumai/rossum-sdk/commit/c02a21b5cab773d0430c9197c826c52b3ba032f1))
+
+- Introduce all RET ruff rules
+  ([`897ea4c`](https://github.com/rossumai/rossum-sdk/commit/897ea4c3e067c78c9c794d039ee97b421af5753c))
+
+- Introduce all RUF ruff rules
+  ([`ea9641e`](https://github.com/rossumai/rossum-sdk/commit/ea9641e8bffd41cafa56341a99b016bc3e182581))
+
+- Introduce all S (flake8-bandit) ruff rules
+  ([`7197383`](https://github.com/rossumai/rossum-sdk/commit/7197383e2bd8b4e1453d097df71555ed7de09a89))
+
+- Introduce all SIM ruff rules
+  ([`3959ec3`](https://github.com/rossumai/rossum-sdk/commit/3959ec3cc220b4c968cfcfdd6a4966d5d536417e))
+
+- Set semantic release to re-generate full chlog
+  ([`edabd78`](https://github.com/rossumai/rossum-sdk/commit/edabd7847045f19bac5e83e7c118de7ec91ca9fa))
+
+- Update and pin ci action versions
+  ([`28822db`](https://github.com/rossumai/rossum-sdk/commit/28822dbfa3a857226f7da7225547d5014cce8de4))
+
+### Documentation
+
+- Introduce sphinx docs
+  ([`4505029`](https://github.com/rossumai/rossum-sdk/commit/4505029ff6561308dd0ed050f9d4204eacb66fcd))
+
+- Update docs to Rossum API only
+  ([`ecda8c8`](https://github.com/rossumai/rossum-sdk/commit/ecda8c8a76f10e70eb82bed931a631b6459570da))
+
+### Features
+
+- Achieve feature parity across sync and async clients
+  ([`9cc7846`](https://github.com/rossumai/rossum-sdk/commit/9cc7846797cfbe4732aa9f7b1db25df07f8138d4))
+
+
+## v3.4.0 (2025-10-30)
+
+### Chores
+
+- Add basic pre-commit hooks
+  ([`87aff93`](https://github.com/rossumai/rossum-sdk/commit/87aff935f87ef8cfa496e6d66b79676e26927770))
+
+- Define Sideload as a type
+  ([`c639b7a`](https://github.com/rossumai/rossum-sdk/commit/c639b7a624065c9a48c35320f90c8eef4c5d3b23))
+
+- Enforce PEP 585
+  ([`eed9f47`](https://github.com/rossumai/rossum-sdk/commit/eed9f47766b037843ece82597440556faff9b23c))
+
+- Enforce PEP 604
+  ([`118bb97`](https://github.com/rossumai/rossum-sdk/commit/118bb97eb5329172f9c4422add1c2e314af83a6d))
+
+- Enforce PEP 604 for optional types
+  ([`118d968`](https://github.com/rossumai/rossum-sdk/commit/118d96854e06a05766008fe5077e7227690bacc9))
+
+- Enforce TCH rule
+  ([`ffd68de`](https://github.com/rossumai/rossum-sdk/commit/ffd68de951ddc5ac4547c200557fe5a3205963af))
+
+- Enforce type checking and fix typing
+  ([`cae0ecd`](https://github.com/rossumai/rossum-sdk/commit/cae0ecdc6544a7ae428723086a7f652af20be174))
+
+- Fix typo in LICENSE file name
+  ([`f10b56d`](https://github.com/rossumai/rossum-sdk/commit/f10b56df10439320af2f93ebfc1a8c9fb420a328))
+
+- Publish package automatically to pypi upon release
+  ([`c335845`](https://github.com/rossumai/rossum-sdk/commit/c33584556e7a97c672be1fdfbf7d9db13574129d))
+
+- Remove unused .flake8 file
+  ([`ade9ea7`](https://github.com/rossumai/rossum-sdk/commit/ade9ea792bcc6a8d06c83fd139b521352ef76a61))
+
+- Remove unused black and isort configs from pyproject.toml
+  ([`80bf6f9`](https://github.com/rossumai/rossum-sdk/commit/80bf6f9c36f216f892c960e9931173011ad2b11f))
+
+- Remove unused Makefile
+  ([`24b4e8e`](https://github.com/rossumai/rossum-sdk/commit/24b4e8e611d822fadf22a678c366b8be17dd908f))
+
+- Remove unused tox.ini file
+  ([`11da97f`](https://github.com/rossumai/rossum-sdk/commit/11da97ff797504b91bd8766705710e7a46597e26))
+
+- Save a few lines by cleaning trailing commas
+  ([`cda1933`](https://github.com/rossumai/rossum-sdk/commit/cda1933f0636bddb44de38ec21fc145e469be2bf))
+
+- Start using ruff in its full strength
+  ([`3d5becd`](https://github.com/rossumai/rossum-sdk/commit/3d5becd04b367883cdd948234bbbe4dfa2ac613e))
+
+- Unify absolute imports of models
+  ([`59b4c03`](https://github.com/rossumai/rossum-sdk/commit/59b4c0366a06680af21f6a6f41a0b182dba4bd0b))
+
+- Update package version in pre-commit
+  ([`0781db4`](https://github.com/rossumai/rossum-sdk/commit/0781db497c37d61cebd6b5aba89872a6a6f2e876))
+
+- Use JsonDict type globally
+  ([`44b9b8a`](https://github.com/rossumai/rossum-sdk/commit/44b9b8a4e9c55b0db7936f66a72959abb94a545b))
+
+### Documentation
+
+- Add badge to pypi
+  ([`ef6e6d4`](https://github.com/rossumai/rossum-sdk/commit/ef6e6d486f49207032532fd2b6f2f1d5f01da7c0))
+
+- Add local development section to README
+  ([`bc6062c`](https://github.com/rossumai/rossum-sdk/commit/bc6062cdf47b58ed2b29383a8a99735a848706b9))
+
+- Clean CONTRIBUTING.md
+  ([`033e7a3`](https://github.com/rossumai/rossum-sdk/commit/033e7a38873cce07d2fa49b7f2e68ba4acc69d74))
+
+- Fix badges
+  ([`191250d`](https://github.com/rossumai/rossum-sdk/commit/191250dfdbe1fe4b5994dba8a00f69643b9db3a5))
+
+- Fix unintentional copy to README
+  ([`2f6e13b`](https://github.com/rossumai/rossum-sdk/commit/2f6e13bd31f9bb0403a3890c2b4ffdd1c9419a80))
+
+- Regenerate CHANGELOG.md following semantic releases conventions
+  ([`f008e54`](https://github.com/rossumai/rossum-sdk/commit/f008e54738392b8d9885f4629a73261529872a2a))
+
+- Remove TODO list
+  ([`3f1c9b4`](https://github.com/rossumai/rossum-sdk/commit/3f1c9b4da74e57bf6423e74bd0b4165bf2128b7d))
+
+- Update installation guide
+  ([`924d108`](https://github.com/rossumai/rossum-sdk/commit/924d108dfd56826aab1e228e47d8d5761bb7d64c))
+
+### Features
+
+- Replace heavy inflect import by a simple heuristic
+  ([`683e722`](https://github.com/rossumai/rossum-sdk/commit/683e72279fc4c0af2753264331f04ef99725a6aa))
+
 
 ## v3.3.0 (2025-10-27)
+
+### Chores
+
+- Replace python <=3.9 support with python 3.13
+  ([`d3dc4bf`](https://github.com/rossumai/rossum-sdk/commit/d3dc4bfde7c3e967edde314dff36d0bcf51ce329))
+
+- Upgrade pytest-httpx
+  ([`59326f1`](https://github.com/rossumai/rossum-sdk/commit/59326f1fc6dd4fb1ee725537f8d600a80f191896))
 
 ### Features
 
 - Add training_queues field for Engine
   ([`6099877`](https://github.com/rossumai/rossum-sdk/commit/60998778b4859bc08d5a91f170aaa88cfb0da20d))
-
-### Chores
-
-- Upgrade pytest-httpx
-  ([`59326f1`](https://github.com/rossumai/rossum-sdk/commit/59326f1fc6dd4fb1ee725537f8d600a80f191896))
-
-- Replace python <=3.9 support with python 3.13
-  ([`d3dc4bf`](https://github.com/rossumai/rossum-sdk/commit/d3dc4bfde7c3e967edde314dff36d0bcf51ce329))
-
-- Publish package automatically to pypi upon release
-  ([`5fd3b80`](https://github.com/rossumai/rossum-sdk/commit/5fd3b800994376f034ddb22574e031a3615a9fa9))
 
 
 ## v3.2.0 (2025-09-16)
@@ -41,11 +169,11 @@
 
 ### Bug Fixes
 
-- Switch from token header to Bearer auth and update tests (+ Sync client)
-  ([`20d715b`](https://github.com/rossumai/rossum-sdk/commit/20d715b0bb9eb326bfb39508fd25465ce727f003))
-
 - Switch from token header to Bearer auth and update tests
   ([`45ed114`](https://github.com/rossumai/rossum-sdk/commit/45ed114a0ebba1f9a7c9912deef1181f410b2cd9))
+
+- Switch from token header to Bearer auth and update tests (+ Sync client)
+  ([`20d715b`](https://github.com/rossumai/rossum-sdk/commit/20d715b0bb9eb326bfb39508fd25465ce727f003))
 
 
 ## v3.1.1 (2025-06-27)
@@ -66,6 +194,11 @@
 
 ## v3.0.0 (2025-05-28)
 
+### Bug Fixes
+
+- Make Task.content optional
+  ([`48d1e4d`](https://github.com/rossumai/rossum-sdk/commit/48d1e4dcd20a6be1d69b36424ede3c6cc86f90a7))
+
 ### Features
 
 - Add email resource
@@ -74,14 +207,9 @@
 - Add email_imported task type
   ([`a1db151`](https://github.com/rossumai/rossum-sdk/commit/a1db15126262f580b04e37c52aa8b5b6be03b685))
 
-### Bug Fixes
-
-- Make Task.content optional
-  ([`48d1e4d`](https://github.com/rossumai/rossum-sdk/commit/48d1e4dcd20a6be1d69b36424ede3c6cc86f90a7))
-
 ### Breaking Changes
 
-- Adding email resource and task type can break existing setups.
+- Adding to Generic class can break existing setups.
 
 
 ## v2.1.0 (2025-05-28)
@@ -99,8 +227,6 @@
 - Move exceptions module to rossum_api package
   ([`548215a`](https://github.com/rossumai/rossum-sdk/commit/548215a4bf04934ba0b80eb8078da314202d92d3))
 
-It's not importable like this if user only installs the rossum-api package.
-
 
 ## v2.0.0 (2025-04-24)
 
@@ -108,8 +234,6 @@ It's not importable like this if user only installs the rossum-api package.
 
 - Add document relation resource
   ([`230bb1c`](https://github.com/rossumai/rossum-sdk/commit/230bb1c8be1f25be9a0f844a831ce2600bedcfa7))
-
-BREAKING CHANGE: Adding to Generic class can break existing setups.
 
 ### Breaking Changes
 
@@ -123,17 +247,10 @@ BREAKING CHANGE: Adding to Generic class can break existing setups.
 - Fix bugs in internal sync client
   ([`5e57018`](https://github.com/rossumai/rossum-sdk/commit/5e57018b5f2a99b3f37cfe5045d2a2b538432471))
 
-- Use helpers from domain logic in clients - Add retry parameters to the constructor of the internal
-  sync client - Add retries to the authentication method - Fix wrong method name in the export
-  method - Fix the _stream method - Add a max_pages parameter to the fetch_resources method - Raise
-  correct exceptions from the _request method - Add tests for the internal sync client
-
 ### Refactoring
 
 - Rename module with tests of internal async client
   ([`1334338`](https://github.com/rossumai/rossum-sdk/commit/1334338ab372d2e7313fcf12961cb442892007e0))
-
-And extract ot conftest things that will be common for both internal clients.
 
 - Use helpers from domain logic in clients
   ([`24e0657`](https://github.com/rossumai/rossum-sdk/commit/24e0657a131aa3629596b582e41dcca04580197f))
@@ -145,8 +262,6 @@ And extract ot conftest things that will be common for both internal clients.
 
 - Implement sync client without event loop
   ([`3964632`](https://github.com/rossumai/rossum-sdk/commit/3964632e9fd112cef5bc8c8c001ef39398fff48f))
-
-BREAKING CHANGE: Public interface changed.
 
 ### Breaking Changes
 
@@ -160,8 +275,6 @@ BREAKING CHANGE: Public interface changed.
 - Add response post-processor
   ([`a1ab75f`](https://github.com/rossumai/rossum-sdk/commit/a1ab75fe505af59ffb363b69439abc4596a156bb))
 
-Useful e.g. for logging.
-
 
 ## v0.23.2 (2025-03-20)
 
@@ -170,9 +283,6 @@ Useful e.g. for logging.
 - Resolve problem with typing and custom deserializer
   ([`a9b95bd`](https://github.com/rossumai/rossum-sdk/commit/a9b95bd16bb2df227727cc30b52d3189ed97f0e9))
 
-When user used a custom deserializer, the typing hints were wrong. This should fix it in a
-  backwards-compatible manner.
-
 
 ## v0.23.1 (2025-01-23)
 
@@ -180,9 +290,6 @@ When user used a custom deserializer, the typing hints were wrong. This should f
 
 - Rename retrieve_engine_queue_stats to retrieve_engine_queues
   ([`7583358`](https://github.com/rossumai/rossum-sdk/commit/7583358da05b37f822e60f9c7b440064d20fbe7c))
-
-The new name better conveys the essence that we're retrieving only a list of queues associated with
-  the given engine. The docstring pointing to official documentation was also corrected.
 
 
 ## v0.23.0 (2025-01-20)
@@ -205,9 +312,6 @@ The new name better conveys the essence that we're retrieving only a list of que
 
 - Use _iter_over_async instead of _run_coroutine and Iterator instead of list
   ([`9540929`](https://github.com/rossumai/rossum-sdk/commit/95409299c468e28a4d89e2a90646d9d2aa73a33e))
-
-Fixing several implementation as well as typing errors introduced in one of the recent pull
-  requests.
 
 ### Code Style
 
@@ -237,8 +341,6 @@ Fixing several implementation as well as typing errors introduced in one of the 
 - Extract sideloading logic into domain logic
   ([`080b7af`](https://github.com/rossumai/rossum-sdk/commit/080b7afbb2f1a7ec3651ee80a6561c9921c55aaf))
 
-...and use inflect to convert resource names to singular.
-
 
 ## v0.20.1 (2024-12-11)
 
@@ -263,15 +365,10 @@ Fixing several implementation as well as typing errors introduced in one of the 
 - Do not crash when running sync client in async context
   ([`0038e4a`](https://github.com/rossumai/rossum-sdk/commit/0038e4a3bfe2f2312a4dfb91f0a7988ba1c798ac))
 
-The asyncio code is now executed in a ThreadPoolExecutor to avoid problems with multiple event
-  loops.
-
 ### Chores
 
 - Fix tests by pinning pytest-httpx
   ([`a0c0eeb`](https://github.com/rossumai/rossum-sdk/commit/a0c0eeb85334f9c3bd86e599ab01c26f5c3bf275))
-
-0.22 is the last version that works with Python 3.8.
 
 - Improve readability of assert in XML export test
   ([`4c88b7e`](https://github.com/rossumai/rossum-sdk/commit/4c88b7e4328f01035a5c9f64ab4b013cce82bb73))
@@ -280,9 +377,6 @@ The asyncio code is now executed in a ThreadPoolExecutor to avoid problems with 
 
 - Retry also on request/HTTP errors during authentication
   ([`3bae7da`](https://github.com/rossumai/rossum-sdk/commit/3bae7dad7d045faad0caf1a038aaf6d0400cbe47))
-
-When Elis API fails intermittently, we were not retrying which leads to unnecessary failures in
-  production when the client is used.
 
 
 ## v0.19.0 (2024-09-25)
@@ -335,119 +429,146 @@ When Elis API fails intermittently, we were not retrying which leads to unnecess
 - Use Iterator instead of Iterable types
   ([`77edb52`](https://github.com/rossumai/rossum-sdk/commit/77edb529e4b69c74695bc16516cfe27ba9094c01))
 
-Iterator is a better type for the method return value, since it correctly type checks the use of
-  `next()`. Iterable interface doesn't.
 
+## v0.17.0 (2024-08-07)
 
-## v0.17.0 (2024-08-08)
+### Chores
 
-### Features
+- Drop support for Python 3.7
+  ([`3a4e359`](https://github.com/rossumai/rossum-sdk/commit/3a4e359c5e7df7c22ef92a64be3369814c8f4e1d))
 
-- Add delete method to Rossum API client
-  ([`2c7db0a`](https://github.com/rossumai/rossum-sdk/commit/2c7db0a1b27ac82db7f4ec831caadf0c1f6c28f5))
-
-- Support user-defined deserialization of sideloaded data
-  ([`b12ad23`](https://github.com/rossumai/rossum-sdk/commit/b12ad239b21b3c5cb3f89e8f8f2a652c4cbb7ad3))
-
-- Support XML document export with sideloads
-  ([`ac02c11`](https://github.com/rossumai/rossum-sdk/commit/ac02c1141cc73c92cbbc68a1b40ad94a1c62ad1f))
-
-### Bug Fixes
-
-- Fix typing of resource delete methods
-  ([`e55aaad`](https://github.com/rossumai/rossum-sdk/commit/e55aaad63d52c7e21a73b3e10ac8c5e5c30b20e0))
-
-### Testing
-
-- Add test for the sideload mechanism
-  ([`e84c7e8`](https://github.com/rossumai/rossum-sdk/commit/e84c7e8a5ea2ea2d91b2c96e5e5e8e8a6a6d12e6))
-
-
-## v0.16.0 (2024-06-20)
+- Fix typos and missing docs
+  ([`a499da2`](https://github.com/rossumai/rossum-sdk/commit/a499da214b01cb4fc1b433c7708cd66320a62ae1))
 
 ### Features
 
-- Add support for updating inbox
-  ([`6b6f20a`](https://github.com/rossumai/rossum-sdk/commit/6b6f20a1c3ecdc3e8a3c0c5ae81a5e8a80ba123d))
+- Add support for Task and Upload objects
+  ([`6e582a9`](https://github.com/rossumai/rossum-sdk/commit/6e582a9451ffd95950442fd6bda7af8a80df0e39))
 
-### Bug Fixes
-
-- Fix organization trial fields typing
-  ([`b80720c`](https://github.com/rossumai/rossum-sdk/commit/b80720c94ac7f80ed6ac9b33e44c0fe0bb3b9d1f))
+- Upload documents using new upload endpoint
+  ([`9ff22d9`](https://github.com/rossumai/rossum-sdk/commit/9ff22d9340210f1d2fde5c0a5b8894f578eaad82))
 
 
-## v0.15.0 (2024-05-16)
+## v0.16.0 (2024-06-04)
 
-### Features
+### Chores
 
-- Add support for connector
-  ([`da885c1`](https://github.com/rossumai/rossum-sdk/commit/da885c1a1a76a6b2a2a46a84a08e16a2cf45a1f2))
-
-- Add support for inbox
-  ([`90fb2ab`](https://github.com/rossumai/rossum-sdk/commit/90fb2ab8a79b3f5e58f9ac5dd4f41b70a6ed2b5b))
-
-- Add username to user model
-  ([`6a07d33`](https://github.com/rossumai/rossum-sdk/commit/6a07d33a3bb0bb7e30c623d6e5e0f7a5096a7ad5))
-
-
-## v0.14.0 (2024-04-16)
+- Add missing type hint for list_all_organizations
+  ([`86fb228`](https://github.com/rossumai/rossum-sdk/commit/86fb228613aa60a0b48c04a1549252454d15b2c9))
 
 ### Features
 
-- Add Group.parent
-  ([`9b91b0e`](https://github.com/rossumai/rossum-sdk/commit/9b91b0e6a8b6cb9c9bf6ebfba72c1bce46b87eeb))
+- Add delete_annotation method ([#75](https://github.com/rossumai/rossum-sdk/pull/75),
+  [`55a3641`](https://github.com/rossumai/rossum-sdk/commit/55a364100e73ec24da009b12819830c7dbd69e5a))
+
+
+## v0.15.2 (2024-06-03)
 
 ### Bug Fixes
 
-- Include py.typed file for mypy support
-  ([`5f8fb95`](https://github.com/rossumai/rossum-sdk/commit/5f8fb959b0ffb2b2c3a9b3f1ab7bfd92a53c1eb3))
+- Fix package versioning
+  ([`d3b5e88`](https://github.com/rossumai/rossum-sdk/commit/d3b5e889d2b4045c63e16eda961922a734b6db66))
 
 
-## v0.13.0 (2024-04-04)
+## v0.15.1 (2024-06-03)
+
+### Bug Fixes
+
+- Remove semantic-release version_variable
+  ([`9d5d101`](https://github.com/rossumai/rossum-sdk/commit/9d5d101016f31d54c612be5a79ba93a0eb6a59f2))
+
+
+## v0.15.0 (2024-06-03)
 
 ### Features
 
-- Add more fields to Hook model
-  ([`e5ff8e6`](https://github.com/rossumai/rossum-sdk/commit/e5ff8e66f6d24fd9b24b5b3c2c2d9c8e9a097cd7))
-
-- Enable cancelling annotation that is in the to_review state
-  ([`b2eb6d9`](https://github.com/rossumai/rossum-sdk/commit/b2eb6d95fafbc3cadb9ea0da8fad8a4374b58b2b))
-
-### Bug Fixes
-
-- Allow None for Hook.settings
-  ([`ee7ba5a`](https://github.com/rossumai/rossum-sdk/commit/ee7ba5af0de6e7ac89c5dc0e2b1fb5a01ba3ba34))
+- Add support for engine object
+  ([`c6ad1d5`](https://github.com/rossumai/rossum-sdk/commit/c6ad1d5809f08113dff074120fa55e8673218de5))
 
 
-## v0.12.1 (2024-02-22)
-
-### Bug Fixes
-
-- Allow all possible values for annotation status
-  ([`dbbba35`](https://github.com/rossumai/rossum-sdk/commit/dbbba35ddeb2c18bdde83e8f8a924aefaf2efd1e))
-
-Since it's an enum that can be extended on the server side, we shouldn't restrict its values.
-
-
-## v0.12.0 (2024-02-13)
+## v0.14.0 (2024-05-22)
 
 ### Features
 
-- Add export convenience methods to the client
-  ([`be0d7ae`](https://github.com/rossumai/rossum-sdk/commit/be0d7ae2ff6e04b9b26e0e3c1c70c2e4c8aaa9d8))
+- Add py.typed and let the world know we use types
+  ([`9415403`](https://github.com/rossumai/rossum-sdk/commit/941540354521e321c2e40cc12b3b2a6e24a8abce))
 
-- Add sideloading support
-  ([`d55a98e`](https://github.com/rossumai/rossum-sdk/commit/d55a98e1b7e35eaf04cee3b1e28e60892d24d13e))
 
-This enables users to include related data when retrieving objects from API.
+## v0.13.3 (2024-05-22)
 
 ### Bug Fixes
+
+- Make User.last_login optional
+  ([`406b16b`](https://github.com/rossumai/rossum-sdk/commit/406b16bdf7528073f1e453a7d2ef7cb4777b4191))
+
+
+## v0.13.2 (2024-04-09)
+
+### Bug Fixes
+
+- **api-client**: Do not reauth if no credentials are available
+  ([`9b5f422`](https://github.com/rossumai/rossum-sdk/commit/9b5f4223b3f1ac852315e98956c920cb16aebd21))
+
+
+## v0.13.1 (2024-03-25)
+
+### Bug Fixes
+
+- **models:automation_blocker**: Fix type of `samples`
+  ([`b36d6a8`](https://github.com/rossumai/rossum-sdk/commit/b36d6a8f1b3ae46722bb5dacf0d01fed5d2544b4))
+
+### Continuous Integration
+
+- **pre-commit**: Update mypy
+  ([`06d2272`](https://github.com/rossumai/rossum-sdk/commit/06d22725d0a9a33ade3d700779707e7c955268dd))
+
+
+## v0.13.0 (2024-02-07)
+
+### Bug Fixes
+
+- Do not send None parent when creating new document
+  ([`95f3fbc`](https://github.com/rossumai/rossum-sdk/commit/95f3fbca22d6ca157567ccf71bd3ff379ab29705))
+
+### Documentation
+
+- Improve client docstrings
+  ([`94e8522`](https://github.com/rossumai/rossum-sdk/commit/94e85229ee3f64bd169ac79c2a8a3a2bf0f03996))
+
+### Features
+
+- Consider new created status when checking if annotation is already imported
+  ([`7c66c63`](https://github.com/rossumai/rossum-sdk/commit/7c66c63585e35cf58272253ba143003c053dccff))
+
+
+## v0.12.0 (2024-02-06)
+
+### Features
+
+- Add new create_new_annotation method
+  ([`7354ec7`](https://github.com/rossumai/rossum-sdk/commit/7354ec71fd7f821ac92870ada87ce44b935fb2c5))
+
+- Add new create_new_document method
+  ([`4affb67`](https://github.com/rossumai/rossum-sdk/commit/4affb6704072305637b5fec403fe3993e0ee1cf3))
+
+- Add new retrieve_document_content method
+  ([`4057e9c`](https://github.com/rossumai/rossum-sdk/commit/4057e9c170267302d7b740980a91c7af26e044ef))
+
+### Refactoring
+
+- Unify naming of ids and add missing typing
+  ([`86246cd`](https://github.com/rossumai/rossum-sdk/commit/86246cd612336f1d919cb01a06f5ea5b542c20fd))
+
+- **tests**: Fix typos in tests
+  ([`19711e2`](https://github.com/rossumai/rossum-sdk/commit/19711e233752c0d2102e4ae4633a3ffdff88a05c))
+
+
+## v0.11.0 (2023-11-08)
+
+### Chores
 
 - Remove side-effects from tests with sideloads
   ([`c3f8130`](https://github.com/rossumai/rossum-sdk/commit/c3f8130561815f1a8f26d7f25a557e77f9e625b3))
-
-dummy_annotation was modified by a side-effect and the expected values didn't need to add content
-  which was confusing.
 
 ### Features
 
@@ -472,15 +593,10 @@ dummy_annotation was modified by a side-effect and the expected values didn't ne
 - Support deserializing of API payloads to user-defined model classes
   ([`a1e1385`](https://github.com/rossumai/rossum-sdk/commit/a1e1385649d974637bec33bd920705d0cdb56f2f))
 
-Users can provide a custom deserializer that allows customising which models should be returned by
-  the client.
-
 ### Refactoring
 
 - Use an enum instead of strings to identify API resources
   ([`acbf731`](https://github.com/rossumai/rossum-sdk/commit/acbf731d369b0adfd2da9268008ca458848a20b1))
-
-This is not only cleaner but will be useful when implementing custom de-serializers.
 
 
 ## v0.9.1 (2023-10-11)
@@ -489,8 +605,6 @@ This is not only cleaner but will be useful when implementing custom de-serializ
 
 - **api_client**: Limit in-flight requests
   ([`56244d0`](https://github.com/rossumai/rossum-sdk/commit/56244d07569ad075ecd4703c3794a344eb609acd))
-
-Limit the maximum number of fetch_all page requests running at in parallel.
 
 
 ## v0.9.0 (2023-10-11)
@@ -596,8 +710,6 @@ Limit the maximum number of fetch_all page requests running at in parallel.
 - Define `Document.creator` as optional ([#35](https://github.com/rossumai/rossum-sdk/pull/35),
   [`d797e99`](https://github.com/rossumai/rossum-sdk/commit/d797e99112416602487409aaa668327fd80663aa))
 
-Co-authored-by: Ondrej Slama <ondrej.slama@rossum.ai>
-
 - **models:hook**: Define some attributes (guide, read_more_url, extension_image_url) as optional
   ([`b16a456`](https://github.com/rossumai/rossum-sdk/commit/b16a456344b41908c16c32b4d5be70d31f3b07b3))
 
@@ -612,13 +724,8 @@ Co-authored-by: Ondrej Slama <ondrej.slama@rossum.ai>
 - Fix mypy installation in pre-commit by upgrading it
   ([`5d4b387`](https://github.com/rossumai/rossum-sdk/commit/5d4b3870570cd7fcd82e86c8835246e7733e29ed))
 
-The old version installed a version of `types-ats` that caused a crash during pre-commit
-  installation.
-
 - Fix tests that started failing with pytest-httpx==0.21.2
   ([`da18d27`](https://github.com/rossumai/rossum-sdk/commit/da18d275eebc4f85af8a6c6f913f430e8e1b871c))
-
-The library no longer ignores missing empty URL parameters when matching URLs.
 
 - Run semrel only once
   ([`3b9392a`](https://github.com/rossumai/rossum-sdk/commit/3b9392ab7cbcbe049cc1c46d2ab434e5f0d5efd8))
@@ -643,8 +750,6 @@ The library no longer ignores missing empty URL parameters when matching URLs.
 
 - Implement retrying of failed requests
   ([`09ab473`](https://github.com/rossumai/rossum-sdk/commit/09ab47332fce0c9700107b47ca06d7a1712d653a))
-
-APIClient now accepts retry configuration where number of retries and backoff can be configured.
 
 
 ## v0.1.3 (2022-10-12)
@@ -673,22 +778,4 @@ APIClient now accepts retry configuration where number of retries and backoff ca
 
 ## v0.1.0 (2022-10-06)
 
-### Chores
-
-- Introduce semantic releasing
-  ([`a485874`](https://github.com/rossumai/rossum-sdk/commit/a48587415bb6c197a3d50b91d80f08ace5e8548c))
-
-### Documentation
-
-- **readme**: Add helper page, add makefile
-  ([`1c95bea`](https://github.com/rossumai/rossum-sdk/commit/1c95beac020fc3a88086fddb4979366cd6e3e06f))
-
-### Features
-
-- First github release by semantic releasing
-  ([`7dd7780`](https://github.com/rossumai/rossum-sdk/commit/7dd77806b030994b00027a17de1895142d852e48))
-
-### Testing
-
-- **api_client**: Reauth correct exception handling
-  ([`5c0d728`](https://github.com/rossumai/rossum-sdk/commit/5c0d728644fb6a8d1884ce236afdfe9b7ef76bb1))
+- Initial Release

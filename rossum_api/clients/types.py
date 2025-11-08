@@ -58,6 +58,8 @@ QueueOrdering: TypeAlias = Literal[
     "locale",
 ]
 
+RuleOrdering: TypeAlias = Literal["id", "name", "organization"]
+
 SchemaOrdering: TypeAlias = Literal["id"]
 
 UserOrdering: TypeAlias = Literal[

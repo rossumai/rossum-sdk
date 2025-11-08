@@ -111,6 +111,20 @@ Models
 
 .. raw:: html
 
+   <h4>Rule</h4>
+
+.. autoclass:: rossum_api.models.rule.Rule
+   :no-index-entry:
+
+.. raw:: html
+
+   <h4>RuleAction</h4>
+
+.. autoclass:: rossum_api.models.rule.RuleAction
+   :no-index-entry:
+
+.. raw:: html
+
    <h4>Schema</h4>
 
 .. autoclass:: rossum_api.models.schema.Schema

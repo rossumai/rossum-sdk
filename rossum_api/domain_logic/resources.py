@@ -23,6 +23,7 @@ class Resource(Enum):
     Email = "emails"
     Organization = "organizations"
     Queue = "queues"
+    Rule = "rules"
     Schema = "schemas"
     Task = "tasks"
     Upload = "uploads"

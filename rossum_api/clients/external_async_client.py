@@ -43,6 +43,7 @@ from rossum_api.models.hook import Hook
 from rossum_api.models.inbox import Inbox
 from rossum_api.models.organization import Organization
 from rossum_api.models.queue import Queue
+from rossum_api.models.rule import Rule
 from rossum_api.models.schema import Schema
 from rossum_api.models.task import Task
 from rossum_api.models.upload import Upload
@@ -62,6 +63,7 @@ from rossum_api.types import (
     InboxType,
     OrganizationType,
     QueueType,
+    RuleType,
     SchemaType,
     TaskType,
     UploadType,
@@ -84,6 +86,7 @@ if TYPE_CHECKING:
         HookOrdering,
         OrganizationOrdering,
         QueueOrdering,
+        RuleOrdering,
         SchemaOrdering,
         UserOrdering,
         UserRoleOrdering,
@@ -108,6 +111,7 @@ class AsyncRossumAPIClient(
         EmailType,
         OrganizationType,
         QueueType,
+        RuleType,
         SchemaType,
         TaskType,
         UploadType,
@@ -1752,6 +1756,105 @@ class AsyncRossumAPIClient(
         """
         return await self._http_client.delete(Resource.Hook, hook_id)
 
+    # ##### RULES #####
+    async def list_rules(
+        self, ordering: Sequence[RuleOrdering] = (), **filters: Any
+    ) -> AsyncIterator[RuleType]:
+        """Retrieve all :class:`~rossum_api.models.rule.Rule` objects satisfying the specified filters.
+
+        Parameters
+        ----------
+        ordering
+            List of object names. Their URLs are used for sorting the results
+        filters
+            id: ID of a :class:`~rossum_api.models.rule.Rule`.
+
+            name: Name of a :class:`~rossum_api.models.rule.Rule`.
+
+            schema: ID of a :class:`~rossum_api.models.schema.Schema`.
+
+            rule_template: URL of the rule template the rule was created from.
+
+            organization: ID of a :class:`~rossum_api.models.organization.Organization`.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#list-all-rules.
+
+        https://elis.rossum.ai/api/docs/#rule.
+        """
+        async for r in self._http_client.fetch_all(Resource.Rule, ordering, **filters):
+            yield self._deserializer(Resource.Rule, r)
+
+    async def retrieve_rule(self, rule_id: int) -> RuleType:
+        """Retrieve a single :class:`~rossum_api.models.rule.Rule` object.
+
+        Parameters
+        ----------
+        rule_id
+            ID of a rule to be retrieved.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#retrieve-rule.
+
+        https://elis.rossum.ai/api/docs/#rule.
+        """
+        rule = await self._http_client.fetch_one(Resource.Rule, rule_id)
+        return self._deserializer(Resource.Rule, rule)
+
+    async def create_new_rule(self, data: dict[str, Any]) -> RuleType:
+        """Create a new :class:`~rossum_api.models.rule.Rule` object.
+
+        Parameters
+        ----------
+        data
+            :class:`~rossum_api.models.rule.Rule` object configuration.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#create-a-new-rule.
+
+        https://elis.rossum.ai/api/docs/#rule.
+        """
+        rule = await self._http_client.create(Resource.Rule, data)
+        return self._deserializer(Resource.Rule, rule)
+
+    async def update_part_rule(self, rule_id: int, data: dict[str, Any]) -> RuleType:
+        """Update part of a :class:`~rossum_api.models.rule.Rule` object.
+
+        Parameters
+        ----------
+        rule_id
+            ID of a rule to be updated.
+        data
+            :class:`~rossum_api.models.rule.Rule` object partial configuration.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#update-a-rule.
+
+        https://elis.rossum.ai/api/docs/#rule.
+        """
+        rule = await self._http_client.update(Resource.Rule, rule_id, data)
+        return self._deserializer(Resource.Rule, rule)
+
+    async def delete_rule(self, rule_id: int) -> None:
+        """Delete a :class:`~rossum_api.models.rule.Rule` object.
+
+        Parameters
+        ----------
+        rule_id
+            ID of a rule to be deleted.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#delete-a-rule.
+
+        https://elis.rossum.ai/api/docs/#rule.
+        """
+        return await self._http_client.delete(Resource.Rule, rule_id)
+
     # ##### USER ROLES #####
     async def list_user_roles(
         self, ordering: Sequence[UserRoleOrdering] = (), **filters: Any
@@ -1834,6 +1937,7 @@ AsyncRossumAPIClientWithDefaultDeserializer = AsyncRossumAPIClient[
     Email,
     Organization,
     Queue,
+    Rule,
     Schema,
     Task,
     Upload,

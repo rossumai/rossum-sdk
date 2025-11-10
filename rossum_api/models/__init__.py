@@ -18,6 +18,7 @@ from rossum_api.models.hook import Hook
 from rossum_api.models.inbox import Inbox
 from rossum_api.models.organization import Organization
 from rossum_api.models.queue import Queue
+from rossum_api.models.rule import Rule
 from rossum_api.models.schema import Schema
 from rossum_api.models.task import Task
 from rossum_api.models.upload import Upload
@@ -50,6 +51,7 @@ RESOURCE_TO_MODEL = {
     Resource.Email: Email,
     Resource.Organization: Organization,
     Resource.Queue: Queue,
+    Resource.Rule: Rule,
     Resource.Schema: Schema,
     Resource.Task: Task,
     Resource.Upload: Upload,

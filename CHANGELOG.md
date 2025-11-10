@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v3.6.0 (2025-11-10)
+
+### Features
+
+- Add Rule & Rule Actions
+  ([`76280c6`](https://github.com/rossumai/rossum-api/commit/76280c6f503972bdf497c0de773ea3c18e22433a))
+
+
 ## v3.5.2 (2025-11-06)
 
 ### Bug Fixes

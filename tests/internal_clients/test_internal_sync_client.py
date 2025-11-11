@@ -64,15 +64,33 @@ def test_authenticate(client, login_mock):
         client._authenticate()
 
 
-def test_authenticate_is_retried(client, httpx_mock):
-    httpx_mock.add_exception(httpx.ReadTimeout(""))
-    httpx_mock.add_response(
-        status_code=200,
-        json={
-            "key": NEW_TOKEN,
-            "domain": "custom-domain.app.rossum.ai",
-        },
-    )
+@pytest.mark.parametrize(
+    "first_response",
+    [
+        pytest.param(httpx.ReadTimeout("Unable to read within timeout"), id="timeout_error"),
+        pytest.param(
+            httpx.Response(status_code=429, json={"detail": "Too many requests"}),
+            id="rate_limit_error",
+        ),
+        pytest.param(
+            APIClientError("POST", "https://elis.rossum.ai/api/v1/auth/login", 429, None),
+            id="api_client_error",
+        ),
+    ],
+)
+def test_authenticate_is_retried(client, httpx_mock, first_response):
+    @count_calls
+    def custom_response(request: httpx.Request, n_calls: int):
+        if n_calls == 1:
+            if isinstance(first_response, Exception):
+                raise first_response
+            return first_response
+
+        return httpx.Response(
+            status_code=200, json={"key": NEW_TOKEN, "domain": "custom-domain.app.rossum.ai"}
+        )
+
+    httpx_mock.add_callback(custom_response, is_reusable=True)
 
     assert client.token != NEW_TOKEN
     client._authenticate()

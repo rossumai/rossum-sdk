@@ -1,6 +1,19 @@
 # CHANGELOG
 
 
+## v3.6.1 (2025-11-13)
+
+### Bug Fixes
+
+- Handle APIClientError in should_retry
+  ([`e397248`](https://github.com/rossumai/rossum-api/commit/e397248080eff19840b648094eb780756c402319))
+
+### Refactoring
+
+- Unify retrying between sync and async internal clients
+  ([`230332d`](https://github.com/rossumai/rossum-api/commit/230332d3b915918f33f26f62abfd6d3c4cd2f928))
+
+
 ## v3.6.0 (2025-11-10)
 
 ### Features

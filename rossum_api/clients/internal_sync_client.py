@@ -55,14 +55,7 @@ class InternalSyncClient:  # noqa: D101
             self.token = credentials.token
 
     def _authenticate(self) -> None:
-        for attempt in tenacity.Retrying(
-            wait=tenacity.wait_exponential_jitter(
-                initial=self.retry_backoff_factor, jitter=self.retry_max_jitter
-            ),
-            retry=tenacity.retry_if_exception_type((httpx.RequestError, APIClientError)),
-            stop=tenacity.stop_after_attempt(self.n_retries),
-            reraise=True,
-        ):
+        for attempt in self._retrying():
             with attempt:
                 response = self.client.post(
                     build_full_login_url(self.base_url),
@@ -129,15 +122,7 @@ class InternalSyncClient:  # noqa: D101
         # Do not force the calling site to always prepend the base URL
         url = enforce_domain(url, self.base_url)
 
-        retrying = tenacity.Retrying(
-            wait=tenacity.wait_exponential_jitter(
-                initial=self.retry_backoff_factor, jitter=self.retry_max_jitter
-            ),
-            retry=tenacity.retry_if_exception(should_retry),
-            stop=tenacity.stop_after_attempt(self.n_retries),
-            reraise=True,
-        )
-        for attempt in retrying:
+        for attempt in self._retrying():
             with (
                 attempt,
                 self.client.stream(
@@ -247,6 +232,17 @@ class InternalSyncClient:  # noqa: D101
     def request(self, method: HttpMethod, *args: Any, **kwargs: Any) -> httpx.Response:  # noqa: D102
         return self._request(method, *args, **kwargs)
 
+    def _retrying(self) -> tenacity.Retrying:
+        """Build Tenacity retrying according to desired settings."""
+        return tenacity.Retrying(
+            wait=tenacity.wait_exponential_jitter(
+                initial=self.retry_backoff_factor, jitter=self.retry_max_jitter
+            ),
+            retry=tenacity.retry_if_exception(should_retry),
+            stop=tenacity.stop_after_attempt(self.n_retries),
+            reraise=True,
+        )
+
     def _request(  # noqa: RET503 (false positive)
         self, method: HttpMethod, url: str, *args: Any, **kwargs: Any
     ) -> httpx.Response:
@@ -261,14 +257,7 @@ class InternalSyncClient:  # noqa: D101
             self._authenticate()
         url = enforce_domain(url, self.base_url)
 
-        for attempt in tenacity.Retrying(
-            wait=tenacity.wait_exponential_jitter(
-                initial=self.retry_backoff_factor, jitter=self.retry_max_jitter
-            ),
-            retry=tenacity.retry_if_exception(should_retry),
-            stop=tenacity.stop_after_attempt(self.n_retries),
-            reraise=True,
-        ):
+        for attempt in self._retrying():
             with attempt:
                 response = self.client.request(method, url, headers=self._headers, *args, **kwargs)
                 if self.response_post_processor is not None:

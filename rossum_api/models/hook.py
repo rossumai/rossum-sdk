@@ -1,7 +1,28 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Literal
+from typing import Literal
+
+from rossum_api.types import JsonDict
+
+HookAction = Literal[
+    "user_update",  # deprecated in favor of `updated` below
+    "created",
+    "updated",
+    "started",
+    "confirm",
+    "changed",
+    "initialize",
+    "export",
+    "received",
+    "manual",
+    "scheduled",
+    "integration",
+    "interface",
+]
+HookType = Literal["webhook", "function", "job"]
+HookEvent = Literal["annotation_status", "annotation_content", "email", "invocation", "upload"]
+HookExtensionSource = Literal["custom", "rossum_store"]
 
 
 @dataclass
@@ -84,21 +105,116 @@ class Hook:
     name: str
     url: str
     active: bool
-    config: dict[str, Any]
-    test: dict[str, Any]
+    config: JsonDict
+    test: JsonDict
     guide: str | None
     read_more_url: str | None
     extension_image_url: str | None
-    type: Literal["webhook", "function", "job"] = "webhook"
-    metadata: dict[str, Any] = field(default_factory=dict)
+    type: HookType = "webhook"
+    metadata: JsonDict = field(default_factory=dict)
     queues: list[str] = field(default_factory=list)
     run_after: list[str] = field(default_factory=list)
-    events: list[str] = field(default_factory=list)
-    settings: dict[str, Any] = field(default_factory=dict)
-    settings_schema: dict[str, Any] | None = None
-    secrets: dict[str, Any] = field(default_factory=dict)
-    extension_source: str = "custom"
+    events: list[HookEvent] = field(default_factory=list)
+    settings: JsonDict = field(default_factory=dict)
+    settings_schema: JsonDict | None = None
+    secrets: JsonDict = field(default_factory=dict)
+    extension_source: HookExtensionSource = "custom"
     sideload: list[str] = field(default_factory=list)
     token_owner: str | None = None
     token_lifetime_s: int | None = None
     description: str | None = None
+
+
+@dataclass
+class HookRunData:
+    """Data class for hook execution logs.
+
+    HookRunData captures detailed execution logs and metadata for webhook/hook runs within the system.
+    It provides structured logging for tracking hook lifecycle events, performance metrics, and debugging information.
+
+    Notes
+    -----
+    The ``timestamp`` field is automatically set to the current UTC time if not provided.
+
+    The ``start`` and ``end`` fields should be used to track execution duration for performance monitoring.
+
+    Attributes
+    ----------
+    log_level
+        The severity level of the log entry: "INFO" for successful execution, "ERROR" for failures,
+        or "WARNING" for non-critical issues.
+    action
+        The specific action being performed by the hook.
+    event
+        The event type that triggered the hook execution.
+    request_id
+        Unique identifier for the HTTP request that initiated this hook execution.
+    organization_id
+        The ID of the organization that owns the hook configuration.
+    hook_id
+        The unique identifier of the hook configuration being executed.
+    hook_type
+        The type/category of the hook (e.g., webhook, email, custom integration).
+    queue_id
+        Reference to the queue where the document/annotation is located.
+    annotation_id
+        Reference to the specific annotation that triggered or is associated with the hook execution.
+    email_id
+        Reference to an email record if the hook involves email processing.
+    message
+        Human-readable description or log message providing additional context about the execution.
+    request
+        Serialized representation of the outgoing HTTP request body sent by the hook (typically JSON).
+    response
+        Serialized representation of the HTTP response received from the hook endpoint.
+    start
+        ISO 8601 timestamp indicating when the hook execution started.
+    end
+        ISO 8601 timestamp indicating when the hook execution completed.
+    settings
+        Dictionary containing hook-specific configuration settings and parameters used during execution.
+    status
+        Text description of the execution status (e.g., "success", "failed", "timeout").
+    status_code
+        HTTP status code returned from the hook endpoint (e.g., 200, 404, 500).
+        If ``None``, no status code is available.
+    timestamp
+        ISO 8601 timestamp of when the log entry was created.
+    uuid
+        Unique identifier for this specific hook execution instance, useful for idempotency and deduplication.
+    output
+        Serialized output or result produced by the hook execution.
+        If ``None``, no output is captured.
+
+    Notes
+    -----
+    The retention policy for the logs is set to 7 days.
+
+    References
+    ----------
+    https://elis.rossum.ai/api/docs/#hook
+
+    https://elis.rossum.ai/api/docs/#webhook-events
+    """
+
+    log_level: Literal["INFO", "ERROR", "WARNING"]
+    action: HookAction
+    event: HookEvent
+    request_id: str
+    organization_id: int
+    hook_id: int
+    hook_type: HookType
+    queue_id: int | None = None
+    annotation_id: int | None = None
+    email_id: int | None = None
+    message: str = ""
+    request: str | None = None
+    response: str | None = None
+    start: str | None = None
+    end: str | None = None
+    settings: JsonDict = field(default_factory=dict)
+    status: str | None = None
+    status_code: int | None = None
+    timestamp: str = ""
+    uuid: str | None = None
+    output: str | None = None

@@ -19,6 +19,7 @@ class Resource(Enum):
     EngineField = "engine_fields"
     Group = "groups"
     Hook = "hooks"
+    HookRunData = "hooks/logs"  # equivalent to hooks/run now
     Inbox = "inboxes"
     Email = "emails"
     Organization = "organizations"
@@ -29,3 +30,6 @@ class Resource(Enum):
     Upload = "uploads"
     User = "users"
     Workspace = "workspaces"
+
+
+NON_PAGINATED_RESOURCES: list[Resource] = [Resource.HookRunData]

@@ -12,6 +12,7 @@ from rossum_api.domain_logic.annotations import (
     get_http_method_for_annotation_export,
 )
 from rossum_api.domain_logic.pagination import build_pagination_params
+from rossum_api.domain_logic.resources import NON_PAGINATED_RESOURCES
 from rossum_api.domain_logic.retry import ForceRetry, should_retry
 from rossum_api.domain_logic.sideloads import build_sideload_params, embed_sideloads
 from rossum_api.domain_logic.upload import build_upload_files
@@ -136,6 +137,7 @@ class InternalAsyncClient:
             method,
             max_pages,
             json,
+            paginated=resource not in NON_PAGINATED_RESOURCES,
             **filters,
         ):
             yield result
@@ -149,6 +151,7 @@ class InternalAsyncClient:
         method: HttpMethod = "GET",
         max_pages: int | None = None,
         json: JsonDict | None = None,
+        paginated: bool = True,
         **filters: Any,
     ) -> AsyncIterator[dict[str, Any]]:
         """Retrieve a list of objects from a specified URL.
@@ -180,6 +183,14 @@ class InternalAsyncClient:
             **build_sideload_params(sideloads, content_schema_ids),
             **filters,
         }
+
+        if not paginated:
+            data = await self.request_json(method, url, params=query_params, json=json)
+            embed_sideloads(data, sideloads)
+            for r in data["results"]:
+                yield r
+            return
+
         results, total_pages = await self._fetch_page(
             url, method, query_params, sideloads, json=json
         )

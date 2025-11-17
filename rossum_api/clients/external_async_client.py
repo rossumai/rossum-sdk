@@ -1662,7 +1662,7 @@ class AsyncRossumAPIClient(
 
             name: Name of a :class:`~rossum_api.models.hook.Hook`
 
-            type: Hook type. Possible values: ``webhook, function``
+            type: Hook type. Possible values: ``webhook, function, job``
 
             queue: ID of a :class:`~rossum_api.models.queue.Queue`
 

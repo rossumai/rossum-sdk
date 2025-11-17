@@ -89,7 +89,7 @@ class Hook:
     guide: str | None
     read_more_url: str | None
     extension_image_url: str | None
-    type: Literal["webhook", "function"] = "webhook"
+    type: Literal["webhook", "function", "job"] = "webhook"
     metadata: dict[str, Any] = field(default_factory=dict)
     queues: list[str] = field(default_factory=list)
     run_after: list[str] = field(default_factory=list)

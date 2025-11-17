@@ -90,6 +90,13 @@ Models
 
 .. raw:: html
 
+   <h4>HookRunData</h4>
+
+.. autoclass:: rossum_api.models.hook.HookRunData
+   :no-index-entry:
+
+.. raw:: html
+
    <h4>Inbox</h4>
 
 .. autoclass:: rossum_api.models.inbox.Inbox

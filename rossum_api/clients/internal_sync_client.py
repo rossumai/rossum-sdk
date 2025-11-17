@@ -10,6 +10,7 @@ from rossum_api.domain_logic.annotations import (
     get_http_method_for_annotation_export,
 )
 from rossum_api.domain_logic.pagination import build_pagination_params
+from rossum_api.domain_logic.resources import NON_PAGINATED_RESOURCES
 from rossum_api.domain_logic.retry import ForceRetry, should_retry
 from rossum_api.domain_logic.sideloads import build_sideload_params, embed_sideloads
 from rossum_api.domain_logic.urls import build_export_url, build_full_login_url, build_url
@@ -169,6 +170,7 @@ class InternalSyncClient:  # noqa: D101
             method,
             json,
             max_pages,
+            paginated=resource not in NON_PAGINATED_RESOURCES,
             **filters,
         )
 
@@ -181,13 +183,30 @@ class InternalSyncClient:  # noqa: D101
         method: HttpMethod = "GET",
         json: JsonDict | None = None,
         max_pages: int | None = None,
+        paginated: bool = True,
         **filters: Any,
     ) -> Iterator[dict[str, Any]]:
         query_params = build_pagination_params(ordering)
         query_params.update(build_sideload_params(sideloads, content_schema_ids))
         query_params.update(**filters)
 
-        return self._fetch_paginated_results(url, method, query_params, sideloads, json, max_pages)
+        if paginated:
+            return self._fetch_paginated_results(
+                url, method, query_params, sideloads, json, max_pages
+            )
+        return self._stream_results(url, method, query_params, sideloads, json)
+
+    def _stream_results(
+        self,
+        url: str,
+        method: HttpMethod,
+        query_params: dict[str, Any],
+        sideloads: Sequence[Sideload],
+        json: JsonDict | None,
+    ) -> Iterator[dict[str, Any]]:
+        data = self.request_json(method, url, params=query_params, json=json)
+        embed_sideloads(data, sideloads)
+        yield from (data["results"])
 
     def _fetch_paginated_results(
         self,

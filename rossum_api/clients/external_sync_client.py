@@ -37,7 +37,7 @@ from rossum_api.models.email import Email
 from rossum_api.models.email_template import EmailTemplate
 from rossum_api.models.engine import Engine, EngineField
 from rossum_api.models.group import Group
-from rossum_api.models.hook import Hook
+from rossum_api.models.hook import Hook, HookRunData
 from rossum_api.models.inbox import Inbox
 from rossum_api.models.organization import Organization
 from rossum_api.models.queue import Queue
@@ -57,6 +57,7 @@ from rossum_api.types import (
     EngineFieldType,
     EngineType,
     GroupType,
+    HookRunDataType,
     HookType,
     InboxType,
     OrganizationType,
@@ -107,6 +108,7 @@ class SyncRossumAPIClient(
         EngineFieldType,
         GroupType,
         HookType,
+        HookRunDataType,
         InboxType,
         EmailType,
         OrganizationType,
@@ -1732,6 +1734,51 @@ class SyncRossumAPIClient(
         """
         return self.internal_client.delete(Resource.Hook, hook_id)
 
+    def list_hook_run_data(self, **filters: Any) -> Iterator[HookRunDataType]:
+        """Retrieve all :class:`~rossum_api.models.hook.HookRunData` objects satisfying the specified filters.
+
+        Parameters
+        ----------
+        filters
+            timestamp: ISO 8601 timestamp of when the log entry was created.
+
+            start_time: ISO 8601 timestamp indicating when the hook execution started
+
+            end_time: ISO 8601 timestamp indicating when the hook execution completed
+
+            hook: ID of a :class:`~rossum_api.models.hook.Hook`
+
+            log_level: Message log level, possible values ``INFO, ERROR, WARNING``
+
+            request_id: Filter by request ID
+
+            status: Filter by status
+
+            status_code: HTTP status code
+
+            queue: ID of a :class:`~rossum_api.models.queue.Queue`
+
+            annotation: ID of a :class:`~rossum_api.models.annotation.Annotation`
+
+            email: ID of a :class:`~rossum_api.models.email.Email`
+
+            search: Full-text search
+
+        Notes
+        -----
+        The retention policy for the logs is set to 7 days.
+
+        Returns at most 100 logs.
+
+        References
+        ----------
+        https://elis.rossum.ai/api/docs/#extension-logs.
+
+        https://elis.rossum.ai/api/docs/#hook.
+        """
+        for d in self.internal_client.fetch_resources(Resource.HookRunData, **filters):
+            yield self._deserializer(Resource.HookRunData, d)
+
     # ##### RULES #####
     def list_rules(
         self, ordering: Sequence[RuleOrdering] = (), **filters: Any
@@ -1883,6 +1930,7 @@ SyncRossumAPIClientWithDefaultDeserializer = SyncRossumAPIClient[
     EngineField,
     Group,
     Hook,
+    HookRunData,
     Inbox,
     Email,
     Organization,

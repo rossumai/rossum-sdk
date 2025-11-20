@@ -7,6 +7,7 @@ name = "rossum_api"
 version = "3.6.1"
 license = {text = "MIT"}
 readme = "README.rst"
+description = "Python API client for the Rossum platform."
 requires-python = ">= 3.10"
 dependencies = [
     "aiofiles",
